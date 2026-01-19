@@ -14,8 +14,7 @@
   },
   "scripts": {
     "dev": "tsx scripts/dev.ts",
-    "dev:next": "next dev",
-    "dev:server": "cd server && npm run dev",
+    "dev:next": "next dev -p 3002",
     "build": "next build",
     "start": "next start",
     "lint": "biome check",
