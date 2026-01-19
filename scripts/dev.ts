@@ -22,7 +22,7 @@ const processes: ProcessConfig[] = [
   {
     name: "next",
     command: "npx",
-    args: ["next", "dev"],
+    args: ["next", "dev", "-p", "3002"],
     cwd: ROOT,
     color: "\x1b[36m", // cyan
   },
@@ -89,10 +89,10 @@ process.on("SIGTERM", () => {
 console.log(`\n${dim}Starting development servers...${reset}\n`);
 
 if (hasServer && processes.length === 2) {
-  console.log(`${dim}  • Next.js workbench: http://localhost:3000${reset}`);
+  console.log(`${dim}  • Next.js workbench: http://localhost:3002${reset}`);
   console.log(`${dim}  • MCP server:        http://localhost:3001/mcp${reset}`);
 } else {
-  console.log(`${dim}  • Next.js workbench: http://localhost:3000${reset}`);
+  console.log(`${dim}  • Next.js workbench: http://localhost:3002${reset}`);
 }
 
 console.log();

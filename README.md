@@ -1,6 +1,8 @@
-# My ChatGPT App
+# ChatGPT App Studio Starter
 
-Built with [ChatGPT App Studio](https://github.com/assistant-ui/assistant-ui/tree/main/packages/chatgpt-app-studio).
+Starter template for building ChatGPT Apps with [ChatGPT App Studio](https://github.com/assistant-ui/assistant-ui/tree/main/packages/chatgpt-app-studio).
+
+> **Note:** This template is automatically downloaded when you run `npx chatgpt-app-studio`. You don't need to clone this repo directly.
 
 ## Quick Start
 
@@ -9,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 — you're in the workbench.
+Open http://localhost:3002 — you're in the workbench.
 
 ## Commands
 

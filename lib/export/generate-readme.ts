@@ -89,7 +89,7 @@ To continue developing, run the workbench:
 npm run dev
 \`\`\`
 
-Then open \`http://localhost:3000\` to preview and test.
+Then open \`http://localhost:3002\` to preview and test.
 
 ## Files Overview
 
