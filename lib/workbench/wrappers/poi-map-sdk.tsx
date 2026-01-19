@@ -2,23 +2,23 @@
 
 import { useCallback, useMemo, useState } from "react";
 import {
-  POIMap,
-  parseSerializablePOIMap,
-  type POIMapViewState,
-  type POICategory,
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
+  type POICategory,
+  POIMap,
+  type POIMapViewState,
+  parseSerializablePOIMap,
 } from "@/components/examples/poi-map";
 import {
-  useWidgetState,
-  useOpenAI,
-  useDisplayMode,
-  useRequestDisplayMode,
   useCallTool,
-  useTheme,
+  useDisplayMode,
+  useOpenAI,
   useOpenExternal,
-  useSendFollowUpMessage,
   usePreviousDisplayMode,
+  useRequestDisplayMode,
+  useSendFollowUpMessage,
+  useTheme,
+  useWidgetState,
 } from "@/lib/workbench/openai-context";
 import type { DisplayMode, View } from "@/lib/workbench/types";
 

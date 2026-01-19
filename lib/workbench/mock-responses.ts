@@ -1,5 +1,5 @@
-import type { CallToolResponse } from "./types";
 import type { MockConfigState, MockResponse } from "./mock-config";
+import type { CallToolResponse } from "./types";
 
 type MockHandler = (args: Record<string, unknown>) => Promise<CallToolResponse>;
 

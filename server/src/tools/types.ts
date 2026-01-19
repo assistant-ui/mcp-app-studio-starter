@@ -8,5 +8,5 @@ export interface ToolResult {
 
 export type ToolHandler = (
   args: Record<string, unknown>,
-  extra?: unknown
+  extra?: unknown,
 ) => Promise<ToolResult>;

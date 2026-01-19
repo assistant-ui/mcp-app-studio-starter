@@ -1,16 +1,16 @@
-export { POIMap, type POIMapProps } from "./poi-map";
 export { POIMapErrorBoundary } from "./error-boundary";
+export { POIMap, type POIMapProps } from "./poi-map";
 export {
-  parseSerializablePOIMap,
-  POIMapPropsSchema,
-  POISchema,
-  POICategorySchema,
-  POIMapViewStateSchema,
   CATEGORY_LABELS,
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
+  type MapCenter,
   type POI,
   type POICategory,
+  POICategorySchema,
+  POIMapPropsSchema,
   type POIMapViewState,
-  type MapCenter,
+  POIMapViewStateSchema,
+  POISchema,
+  parseSerializablePOIMap,
 } from "./schema";

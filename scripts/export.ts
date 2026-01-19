@@ -1,11 +1,11 @@
 #!/usr/bin/env tsx
+import type { ExportConfig } from "../lib/export";
 import {
-  exportWidget,
   createDefaultExportConfig,
+  exportWidget,
   generateExportSummary,
   printExportSummary,
 } from "../lib/export";
-import type { ExportConfig } from "../lib/export";
 
 interface ExportArgs {
   entryPoint: string;

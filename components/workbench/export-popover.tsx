@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Download,
+  ExternalLink,
+  FolderOpen,
+  Loader2,
+  Package,
+  Terminal,
+} from "lucide-react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Download,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  FolderOpen,
-  ExternalLink,
-  Package,
-  Terminal,
-} from "lucide-react";
-import { useSelectedComponent } from "@/lib/workbench/store";
 import { getComponent } from "@/lib/workbench/component-registry";
+import { useSelectedComponent } from "@/lib/workbench/store";
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 

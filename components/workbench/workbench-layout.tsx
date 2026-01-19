@@ -1,22 +1,22 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { cn } from "@/lib/ui/cn";
 import {
+  type ImperativePanelHandle,
   Panel,
   PanelGroup,
   PanelResizeHandle,
-  type ImperativePanelHandle,
 } from "react-resizable-panels";
+import { cn } from "@/lib/ui/cn";
 import { PANEL_AUTO_SAVE_IDS } from "@/lib/workbench/persistence";
 import {
   useIsLeftPanelOpen,
   useIsRightPanelOpen,
   useWorkbenchStore,
 } from "@/lib/workbench/store";
+import { ActivityPanel } from "./activity-panel";
 import { EditorPanel } from "./editor-panel";
 import { PreviewPanel } from "./preview-panel";
-import { ActivityPanel } from "./activity-panel";
 
 const HANDLE_CLASSES = "group relative w-4 shrink-0";
 

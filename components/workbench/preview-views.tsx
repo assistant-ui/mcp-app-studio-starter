@@ -1,26 +1,26 @@
 "use client";
 
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  type ImperativePanelGroupHandle,
   Panel,
   PanelGroup,
   PanelResizeHandle,
-  type ImperativePanelGroupHandle,
 } from "react-resizable-panels";
+import { cn } from "@/lib/ui/cn";
 import {
-  useWorkbenchStore,
-  useIsTransitioning,
   useDeviceType,
-  useResizableWidth,
   useDisplayMode,
   useIframePreview,
+  useIsTransitioning,
+  useResizableWidth,
+  useWorkbenchStore,
 } from "@/lib/workbench/store";
 import { DEVICE_PRESETS } from "@/lib/workbench/types";
-import { cn } from "@/lib/ui/cn";
-import { ComponentContent } from "./component-renderer";
-import { IframeComponentContent } from "./iframe-component-content";
-import { DeviceFrame } from "./device-frame";
 import { ChatThread } from "./chat-thread";
+import { ComponentContent } from "./component-renderer";
+import { DeviceFrame } from "./device-frame";
+import { IframeComponentContent } from "./iframe-component-content";
 import { MockComposer } from "./mock-composer";
 
 const PREVIEW_MIN_SIZE = 30;

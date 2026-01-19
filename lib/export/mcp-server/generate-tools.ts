@@ -1,4 +1,4 @@
-import type { MCPToolConfig, GeneratedFile } from "./types";
+import type { GeneratedFile, MCPToolConfig } from "./types";
 
 function toSafeFileName(name: string): string {
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentType } from "react";
-import { WelcomeCardSDK, POIMapSDK } from "./wrappers";
+import { POIMapSDK, WelcomeCardSDK } from "./wrappers";
 
 export type ComponentCategory = "cards" | "lists" | "forms" | "data";
 

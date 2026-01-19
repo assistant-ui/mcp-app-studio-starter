@@ -1,7 +1,9 @@
 "use client";
 
+import { MessageCircle, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import * as React from "react";
-import { WorkbenchLayout } from "./workbench-layout";
+import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/ui/logo";
 import {
   Select,
@@ -10,25 +12,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/ui/cn";
+import { workbenchComponents } from "@/lib/workbench/component-registry";
+import { useWorkbenchPersistence } from "@/lib/workbench/persistence";
 import {
-  useSelectedComponent,
-  useWorkbenchStore,
   useDisplayMode,
   useIsLeftPanelOpen,
   useIsRightPanelOpen,
   useIsSDKGuideOpen,
+  useSelectedComponent,
+  useWorkbenchStore,
 } from "@/lib/workbench/store";
-import { useWorkbenchPersistence } from "@/lib/workbench/persistence";
-import { workbenchComponents } from "@/lib/workbench/component-registry";
-import { SELECT_CLASSES, COMPACT_SMALL_TEXT_CLASSES } from "./styles";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/ui/cn";
-import { useTheme } from "next-themes";
-import { Moon, Sun, MessageCircle } from "lucide-react";
+import { ExportPopover } from "./export-popover";
 import { OnboardingModal } from "./onboarding-modal";
 import { LeftPanelIcon, RightPanelIcon } from "./panel-toggle-icons";
 import { SDKGuideModal } from "./sdk-guide/sdk-guide-modal";
-import { ExportPopover } from "./export-popover";
+import { COMPACT_SMALL_TEXT_CLASSES, SELECT_CLASSES } from "./styles";
+import { WorkbenchLayout } from "./workbench-layout";
 
 export function WorkbenchShell() {
   const [mounted, setMounted] = React.useState(false);

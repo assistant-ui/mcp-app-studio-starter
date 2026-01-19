@@ -1,39 +1,42 @@
 "use client";
 
-import { create } from "zustand";
 import { useMemo } from "react";
-import type {
-  DisplayMode,
-  Theme,
-  DeviceType,
-  ConsoleEntry,
-  ConsoleEntryType,
-  OpenAIGlobals,
-  SafeAreaInsets,
-  View,
-  WidgetState,
-  UserLocation,
-  SimulationState,
-  ToolSimulationConfig,
-} from "./types";
-import { DEFAULT_SIMULATION_STATE, DEFAULT_TOOL_CONFIG } from "./types";
-import { DEVICE_PRESETS } from "./types";
+import { create } from "zustand";
 import { workbenchComponents } from "./component-registry";
 import { clearFiles } from "./file-store";
 import type {
   MockConfigState,
-  MockVariant,
   MockResponse,
+  MockVariant,
   ToolAnnotations,
   ToolDescriptorMeta,
+  ToolMockConfig,
   ToolSchemas,
   ToolSource,
-  ToolMockConfig,
 } from "./mock-config";
 import {
-  createToolMockConfig,
   createEmptyMockConfigState,
+  createToolMockConfig,
 } from "./mock-config";
+import type {
+  ConsoleEntry,
+  ConsoleEntryType,
+  DeviceType,
+  DisplayMode,
+  OpenAIGlobals,
+  SafeAreaInsets,
+  SimulationState,
+  Theme,
+  ToolSimulationConfig,
+  UserLocation,
+  View,
+  WidgetState,
+} from "./types";
+import {
+  DEFAULT_SIMULATION_STATE,
+  DEFAULT_TOOL_CONFIG,
+  DEVICE_PRESETS,
+} from "./types";
 
 const defaultComponent = workbenchComponents[0];
 

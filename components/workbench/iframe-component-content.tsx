@@ -1,8 +1,8 @@
 "use client";
 
-import { useSelectedComponent } from "@/lib/workbench/store";
-import { WidgetIframeHost, useWidgetBundle } from "@/lib/workbench/iframe";
 import { cn } from "@/lib/ui/cn";
+import { useWidgetBundle, WidgetIframeHost } from "@/lib/workbench/iframe";
+import { useSelectedComponent } from "@/lib/workbench/store";
 import { IsolatedThemeWrapper } from "./isolated-theme-wrapper";
 
 function LoadingState() {

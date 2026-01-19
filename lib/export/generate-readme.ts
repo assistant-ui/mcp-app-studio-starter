@@ -1,4 +1,4 @@
-import type { ExportConfig, ChatGPTAppManifest } from "./types";
+import type { ChatGPTAppManifest, ExportConfig } from "./types";
 
 export interface GenerateReadmeOptions {
   config: ExportConfig;

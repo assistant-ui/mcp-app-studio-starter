@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { exportWidget, createDefaultExportConfig } from "@/lib/export";
-import type { ExportConfig } from "@/lib/export";
 import path from "node:path";
+import { type NextRequest, NextResponse } from "next/server";
+import type { ExportConfig } from "@/lib/export";
+import { createDefaultExportConfig, exportWidget } from "@/lib/export";
 
 export const runtime = "nodejs";
 

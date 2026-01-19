@@ -1,11 +1,11 @@
 "use client";
 
-import type { MockVariant } from "@/lib/workbench/mock-config";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/ui/cn";
+import type { MockVariant } from "@/lib/workbench/mock-config";
 
 interface MockVariantListProps {
   variants: MockVariant[];

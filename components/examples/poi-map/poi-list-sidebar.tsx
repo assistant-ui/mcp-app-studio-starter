@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import type { POI } from "./schema";
-import { POICard } from "./poi-card";
+import { useEffect, useRef } from "react";
 import { cn } from "./_adapter";
+import { POICard } from "./poi-card";
+import type { POI } from "./schema";
 
 interface POIListSidebarProps {
   pois: POI[];

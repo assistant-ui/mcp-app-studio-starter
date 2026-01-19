@@ -1,9 +1,9 @@
 import type {
-  DisplayMode,
-  Theme,
-  DeviceType,
-  SafeAreaInsets,
   ConsoleEntry,
+  DeviceType,
+  DisplayMode,
+  SafeAreaInsets,
+  Theme,
 } from "../types";
 
 export interface UrlState {

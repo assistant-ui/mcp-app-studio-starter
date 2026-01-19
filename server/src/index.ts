@@ -21,23 +21,18 @@ function createAppServer() {
     version: "1.0.0",
   });
 
-  server.registerResource(
-    "widget",
-    "ui://widget/main.html",
-    {},
-    async () => ({
-      contents: [
-        {
-          uri: "ui://widget/main.html",
-          mimeType: "text/html+skybridge",
-          text: WIDGET_HTML,
-          _meta: {
-            "openai/widgetPrefersBorder": true,
-          },
+  server.registerResource("widget", "ui://widget/main.html", {}, async () => ({
+    contents: [
+      {
+        uri: "ui://widget/main.html",
+        mimeType: "text/html+skybridge",
+        text: WIDGET_HTML,
+        _meta: {
+          "openai/widgetPrefersBorder": true,
         },
-      ],
-    })
-  );
+      },
+    ],
+  }));
 
   server.registerTool(
     "example_tool",
@@ -54,7 +49,7 @@ function createAppServer() {
         "openai/toolInvocation/invoked": "Done",
       },
     },
-    exampleToolHandler
+    exampleToolHandler,
   );
 
   return server;
@@ -121,5 +116,7 @@ const httpServer = createServer(async (req, res) => {
 });
 
 httpServer.listen(port, () => {
-  console.log(`${APP_NAME} MCP server listening on http://localhost:${port}${MCP_PATH}`);
+  console.log(
+    `${APP_NAME} MCP server listening on http://localhost:${port}${MCP_PATH}`,
+  );
 });

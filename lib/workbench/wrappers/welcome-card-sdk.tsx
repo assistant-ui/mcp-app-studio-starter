@@ -2,9 +2,9 @@
 
 import { WelcomeCard } from "@/components/examples/welcome-card";
 import {
-  useTheme,
   useDisplayMode,
   useRequestDisplayMode,
+  useTheme,
 } from "@/lib/workbench/openai-context";
 
 interface WelcomeCardInput {

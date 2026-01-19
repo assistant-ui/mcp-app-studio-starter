@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
-import type { POI, POIMapViewState, MapCenter, POICategory } from "./schema";
+import { useCallback, useMemo } from "react";
+import type { MapCenter, POI, POICategory, POIMapViewState } from "./schema";
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from "./schema";
 
 interface UsePOIMapOptions {

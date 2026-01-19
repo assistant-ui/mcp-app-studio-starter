@@ -1,10 +1,10 @@
 import { openai } from "@ai-sdk/openai";
-import { streamText, convertToModelMessages, stepCountIs } from "ai";
+import { convertToModelMessages, stepCountIs, streamText } from "ai";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/integrations/rate-limit/upstash";
 import {
-  retrieveRelevantDocs,
   formatDocsForPrompt,
+  retrieveRelevantDocs,
 } from "@/lib/workbench/sdk-guide/retrieve-docs";
 
 export const runtime = "edge";

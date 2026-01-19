@@ -1,16 +1,16 @@
 "use client";
 
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { Check, ChevronDown, ChevronUp, Copy } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createHighlighter, type Highlighter } from "shiki";
-import { Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
-import type { CodeBlockProps } from "./schema";
 import {
   ActionButtons,
   normalizeActionsConfig,
   useCopyToClipboard,
 } from "../shared";
-import { Button, cn, Collapsible, CollapsibleTrigger } from "./_adapter";
+import { Button, Collapsible, CollapsibleTrigger, cn } from "./_adapter";
 import { CodeBlockProgress } from "./progress";
+import type { CodeBlockProps } from "./schema";
 
 const COPY_ID = "codeblock-code";
 const HTML_CACHE_MAX_SIZE = 100;

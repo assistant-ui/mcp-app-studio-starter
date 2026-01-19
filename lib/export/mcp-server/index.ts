@@ -1,21 +1,21 @@
-import path from "node:path";
 import fs from "node:fs/promises";
-import type {
-  MCPServerConfig,
-  MCPServerGeneratorOptions,
-  MCPServerGeneratorResult,
-  GeneratedFile,
-} from "./types";
+import path from "node:path";
+import { generateConfigFiles } from "./generate-configs";
 import { generateServerEntry } from "./generate-server";
 import { generateToolFiles } from "./generate-tools";
-import { generateConfigFiles } from "./generate-configs";
-
-export type {
+import type {
+  GeneratedFile,
   MCPServerConfig,
-  MCPToolConfig,
   MCPServerGeneratorOptions,
   MCPServerGeneratorResult,
+} from "./types";
+
+export type {
   GeneratedFile,
+  MCPServerConfig,
+  MCPServerGeneratorOptions,
+  MCPServerGeneratorResult,
+  MCPToolConfig,
 } from "./types";
 
 export async function generateMCPServer(

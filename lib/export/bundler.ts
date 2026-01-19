@@ -1,8 +1,8 @@
-import * as esbuild from "esbuild";
-import path from "node:path";
 import fs from "node:fs/promises";
-import type { ExportConfig, ExportedFile } from "./types";
+import path from "node:path";
+import * as esbuild from "esbuild";
 import { compileCss } from "./compile-css";
+import type { ExportConfig, ExportedFile } from "./types";
 
 const ENTRY_TEMPLATE = `
 import React from "react";

@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Database, Layers, Wand2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Layers, Wand2, Database } from "lucide-react";
 
 const ONBOARDING_KEY = "chatgpt-app-studio-workbench-onboarded";
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";

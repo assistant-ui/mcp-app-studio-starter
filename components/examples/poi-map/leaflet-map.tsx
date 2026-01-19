@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useMemo, memo } from "react";
+import L from "leaflet";
+import { memo, useEffect, useMemo, useRef } from "react";
 import {
   MapContainer,
-  TileLayer,
   Marker,
+  TileLayer,
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import type { POI, MapCenter, POICategory } from "./schema";
-import { CATEGORY_COLORS, type MapViewProps } from "./map-view";
 import { cn } from "./_adapter";
+import { CATEGORY_COLORS, type MapViewProps } from "./map-view";
+import type { MapCenter, POI, POICategory } from "./schema";
 
 function createMarkerIcon(
   category: POICategory,

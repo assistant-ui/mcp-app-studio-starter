@@ -1,14 +1,14 @@
 import type {
+  CallToolResponse,
+  DisplayMode,
+  GetFileDownloadUrlResponse,
+  IframeToParentMessage,
+  ModalOptions,
   OpenAIAPI,
   OpenAIGlobals,
-  IframeToParentMessage,
   ParentToIframeMessage,
-  CallToolResponse,
-  WidgetState,
-  DisplayMode,
-  ModalOptions,
   UploadFileResponse,
-  GetFileDownloadUrlResponse,
+  WidgetState,
 } from "../types";
 
 export interface WorkbenchMessageHandlers {

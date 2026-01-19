@@ -6,8 +6,8 @@ import {
   unstable_memoizeMarkdownComponents as memoizeMarkdownComponents,
   useIsMarkdownCodeBlock,
 } from "@assistant-ui/react-markdown";
+import { type FC, memo, useEffect, useId, useState } from "react";
 import remarkGfm from "remark-gfm";
-import { memo, useId, useState, useEffect, type FC } from "react";
 import { CodeBlock } from "@/components/workbench/code-block";
 import { cn } from "@/lib/ui/cn";
 

@@ -1,15 +1,13 @@
 export {
+  type AspectRatio,
   AspectRatioSchema,
+  getFitClass,
+  getRatioClass,
+  type MediaFit,
   MediaFitSchema,
   RATIO_CLASS_MAP,
-  getRatioClass,
-  getFitClass,
-  type AspectRatio,
-  type MediaFit,
 } from "./aspect-ratio";
-
-export { OVERLAY_GRADIENT } from "./overlay-gradient";
-
 export { formatDuration, formatFileSize } from "./format-utils";
+export { OVERLAY_GRADIENT } from "./overlay-gradient";
 
 export { sanitizeHref } from "./sanitize-href";

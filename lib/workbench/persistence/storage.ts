@@ -1,7 +1,7 @@
-import type { LocalStoragePreferences } from "./types";
-import type { ConsoleEntry } from "../types";
 import type { MockConfigState } from "../mock-config";
-import { STORAGE_KEYS, CONSOLE_MAX_ENTRIES } from "./constants";
+import type { ConsoleEntry } from "../types";
+import { CONSOLE_MAX_ENTRIES, STORAGE_KEYS } from "./constants";
+import type { LocalStoragePreferences } from "./types";
 
 function isBrowser(): boolean {
   return typeof window !== "undefined";

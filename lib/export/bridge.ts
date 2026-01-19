@@ -1,15 +1,15 @@
 import type {
-  OpenAIGlobals,
-  OpenAIAPI,
-  WindowOpenAI,
-  DisplayMode,
   CallToolResponse,
-  ModalOptions,
-  UploadFileResponse,
+  DisplayMode,
   GetFileDownloadUrlResponse,
-  ParentToIframeMessage,
   IframeToParentMessage,
+  ModalOptions,
+  OpenAIAPI,
+  OpenAIGlobals,
+  ParentToIframeMessage,
+  UploadFileResponse,
   WidgetState,
+  WindowOpenAI,
 } from "../workbench/types";
 import { SET_GLOBALS_EVENT_TYPE } from "../workbench/types";
 

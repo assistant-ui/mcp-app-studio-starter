@@ -1,4 +1,4 @@
-import { SDK_DOCS_INDEX, type DocChunk } from "./docs-index";
+import { type DocChunk, SDK_DOCS_INDEX } from "./docs-index";
 
 interface ScoredChunk {
   chunk: DocChunk;

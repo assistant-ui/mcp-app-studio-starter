@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useEffect, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { cn } from "@/lib/ui/cn";
 import {
+  useConversationMode,
   useDisplayMode,
   useWorkbenchStore,
   useWorkbenchTheme,
-  useConversationMode,
 } from "@/lib/workbench/store";
 import { MorphContainer } from "./component-renderer";
 import { ConversationView } from "./conversation-view";

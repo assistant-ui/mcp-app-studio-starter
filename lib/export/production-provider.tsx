@@ -2,28 +2,28 @@
 
 import {
   createContext,
-  useContext,
+  type ReactNode,
   useCallback,
-  useMemo,
+  useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
 import type {
-  OpenAIGlobals,
-  OpenAIAPI,
-  DisplayMode,
   CallToolResponse,
-  ModalOptions,
-  UploadFileResponse,
+  DisplayMode,
   GetFileDownloadUrlResponse,
+  ModalOptions,
+  OpenAIAPI,
+  OpenAIGlobals,
+  UploadFileResponse,
   WidgetState,
   WindowOpenAI,
 } from "../workbench/types";
 import { SET_GLOBALS_EVENT_TYPE } from "../workbench/types";
-import { installOpenAIBridge, getOpenAIBridge } from "./bridge";
+import { getOpenAIBridge, installOpenAIBridge } from "./bridge";
 
 interface OpenAIContextValue extends OpenAIGlobals, OpenAIAPI {}
 

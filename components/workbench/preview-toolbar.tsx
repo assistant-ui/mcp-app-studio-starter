@@ -1,21 +1,37 @@
 "use client";
 
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import {
+  Layers,
+  type LucideIcon,
+  MapPin,
+  Maximize2,
+  MessageSquare,
+  Monitor,
+  Moon,
+  MoreHorizontal,
+  MoveHorizontal,
+  PictureInPicture2,
+  Smartphone,
+  Square,
+  Sun,
+  Tablet,
+  X,
+} from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
-import {
-  useWorkbenchStore,
-  useDisplayMode,
-  useWorkbenchTheme,
-  useDeviceType,
-  useConversationMode,
-} from "@/lib/workbench/store";
-import {
-  LOCALE_OPTIONS,
-  type DisplayMode,
-  type DeviceType,
-  type UserLocation,
-} from "@/lib/workbench/types";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -23,46 +39,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/ui/cn";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  useConversationMode,
+  useDeviceType,
+  useDisplayMode,
+  useWorkbenchStore,
+  useWorkbenchTheme,
+} from "@/lib/workbench/store";
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import { Label } from "@/components/ui/label";
+  type DeviceType,
+  type DisplayMode,
+  LOCALE_OPTIONS,
+  type UserLocation,
+} from "@/lib/workbench/types";
 import { SafeAreaInsetsControl } from "./safe-area-insets-control";
 import {
-  Monitor,
-  Tablet,
-  Smartphone,
-  Maximize2,
-  Square,
-  PictureInPicture2,
-  Moon,
-  Sun,
-  MoreHorizontal,
-  MapPin,
-  X,
-  Layers,
-  MoveHorizontal,
-  MessageSquare,
-  type LucideIcon,
-} from "lucide-react";
-import { cn } from "@/lib/ui/cn";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-import {
-  INPUT_GROUP_CLASSES,
-  INPUT_CLASSES,
   ADDON_CLASSES,
+  INPUT_CLASSES,
+  INPUT_GROUP_CLASSES,
   LABEL_CLASSES,
   SELECT_CLASSES,
-  TOGGLE_BUTTON_CLASSES,
   TOGGLE_BUTTON_ACTIVE_CLASSES,
+  TOGGLE_BUTTON_CLASSES,
 } from "./styles";
 
 const DISPLAY_MODES: ReadonlyArray<{

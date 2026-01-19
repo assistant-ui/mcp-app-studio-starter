@@ -16,24 +16,16 @@
  */
 
 export { cn } from "../../../lib/ui/cn";
+export { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
+export { Badge } from "../../ui/badge";
 export { Button } from "../../ui/button";
 export {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
 } from "../../ui/card";
-export { Badge } from "../../ui/badge";
-export {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../ui/tooltip";
-export { Skeleton } from "../../ui/skeleton";
-export { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
-export { Separator } from "../../ui/separator";
 export {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,3 +33,11 @@ export {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
+export { Separator } from "../../ui/separator";
+export { Skeleton } from "../../ui/skeleton";
+export {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../ui/tooltip";

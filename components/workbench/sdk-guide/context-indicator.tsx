@@ -1,8 +1,8 @@
 "use client";
 
 import { Layers } from "lucide-react";
-import { useSelectedComponent } from "@/lib/workbench/store";
 import { workbenchComponents } from "@/lib/workbench/component-registry";
+import { useSelectedComponent } from "@/lib/workbench/store";
 
 export function ContextIndicator() {
   const selectedComponentId = useSelectedComponent();

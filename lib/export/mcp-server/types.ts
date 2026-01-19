@@ -1,7 +1,7 @@
 import type {
+  MockResponse,
   ToolAnnotations,
   ToolDescriptorMeta,
-  MockResponse,
 } from "../../workbench/mock-config/types";
 
 export interface MCPToolConfig {

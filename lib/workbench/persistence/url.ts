@@ -1,7 +1,7 @@
-import type { DisplayMode, Theme, DeviceType } from "../types";
-import type { UrlState } from "./types";
-import { URL_PARAMS } from "./constants";
 import { getComponentIds } from "../component-registry";
+import type { DeviceType, DisplayMode, Theme } from "../types";
+import { URL_PARAMS } from "./constants";
+import type { UrlState } from "./types";
 
 const VALID_MODES: DisplayMode[] = ["inline", "pip", "fullscreen"];
 const VALID_THEMES: Theme[] = ["light", "dark"];

@@ -1,22 +1,22 @@
 "use client";
 
-import type { ConsoleEntry, ConsoleEntryType } from "@/lib/workbench/types";
+import type { LucideIcon } from "lucide-react";
 import {
-  Wrench,
+  Activity,
+  AlertCircle,
+  Circle,
   CornerDownRight,
   Database,
-  PanelTop,
   ExternalLink,
-  MessageSquare,
   FileIcon,
-  Activity,
-  Circle,
-  AlertCircle,
   Loader2,
+  MessageSquare,
+  PanelTop,
+  Wrench,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { Entry } from "./activity-primitives/entry-layout";
+import type { ConsoleEntry, ConsoleEntryType } from "@/lib/workbench/types";
 import { ArgsPreview, ResultPreview } from "./activity-primitives";
+import { Entry } from "./activity-primitives/entry-layout";
 
 const ENTRY_CONFIG: Record<
   ConsoleEntryType,

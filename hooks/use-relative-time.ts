@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function formatRelativeTime(date: Date): string {
   const now = Date.now();

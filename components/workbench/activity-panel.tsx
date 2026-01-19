@@ -1,17 +1,17 @@
 "use client";
 
+import { Activity, Trash2, Wrench } from "lucide-react";
 import { useState } from "react";
-import { useConsoleLogs, useClearConsole } from "@/lib/workbench/store";
-import { ActivitySection } from "./activity-section";
-import { MockConfigPanel } from "./mock-config-panel";
 import { Button } from "@/components/ui/button";
-import { Trash2, Activity, Wrench } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/ui/cn";
+import { useClearConsole, useConsoleLogs } from "@/lib/workbench/store";
+import { ActivitySection } from "./activity-section";
+import { MockConfigPanel } from "./mock-config-panel";
 
 type ActivityTab = "activity" | "simulation";
 

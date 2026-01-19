@@ -1,33 +1,33 @@
 "use client";
 
-import { memo } from "react";
 import {
-  UtensilsCrossed,
   Coffee,
-  Landmark,
-  Trees,
-  ShoppingBag,
-  Ticket,
-  Mountain,
-  Train,
-  MapPin,
-  Star,
   Heart,
   Info,
+  Landmark,
+  MapPin,
+  Mountain,
+  ShoppingBag,
+  Star,
+  Ticket,
+  Train,
+  Trees,
+  UtensilsCrossed,
 } from "lucide-react";
-import type { POI, POICategory } from "./schema";
-import { CATEGORY_LABELS } from "./schema";
+import { memo } from "react";
 import {
-  cn,
-  Button,
-  Badge,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
   Avatar,
   AvatarFallback,
   AvatarImage,
+  Badge,
+  Button,
+  cn,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "./_adapter";
+import type { POI, POICategory } from "./schema";
+import { CATEGORY_LABELS } from "./schema";
 
 const CATEGORY_ICONS: Record<POICategory, typeof MapPin> = {
   restaurant: UtensilsCrossed,

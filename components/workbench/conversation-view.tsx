@@ -1,15 +1,15 @@
 "use client";
 
+import { MapPin, MessageCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/ui/cn";
-import { MapPin, MessageCircle } from "lucide-react";
-import {
-  useWorkbenchStore,
-  useWorkbenchTheme,
-  useSelectedComponent,
-} from "@/lib/workbench/store";
 import { workbenchComponents } from "@/lib/workbench/component-registry";
 import type { ConversationContext } from "@/lib/workbench/mock-config";
+import {
+  useSelectedComponent,
+  useWorkbenchStore,
+  useWorkbenchTheme,
+} from "@/lib/workbench/store";
 import { MorphContainer } from "./component-renderer";
 
 interface MessageBubbleProps {

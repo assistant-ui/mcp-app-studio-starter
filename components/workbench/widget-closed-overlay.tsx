@@ -1,7 +1,7 @@
 "use client";
 
+import { RefreshCw, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { XCircle, RefreshCw } from "lucide-react";
 
 interface WidgetClosedOverlayProps {
   onReopen: () => void;

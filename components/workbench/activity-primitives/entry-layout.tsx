@@ -1,6 +1,6 @@
-import { forwardRef, type ReactNode, type ComponentProps } from "react";
-import { cn } from "@/lib/ui/cn";
 import type { LucideIcon } from "lucide-react";
+import { type ComponentProps, forwardRef, type ReactNode } from "react";
+import { cn } from "@/lib/ui/cn";
 
 /**
  * Entry Layout System

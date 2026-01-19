@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { useWorkbenchStore } from "./store";
+import { beforeEach, describe, expect, it } from "vitest";
 import { workbenchComponents } from "./component-registry";
+import { useWorkbenchStore } from "./store";
 
 describe("Workbench Store", () => {
   // Reset store before each test

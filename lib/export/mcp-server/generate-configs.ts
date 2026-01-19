@@ -1,4 +1,4 @@
-import type { MCPServerConfig, GeneratedFile } from "./types";
+import type { GeneratedFile, MCPServerConfig } from "./types";
 
 export function generatePackageJson(config: MCPServerConfig): string {
   const pkg = {

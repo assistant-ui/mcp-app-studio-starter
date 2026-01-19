@@ -1,7 +1,7 @@
-export { ArgsPreview, ResultPreview } from "./json-preview";
-export { Entry } from "./entry-layout";
 export type {
+  BadgeVariant,
   EntryVariant,
   IndicatorState,
-  BadgeVariant,
 } from "./entry-layout";
+export { Entry } from "./entry-layout";
+export { ArgsPreview, ResultPreview } from "./json-preview";

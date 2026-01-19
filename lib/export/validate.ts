@@ -1,4 +1,4 @@
-import type { ExportedFile, ChatGPTAppManifest } from "./types";
+import type { ChatGPTAppManifest, ExportedFile } from "./types";
 
 export interface ValidationResult {
   errors: string[];

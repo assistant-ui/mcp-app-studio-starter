@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useShallow } from "zustand/react/shallow";
-import { useWorkbenchStore, useSimulation } from "@/lib/workbench/store";
-import type { ResponseMode } from "@/lib/workbench/types";
-import { cn } from "@/lib/ui/cn";
 import {
-  Circle,
   AlertCircle,
-  Loader2,
   ChevronDown,
+  Circle,
+  Loader2,
   RotateCcw,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { cn } from "@/lib/ui/cn";
+import { useSimulation, useWorkbenchStore } from "@/lib/workbench/store";
+import type { ResponseMode } from "@/lib/workbench/types";
 import { JsonEditor } from "./json-editor";
 
 const RESPONSE_MODES: Array<{

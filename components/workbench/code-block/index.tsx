@@ -3,6 +3,6 @@ export { CodeBlockErrorBoundary } from "./error-boundary";
 export type { CodeBlockProps, SerializableCodeBlock } from "./schema";
 export {
   CodeBlockPropsSchema,
-  SerializableCodeBlockSchema,
   parseSerializableCodeBlock,
+  SerializableCodeBlockSchema,
 } from "./schema";

@@ -1,21 +1,21 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { cn } from "@/lib/ui/cn";
+import { getComponent } from "@/lib/workbench/component-registry";
+import { OpenAIProvider } from "@/lib/workbench/openai-context";
 import {
   useIsTransitioning,
   useSelectedComponent,
   useToolInput,
 } from "@/lib/workbench/store";
-import { getComponent } from "@/lib/workbench/component-registry";
-import { OpenAIProvider } from "@/lib/workbench/openai-context";
-import { cn } from "@/lib/ui/cn";
 import {
   VIEW_TRANSITION_NAME,
   VIEW_TRANSITION_PARENT_NAME,
 } from "@/lib/workbench/transition-config";
 import { ComponentErrorBoundary } from "./component-error-boundary";
 import { IsolatedThemeWrapper } from "./isolated-theme-wrapper";
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 function FallbackComponent({ componentId }: { componentId: string }) {
   return (

@@ -6,6 +6,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
     "inspect": "npx @modelcontextprotocol/inspector@latest http://localhost:3001/mcp"
   },
   "dependencies": {

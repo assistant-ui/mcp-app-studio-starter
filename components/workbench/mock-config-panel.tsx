@@ -1,15 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useWorkbenchStore, useMockConfig } from "@/lib/workbench/store";
-import { fetchMcpTools } from "@/lib/workbench/mcp-client";
-import { Switch } from "@/components/ui/switch";
+import { ChevronDown, Loader2, RefreshCw, Wrench } from "lucide-react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -17,8 +10,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronDown, Wrench, RefreshCw, Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/ui/cn";
+import { fetchMcpTools } from "@/lib/workbench/mcp-client";
+import { useMockConfig, useWorkbenchStore } from "@/lib/workbench/store";
 import { MockVariantEditor } from "./mock-variant-editor";
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";

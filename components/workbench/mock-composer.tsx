@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
 import { ArrowUp } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
 import { cn } from "@/lib/ui/cn";
 import {
   useDeviceType,
-  useWorkbenchStore,
   useIsTransitioning,
+  useWorkbenchStore,
 } from "@/lib/workbench/store";
 
 type ComposerVariant = "bottom" | "overlay";

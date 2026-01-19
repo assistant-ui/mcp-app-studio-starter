@@ -1,46 +1,46 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
 import {
-  Maximize2,
-  Minimize2,
-  RefreshCw,
-  Filter,
   Check,
-  MapPin,
-  Star,
-  Heart,
-  ExternalLink,
-  MessageCircle,
-  UtensilsCrossed,
   Coffee,
+  ExternalLink,
+  Filter,
+  Heart,
   Landmark,
-  Trees,
-  ShoppingBag,
-  Ticket,
+  MapPin,
+  Maximize2,
+  MessageCircle,
+  Minimize2,
   Mountain,
+  RefreshCw,
+  ShoppingBag,
+  Star,
+  Ticket,
   Train,
+  Trees,
+  UtensilsCrossed,
   X,
 } from "lucide-react";
-import type { POI, POIMapViewState, MapCenter, POICategory } from "./schema";
-import { CATEGORY_LABELS } from "./schema";
-import { usePOIMap } from "./use-poi-map";
-import { POIListInline } from "./poi-list-inline";
-import { POIListSidebar } from "./poi-list-sidebar";
-import { MapView } from "./map-view";
+import { useCallback, useMemo } from "react";
 import {
-  cn,
-  Button,
   Badge,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
+  Button,
+  cn,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "./_adapter";
+import { MapView } from "./map-view";
+import { POIListInline } from "./poi-list-inline";
+import { POIListSidebar } from "./poi-list-sidebar";
+import type { MapCenter, POI, POICategory, POIMapViewState } from "./schema";
+import { CATEGORY_LABELS } from "./schema";
+import { usePOIMap } from "./use-poi-map";
 
 type DisplayMode = "inline" | "pip" | "fullscreen";
 

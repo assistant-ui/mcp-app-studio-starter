@@ -1,14 +1,14 @@
 "use client";
 
+import { Check, ChevronDown, ChevronRight, Copy } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ConsoleEntry, ConsoleEntryType } from "@/lib/workbench/types";
-import { cn } from "@/lib/ui/cn";
-import { ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { cn } from "@/lib/ui/cn";
+import type { ConsoleEntry, ConsoleEntryType } from "@/lib/workbench/types";
 
 const typeColors: Record<ConsoleEntryType, string> = {
   callTool: "text-blue-600 dark:text-blue-400",

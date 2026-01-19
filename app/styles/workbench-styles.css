@@ -51,9 +51,12 @@
   .shadow-crisp-edge {
     position: relative;
     box-sizing: padding-box;
-    box-shadow: 0px 1px 0px -1px oklch(0 0 0 / 0.1),
-      0px 1px 1px -1px oklch(0 0 0 / 0.1), 0px 1px 2px -1px oklch(0 0 0 / 0.1),
-      0px 2px 4px -2px oklch(0 0 0 / 0.1), 0px 3px 6px -3px oklch(0 0 0 / 0.1);
+    box-shadow:
+      0px 1px 0px -1px oklch(0 0 0 / 0.1),
+      0px 1px 1px -1px oklch(0 0 0 / 0.1),
+      0px 1px 2px -1px oklch(0 0 0 / 0.1),
+      0px 2px 4px -2px oklch(0 0 0 / 0.1),
+      0px 3px 6px -3px oklch(0 0 0 / 0.1);
 
     &::after {
       content: "";
@@ -61,18 +64,23 @@
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      box-shadow: inset 0px 0px 0px 1px oklch(1 0 0 / 0.5),
+      box-shadow:
+        inset 0px 0px 0px 1px oklch(1 0 0 / 0.5),
         inset 0px 1px 0px oklch(1 0 0 / 0.5);
     }
   }
 
   .dark .shadow-crisp-edge {
-    box-shadow: 0px 1px 0px -1px oklch(0 0 0 / 0.1),
-      0px 1px 1px -1px oklch(0 0 0 / 0.1), 0px 1px 2px -1px oklch(0 0 0 / 0.1),
-      0px 2px 4px -2px oklch(0 0 0 / 0.1), 0px 3px 6px -3px oklch(0 0 0 / 0.1);
+    box-shadow:
+      0px 1px 0px -1px oklch(0 0 0 / 0.1),
+      0px 1px 1px -1px oklch(0 0 0 / 0.1),
+      0px 1px 2px -1px oklch(0 0 0 / 0.1),
+      0px 2px 4px -2px oklch(0 0 0 / 0.1),
+      0px 3px 6px -3px oklch(0 0 0 / 0.1);
 
     &::after {
-      box-shadow: inset 0px 0px 0px 1px oklch(1 0 0 / 0.05),
+      box-shadow:
+        inset 0px 0px 0px 1px oklch(1 0 0 / 0.05),
         inset 0px 1px 0px oklch(1 0 0 / 0.05);
     }
   }
@@ -122,8 +130,8 @@
       rgba(0, 0, 0, 0.08) 0%,
       rgba(0, 0, 0, 0) 100%
     );
-    background: linear-gradient(var(--background), var(--background))
-        padding-box,
+    background:
+      linear-gradient(var(--background), var(--background)) padding-box,
       var(--glow-gradient) border-box;
     border: 1px solid transparent;
   }

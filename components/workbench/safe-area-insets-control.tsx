@@ -1,30 +1,30 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronDown, RotateCcw } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import type { SafeAreaInsets } from "@/lib/workbench/types";
 import {
-  INPUT_GROUP_CLASSES,
-  INPUT_CLASSES,
   COMPACT_ADDON_CLASSES,
   COMPACT_LABEL_CLASSES,
+  INPUT_CLASSES,
+  INPUT_GROUP_CLASSES,
   LABEL_CLASSES,
   TRANSPARENT_CONTROL_BG_CLASSES,
 } from "./styles";
-import { Separator } from "@/components/ui/separator";
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;

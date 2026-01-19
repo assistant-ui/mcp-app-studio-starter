@@ -2,19 +2,19 @@
 
 import { useCallback } from "react";
 import {
-  useWorkbenchStore,
   useIsTransitioning,
   useIsWidgetClosed,
   useSelectedComponent,
+  useWorkbenchStore,
 } from "@/lib/workbench/store";
 import {
   VIEW_TRANSITION_PARENT_NAME,
   VIEW_TRANSITION_ROOT_NAME,
 } from "@/lib/workbench/transition-config";
-import { PreviewContent } from "./preview-views";
-import { WidgetClosedOverlay } from "./widget-closed-overlay";
 import { ModalOverlay } from "./modal-overlay";
 import { PreviewToolbar } from "./preview-toolbar";
+import { PreviewContent } from "./preview-views";
+import { WidgetClosedOverlay } from "./widget-closed-overlay";
 
 const COMPONENTS_WITH_OWN_MODAL = new Set(["poi-map"]);
 

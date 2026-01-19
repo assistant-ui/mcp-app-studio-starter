@@ -1,8 +1,8 @@
 "use client";
 
-import type { ReactNode, CSSProperties } from "react";
-import { useWorkbenchStore, useDisplayMode } from "@/lib/workbench/store";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/ui/cn";
+import { useDisplayMode, useWorkbenchStore } from "@/lib/workbench/store";
 
 const LIGHT_THEME_VARS: CSSProperties = {
   "--background": "oklch(1 0 0)",

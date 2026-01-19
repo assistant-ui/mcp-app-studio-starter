@@ -1,19 +1,18 @@
 "use client";
 
-import { useCallback, useState, type ReactNode } from "react";
+import { ChevronDown, RotateCcw } from "lucide-react";
+import { type ReactNode, useCallback, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { useWorkbenchStore, useSelectedComponent } from "@/lib/workbench/store";
-import { getComponent } from "@/lib/workbench/component-registry";
-import { JsonEditor } from "./json-editor";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/ui/cn";
-import { RotateCcw, ChevronDown } from "lucide-react";
-
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/ui/cn";
+import { getComponent } from "@/lib/workbench/component-registry";
+import { useSelectedComponent, useWorkbenchStore } from "@/lib/workbench/store";
+import { JsonEditor } from "./json-editor";
 
 type JsonEditorTab =
   | "toolInput"

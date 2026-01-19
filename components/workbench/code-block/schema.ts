@@ -1,11 +1,11 @@
 import { z } from "zod";
 import {
+  parseWithSchema,
+  SerializableActionSchema,
+  SerializableActionsConfigSchema,
   ToolUIIdSchema,
   ToolUIReceiptSchema,
   ToolUIRoleSchema,
-  SerializableActionSchema,
-  SerializableActionsConfigSchema,
-  parseWithSchema,
 } from "../shared";
 
 export const CodeBlockPropsSchema = z.object({

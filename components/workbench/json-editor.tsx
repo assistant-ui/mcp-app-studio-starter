@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import CodeMirror from "@uiw/react-codemirror";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
-import { linter, lintGutter, type Diagnostic } from "@codemirror/lint";
+import { type Diagnostic, linter, lintGutter } from "@codemirror/lint";
 import { EditorView, placeholder, tooltips } from "@codemirror/view";
-import { githubLight, githubDark } from "@uiw/codemirror-theme-github";
+import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
+import CodeMirror from "@uiw/react-codemirror";
 import { useTheme } from "next-themes";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/ui/cn";
 
 const jsonLinterWithNullSupport = linter((view): Diagnostic[] => {

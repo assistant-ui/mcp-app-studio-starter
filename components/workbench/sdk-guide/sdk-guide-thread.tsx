@@ -1,9 +1,5 @@
 "use client";
 
-import { SDKGuideMarkdownText } from "./markdown-text";
-import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
-import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
-import { Button } from "@/components/ui/button";
 import {
   ActionBarPrimitive,
   AssistantIf,
@@ -17,12 +13,16 @@ import {
   ArrowUpIcon,
   CheckIcon,
   CopyIcon,
-  RefreshCwIcon,
   MessageCircle,
+  RefreshCwIcon,
   SquareIcon,
 } from "lucide-react";
 import type { FC } from "react";
+import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
+import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
+import { Button } from "@/components/ui/button";
 import { ContextIndicator } from "./context-indicator";
+import { SDKGuideMarkdownText } from "./markdown-text";
 
 const SDK_SUGGESTIONS = [
   {

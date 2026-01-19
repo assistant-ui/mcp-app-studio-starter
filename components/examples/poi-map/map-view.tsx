@@ -1,9 +1,9 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { MapPin } from "lucide-react";
-import type { POI, MapCenter, POICategory } from "./schema";
+import dynamic from "next/dynamic";
 import { cn, Skeleton } from "./_adapter";
+import type { MapCenter, POI, POICategory } from "./schema";
 
 export const CATEGORY_COLORS: Record<POICategory, string> = {
   restaurant: "#ef4444",

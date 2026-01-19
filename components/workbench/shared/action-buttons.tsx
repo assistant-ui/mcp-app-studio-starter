@@ -1,7 +1,7 @@
 "use client";
 
+import { Button, cn } from "./_adapter";
 import type { Action } from "./schema";
-import { cn, Button } from "./_adapter";
 import { useActionButtons } from "./use-action-buttons";
 
 export interface ActionButtonsProps {

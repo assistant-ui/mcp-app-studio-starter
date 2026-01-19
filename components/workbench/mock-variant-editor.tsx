@@ -1,21 +1,15 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import CodeMirror from "@uiw/react-codemirror";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
-import { linter, lintGutter, type Diagnostic } from "@codemirror/lint";
+import { type Diagnostic, linter, lintGutter } from "@codemirror/lint";
 import { EditorView, tooltips } from "@codemirror/view";
-import { githubLight, githubDark } from "@uiw/codemirror-theme-github";
+import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
+import CodeMirror from "@uiw/react-codemirror";
 import { useTheme } from "next-themes";
-import type {
-  MockVariant,
-  MockVariantType,
-  MockResponse,
-} from "@/lib/workbench/mock-config";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -23,7 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/ui/cn";
+import type {
+  MockResponse,
+  MockVariant,
+  MockVariantType,
+} from "@/lib/workbench/mock-config";
 import { COMPACT_LABEL_CLASSES } from "./styles";
 
 interface MockVariantEditorProps {

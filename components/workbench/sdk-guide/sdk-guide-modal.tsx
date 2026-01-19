@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
 import {
-  AssistantRuntimeProvider,
   AssistantModalPrimitive,
+  AssistantRuntimeProvider,
 } from "@assistant-ui/react";
 import {
   AssistantChatTransport,
   useChatRuntime,
 } from "@assistant-ui/react-ai-sdk";
-import { useWorkbenchStore, useIsSDKGuideOpen } from "@/lib/workbench/store";
+import { useMemo } from "react";
+import { useIsSDKGuideOpen, useWorkbenchStore } from "@/lib/workbench/store";
 import { SDKGuideThread } from "./sdk-guide-thread";
 
 function getWorkbenchContext() {

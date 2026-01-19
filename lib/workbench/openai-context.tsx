@@ -2,36 +2,37 @@
 
 import {
   createContext,
-  useContext,
+  type MutableRefObject,
+  type ReactNode,
   useCallback,
-  useMemo,
+  useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
-  type ReactNode,
-  type MutableRefObject,
 } from "react";
-import { useWorkbenchStore } from "./store";
-import { handleMockToolCall, type MockToolCallResult } from "./mock-responses";
-import { MORPH_TIMING } from "./transition-config";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { handleMockToolCall, type MockToolCallResult } from "./mock-responses";
+import { useWorkbenchStore } from "./store";
+import { MORPH_TIMING } from "./transition-config";
 import type {
-  OpenAIGlobals,
-  OpenAIAPI,
-  DisplayMode,
   CallToolResponse,
-  ModalOptions,
-  UploadFileResponse,
+  DisplayMode,
   GetFileDownloadUrlResponse,
+  ModalOptions,
+  OpenAIAPI,
+  OpenAIGlobals,
+  UploadFileResponse,
   View,
   WidgetState,
   WindowOpenAI,
 } from "./types";
 
 const DEFAULT_TOOL_CALL_DELAY_MS = 300;
+
+import { getFileUrl, storeFile } from "./file-store";
 import { SET_GLOBALS_EVENT_TYPE } from "./types";
-import { storeFile, getFileUrl } from "./file-store";
 
 interface OpenAIContextValue extends OpenAIGlobals, OpenAIAPI {}
 

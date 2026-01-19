@@ -1,33 +1,33 @@
 "use client";
 
 import {
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback,
-  useState,
   type CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { getFileUrl, storeFile } from "../file-store";
+import { handleMockToolCall } from "../mock-responses";
 import { useWorkbenchStore } from "../store";
+import { MORPH_TIMING } from "../transition-config";
+import type {
+  CallToolResponse,
+  DisplayMode,
+  ModalOptions,
+  OpenAIGlobals,
+  WidgetState,
+} from "../types";
+import {
+  generateEmptyIframeHtml,
+  generateIframeHtml,
+} from "./generate-iframe-html";
 import {
   WorkbenchMessageBridge,
   type WorkbenchMessageHandlers,
 } from "./workbench-message-bridge";
-import {
-  generateIframeHtml,
-  generateEmptyIframeHtml,
-} from "./generate-iframe-html";
-import type {
-  OpenAIGlobals,
-  CallToolResponse,
-  DisplayMode,
-  ModalOptions,
-  WidgetState,
-} from "../types";
-import { handleMockToolCall } from "../mock-responses";
-import { storeFile, getFileUrl } from "../file-store";
-import { MORPH_TIMING } from "../transition-config";
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 export interface WidgetIframeHostProps {
   widgetBundle: string | null;

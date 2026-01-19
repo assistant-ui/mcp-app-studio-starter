@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/ui/cn";
-import { useWorkbenchTheme, useDeviceType } from "@/lib/workbench/store";
+import { useDeviceType, useWorkbenchTheme } from "@/lib/workbench/store";
 import type { DeviceType } from "@/lib/workbench/types";
 
 interface DeviceFrameProps {
