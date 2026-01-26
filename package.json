@@ -1,11 +1,11 @@
 {
-  "name": "chatgpt-app-studio-starter",
+  "name": "mcp-app-studio-starter",
   "version": "0.1.0",
   "private": true,
-  "description": "Starter template for ChatGPT App Studio",
+  "description": "Starter template for MCP App Studio",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/assistant-ui/chatgpt-app-studio-starter.git"
+    "url": "git+https://github.com/assistant-ui/mcp-app-studio-starter.git"
   },
   "homepage": "https://www.assistant-ui.com/",
   "overrides": {

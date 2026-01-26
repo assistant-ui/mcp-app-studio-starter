@@ -64,12 +64,12 @@ function DemoModeContent() {
         </div>
         <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2 font-mono text-[11px]">
           <Terminal className="size-3.5 shrink-0 text-muted-foreground" />
-          <span>npx chatgpt-app-studio</span>
+          <span>npx mcp-app-studio</span>
         </div>
       </div>
 
       <a
-        href="https://www.assistant-ui.com/docs/chatgpt-app-studio"
+        href="https://www.assistant-ui.com/docs/mcp-app-studio"
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-2 font-medium text-[11px] text-primary-foreground transition-colors hover:bg-primary/90"

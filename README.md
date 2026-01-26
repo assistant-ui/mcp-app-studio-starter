@@ -1,8 +1,8 @@
-# ChatGPT App Studio Starter
+# MCP App Studio Starter
 
-Starter template for building ChatGPT Apps with [ChatGPT App Studio](https://github.com/assistant-ui/assistant-ui/tree/main/packages/chatgpt-app-studio).
+Starter template for building interactive apps for AI assistants with [MCP App Studio](https://github.com/assistant-ui/assistant-ui/tree/main/packages/mcp-app-studio).
 
-> **Note:** This template is automatically downloaded when you run `npx chatgpt-app-studio`. You don't need to clone this repo directly.
+> **Note:** This template is automatically downloaded when you run `npx mcp-app-studio`. You don't need to clone this repo directly.
 
 ## Quick Start
 
@@ -19,7 +19,7 @@ Open http://localhost:3002 — you're in the workbench.
 | ---------------- | ---------------------------------------- |
 | `npm run dev`    | Start workbench (Next.js + MCP server)   |
 | `npm run build`  | Production build                         |
-| `npm run export` | Generate widget bundle for ChatGPT       |
+| `npm run export` | Generate widget bundle for deployment    |
 
 ## Project Structure
 
@@ -84,7 +84,7 @@ Full documentation: [`lib/workbench/README.md`](lib/workbench/README.md)
 **Calling methods:**
 - `useCallTool()` — Call MCP tools
 - `useRequestDisplayMode()` — Request display mode change
-- `useSendFollowUpMessage()` — Send message to ChatGPT
+- `useSendFollowUpMessage()` — Send message to assistant
 - `useOpenExternal()` — Open URL in new tab
 
 ## Exporting for Production
@@ -99,7 +99,7 @@ Generates:
 export/
 ├── widget/
 │   └── index.html      Self-contained widget
-├── manifest.json       ChatGPT App manifest
+├── manifest.json       App manifest
 └── README.md           Deployment instructions
 ```
 
@@ -129,12 +129,17 @@ npm run build
 # Deploy to Vercel, Railway, Fly.io, etc.
 ```
 
-### Register with ChatGPT
+### Register with Platform
 
+**For ChatGPT:**
 1. Update `manifest.json` with your deployed widget URL
 2. Go to [ChatGPT Apps dashboard](https://chatgpt.com/apps)
 3. Create a new app and connect your MCP server
 4. Test in a new ChatGPT conversation
+
+**For Claude Desktop:**
+1. Configure your MCP server in Claude Desktop settings
+2. The widget will render when tools with UI are invoked
 
 ## Configuration
 
@@ -168,6 +173,6 @@ Exported widgets inherit the host's theme. Ensure your CSS responds to `.dark`:
 
 ## Learn More
 
-- [ChatGPT Apps SDK](https://developers.openai.com/apps-sdk/) — Official documentation
-- [Apps SDK Reference](https://developers.openai.com/apps-sdk/reference/) — `window.openai` API
+- [MCP App Studio](https://github.com/assistant-ui/assistant-ui/tree/main/packages/mcp-app-studio) — CLI and SDK documentation
 - [MCP Specification](https://modelcontextprotocol.io/specification/) — Model Context Protocol
+- [ChatGPT Apps SDK](https://developers.openai.com/apps-sdk/) — ChatGPT integration

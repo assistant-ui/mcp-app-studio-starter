@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const ONBOARDING_KEY = "chatgpt-app-studio-workbench-onboarded";
+const ONBOARDING_KEY = "mcp-app-studio-workbench-onboarded";
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 interface OnboardingStep {

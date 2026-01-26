@@ -102,6 +102,6 @@ Then open \`http://localhost:3002\` to preview and test.
 
 ---
 
-Generated with [ChatGPT App Studio](https://github.com/assistant-ui/chatgpt-app-studio)
+Generated with [MCP App Studio](https://github.com/assistant-ui/mcp-app-studio)
 `;
 }
