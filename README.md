@@ -21,7 +21,7 @@ npm run dev
 
 Open http://localhost:3002 — you're in the workbench.
 
-The workbench includes a **Platform Toggle** that lets you preview your widget's behavior on both ChatGPT and MCP platforms.
+The workbench operates in **universal mode**, where all platform features are available for testing. Your widget will automatically adapt to the actual platform when deployed.
 
 ## Commands
 
@@ -102,26 +102,36 @@ Configure mock tool responses in `lib/workbench/mock-config/`.
 
 Full documentation: [`lib/workbench/README.md`](lib/workbench/README.md)
 
-**Platform detection:**
-- `usePlatform()` — `"chatgpt"` or `"mcp"`
-- `useCapabilities()` — Platform-specific capabilities object
-- `useFeature(name)` — Check if a specific feature is available
+#### Universal Hooks (recommended)
 
-**Reading state:**
-- `useToolInput<T>()` — Input from the tool call
-- `useToolInputPartial<T>()` — Partial input during streaming (MCP only)
-- `useToolOutput<T>()` — Response from most recent tool call
-- `useTheme()` — `"light"` or `"dark"`
-- `useDisplayMode()` — `"inline"`, `"pip"`, or `"fullscreen"`
-- `useWidgetState<T>()` — Persistent widget state (ChatGPT only)
+These hooks work identically on ChatGPT and MCP platforms:
 
-**Calling methods:**
-- `useCallTool()` — Call MCP tools
-- `useRequestDisplayMode()` — Request display mode change
-- `useSendFollowUpMessage()` — Send message to assistant
-- `useOpenExternal()` — Open URL in new tab
-- `useUpdateModelContext()` — Update model context (MCP only)
-- `useLog()` — Structured logging (MCP only)
+| Hook | Description |
+| ---- | ----------- |
+| `useToolInput<T>()` | Get input arguments from tool call |
+| `useTheme()` | Get current theme ("light" or "dark") |
+| `useCallTool()` | Call backend tools |
+| `useDisplayMode()` | Get/set display mode |
+| `useSendMessage()` | Send messages to conversation |
+
+#### Platform Detection (when needed)
+
+| Hook | Description |
+| ---- | ----------- |
+| `usePlatform()` | Returns "chatgpt", "mcp", or "unknown" |
+| `useCapabilities()` | Get full capability object |
+| `useFeature(name)` | Check if specific feature is available |
+
+#### Platform-Specific (advanced)
+
+These hooks only work on specific platforms. Check availability first:
+
+| Hook | Platform | Description |
+| ---- | -------- | ----------- |
+| `useWidgetState()` | ChatGPT | Persistent state across sessions |
+| `useUpdateModelContext()` | MCP | Update model's context dynamically |
+| `useToolInputPartial()` | MCP | Streaming input during generation |
+| `useLog()` | MCP | Structured logging to host |
 
 ## Platform-Specific Features
 

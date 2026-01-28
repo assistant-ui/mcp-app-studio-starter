@@ -2,14 +2,18 @@
 
 React hooks for building widgets that run on ChatGPT and MCP hosts (Claude Desktop, etc.). These hooks provide access to platform APIs, which are simulated locally in the workbench and work in production when deployed.
 
+## Universal Mode
+
+The workbench operates in **universal mode** — all platform features are available for testing. When your widget is deployed, it will automatically adapt to the actual platform (ChatGPT or MCP) using feature detection.
+
+The export dialog shows platform compatibility information to help you understand which features work where.
+
 ## Supported Platforms
 
-The workbench supports development for:
+Build once, deploy anywhere:
 
 - **ChatGPT** — via the ChatGPT Apps SDK
 - **MCP Hosts** — via the Model Context Protocol (Claude Desktop, etc.)
-
-Use the **Platform Toggle** in the workbench toolbar to preview behavior on each platform.
 
 ## Quick Start
 
@@ -466,10 +470,6 @@ See complete widget implementations:
 ---
 
 ## Workbench Features
-
-### Platform Toggle
-
-Switch between ChatGPT and MCP platforms to preview how your widget behaves on each. The toggle is in the workbench toolbar next to the display mode buttons.
 
 ### Display Modes
 

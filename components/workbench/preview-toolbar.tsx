@@ -2,7 +2,6 @@
 
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import {
-  Bot,
   Layers,
   type LucideIcon,
   MapPin,
@@ -14,7 +13,6 @@ import {
   MoveHorizontal,
   PictureInPicture2,
   Smartphone,
-  Sparkles,
   Square,
   Sun,
   Tablet,
@@ -44,11 +42,9 @@ import {
 import { TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/ui/cn";
 import {
-  type Platform,
   useConversationMode,
   useDeviceType,
   useDisplayMode,
-  useWorkbenchPlatform,
   useWorkbenchStore,
   useWorkbenchTheme,
 } from "@/lib/workbench/store";
@@ -88,15 +84,6 @@ const DEVICE_TYPES: ReadonlyArray<{
   { id: "tablet", label: "Tablet", icon: Tablet },
   { id: "mobile", label: "Mobile", icon: Smartphone },
   { id: "resizable", label: "Resizable", icon: MoveHorizontal },
-];
-
-const PLATFORMS: ReadonlyArray<{
-  id: Platform;
-  label: string;
-  icon: LucideIcon;
-}> = [
-  { id: "chatgpt", label: "ChatGPT", icon: Sparkles },
-  { id: "mcp", label: "MCP (Claude)", icon: Bot },
 ];
 
 const LOCATION_PRESETS: ReadonlyArray<{
@@ -353,23 +340,16 @@ export function PreviewToolbar() {
   const theme = useWorkbenchTheme();
   const deviceType = useDeviceType();
   const conversationMode = useConversationMode();
-  const platform = useWorkbenchPlatform();
 
-  const {
-    setDisplayMode,
-    setDeviceType,
-    setTheme,
-    setConversationMode,
-    setPlatform,
-  } = useWorkbenchStore(
-    useShallow((s) => ({
-      setDisplayMode: s.setDisplayMode,
-      setDeviceType: s.setDeviceType,
-      setTheme: s.setTheme,
-      setConversationMode: s.setConversationMode,
-      setPlatform: s.setPlatform,
-    })),
-  );
+  const { setDisplayMode, setDeviceType, setTheme, setConversationMode } =
+    useWorkbenchStore(
+      useShallow((s) => ({
+        setDisplayMode: s.setDisplayMode,
+        setDeviceType: s.setDeviceType,
+        setTheme: s.setTheme,
+        setConversationMode: s.setConversationMode,
+      })),
+    );
 
   const isDark = theme === "dark";
 
@@ -423,34 +403,6 @@ export function PreviewToolbar() {
                           : TOGGLE_BUTTON_CLASSES,
                       )}
                       onClick={() => setDisplayMode(id)}
-                    >
-                      <Icon className="size-3.5" />
-                    </Button>
-                  </TooltipPrimitive.Trigger>
-                  <TooltipContent side="top">{label}</TooltipContent>
-                </TooltipPrimitive.Root>
-              ))}
-            </ButtonGroup>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="cursor-default select-none text-muted-foreground/60 text-xs">
-              Platform
-            </span>
-            <ButtonGroup>
-              {PLATFORMS.map(({ id, label, icon: Icon }) => (
-                <TooltipPrimitive.Root key={id}>
-                  <TooltipPrimitive.Trigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={cn(
-                        "size-7 p-0",
-                        platform === id
-                          ? TOGGLE_BUTTON_ACTIVE_CLASSES
-                          : TOGGLE_BUTTON_CLASSES,
-                      )}
-                      onClick={() => setPlatform(id)}
                     >
                       <Icon className="size-3.5" />
                     </Button>

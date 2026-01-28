@@ -1,115 +1,149 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import {
-  type Platform,
-  useWorkbenchPlatform,
-  useWorkbenchStore,
-} from "./store";
+import { type Platform, useWorkbenchStore } from "./store";
 
 export interface WorkbenchCapabilities {
   widgetState: boolean;
   toolInputPartial: boolean;
   modelContext: boolean;
   fileUpload: boolean;
+  fileDownload: boolean;
+  modal: boolean;
+  closeWidget: boolean;
   sendMessage: boolean;
   displayModes: boolean;
+  sizeReporting: boolean;
   log: boolean;
+  callTool: boolean;
+  openLink: boolean;
+  toolCancellation: boolean;
+  teardown: boolean;
 }
 
-const CHATGPT_CAPABILITIES: WorkbenchCapabilities = {
+const WORKBENCH_CAPABILITIES: WorkbenchCapabilities = {
   widgetState: true,
-  toolInputPartial: false,
-  modelContext: false,
   fileUpload: true,
-  sendMessage: true,
-  displayModes: true,
-  log: false,
-};
-
-const MCP_CAPABILITIES: WorkbenchCapabilities = {
-  widgetState: false,
+  fileDownload: true,
+  modal: true,
+  closeWidget: true,
   toolInputPartial: true,
   modelContext: true,
-  fileUpload: false,
-  sendMessage: true,
-  displayModes: true,
   log: true,
+  toolCancellation: true,
+  teardown: true,
+  callTool: true,
+  openLink: true,
+  sendMessage: true,
+  sizeReporting: true,
+  displayModes: true,
 };
 
 export function usePlatform(): Platform {
-  return useWorkbenchPlatform();
+  return "chatgpt";
 }
 
 export function useCapabilities(): WorkbenchCapabilities {
-  const platform = usePlatform();
-  return platform === "mcp" ? MCP_CAPABILITIES : CHATGPT_CAPABILITIES;
+  return WORKBENCH_CAPABILITIES;
 }
 
 export function useToolInputPartial<T = Record<string, unknown>>(): T | null {
-  const platform = usePlatform();
   const [partialInput, _setPartialInput] = useState<T | null>(null);
-
-  if (platform !== "mcp") {
-    return null;
-  }
-
   return partialInput;
 }
 
 export function useUpdateModelContext() {
   const store = useWorkbenchStore();
-  const platform = usePlatform();
 
   return useCallback(
     async (ctx: {
       content?: Array<{ type: string; text?: string }>;
       structuredContent?: Record<string, unknown>;
     }): Promise<void> => {
-      if (platform !== "mcp") {
-        console.warn(
-          "[Workbench] useUpdateModelContext is only available on MCP. " +
-            "On ChatGPT, consider using useWidgetState instead.",
-        );
-        return;
-      }
-
       store.addConsoleEntry({
         type: "event",
         method: "updateModelContext",
         args: ctx,
       });
     },
-    [store, platform],
+    [store],
   );
 }
 
 export function useLog() {
   const store = useWorkbenchStore();
-  const platform = usePlatform();
 
   return useCallback(
     (level: "debug" | "info" | "warning" | "error", data: string): void => {
-      if (platform !== "mcp") {
-        console.warn(
-          "[Workbench] useLog is only available on MCP hosts. " +
-            "Falling back to console.log.",
-        );
-        console.log(`[${level}]`, data);
-        return;
-      }
-
       store.addConsoleEntry({
         type: "event",
         method: `log.${level}`,
         args: { level, data },
       });
     },
-    [store, platform],
+    [store],
   );
 }
 
 export function useFeature(feature: keyof WorkbenchCapabilities): boolean {
   const capabilities = useCapabilities();
   return capabilities[feature] ?? false;
+}
+
+export function usePersistentState<T>(
+  key: string,
+  defaultValue: T,
+): [T, (value: T) => void] {
+  const store = useWorkbenchStore();
+  const widgetState = store.widgetState;
+
+  const value = ((widgetState?.[key] as T) ?? defaultValue) as T;
+
+  const setValue = useCallback(
+    (newValue: T) => {
+      store.updateWidgetState({ [key]: newValue });
+      store.addConsoleEntry({
+        type: "event",
+        method: `usePersistentState("${key}")`,
+        args: newValue,
+      });
+    },
+    [key, store],
+  );
+
+  return [value, setValue];
+}
+
+export function useModelContext() {
+  const store = useWorkbenchStore();
+
+  const setContext = useCallback(
+    (data: Record<string, unknown>) => {
+      store.updateWidgetState({ __modelContext: data });
+      store.addConsoleEntry({
+        type: "event",
+        method: "useModelContext.setContext",
+        args: data,
+      });
+    },
+    [store],
+  );
+
+  return { setContext };
+}
+
+export type ToolInputStatus = "loading" | "streaming" | "ready";
+
+export function useToolInputStatus(): ToolInputStatus {
+  const store = useWorkbenchStore();
+  const toolInput = store.toolInput;
+  return toolInput && Object.keys(toolInput).length > 0 ? "ready" : "loading";
+}
+
+export function useChatGPTBridge() {
+  return null;
+}
+
+export function useMCPBridge() {
+  return null;
 }

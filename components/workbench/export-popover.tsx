@@ -197,6 +197,25 @@ function ExportContent() {
             Total:{" "}
             {formatBytes(result.files.reduce((sum, f) => sum + f.size, 0))}
           </div>
+
+          <div className="mt-2 border-t pt-2">
+            <div className="mb-1.5 font-medium text-[11px]">
+              Platform Compatibility
+            </div>
+            <div className="space-y-1 text-[11px]">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="size-3 text-green-500" />
+                <span>ChatGPT Apps</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="size-3 text-green-500" />
+                <span>MCP Hosts (Claude, etc.)</span>
+              </div>
+            </div>
+            <p className="mt-2 text-[10px] text-muted-foreground">
+              Your widget uses universal hooks and will work on both platforms.
+            </p>
+          </div>
         </div>
       )}
 
