@@ -1,4 +1,3 @@
-import { getComponentIds } from "../component-registry";
 import type { DeviceType, DisplayMode, Theme } from "../types";
 import { URL_PARAMS } from "./constants";
 import type { UrlState } from "./types";
@@ -11,11 +10,6 @@ export function parseUrlParams(
   searchParams: URLSearchParams,
 ): Partial<UrlState> {
   const result: Partial<UrlState> = {};
-
-  const componentParam = searchParams.get(URL_PARAMS.COMPONENT);
-  if (componentParam && getComponentIds().includes(componentParam)) {
-    result.component = componentParam;
-  }
 
   const modeParam = searchParams.get(URL_PARAMS.MODE) as DisplayMode | null;
   if (modeParam && VALID_MODES.includes(modeParam)) {
@@ -37,7 +31,6 @@ export function parseUrlParams(
 
 export function buildUrlParams(state: UrlState): URLSearchParams {
   const params = new URLSearchParams();
-  params.set(URL_PARAMS.COMPONENT, state.component);
   params.set(URL_PARAMS.MODE, state.mode);
   params.set(URL_PARAMS.DEVICE, state.device);
   params.set(URL_PARAMS.THEME, state.theme);

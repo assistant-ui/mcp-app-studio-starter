@@ -7,7 +7,6 @@ import type {
 } from "../types";
 
 export interface UrlState {
-  component: string;
   mode: DisplayMode;
   device: DeviceType;
   theme: Theme;

@@ -166,7 +166,7 @@ function getDefaultAssistantResponse(toolName: string): string {
     "poi-map":
       "Here's an interactive map with some great spots to check out. Tap any location for more details!",
     welcome:
-      "I'd be happy to show you around! This is an interactive widget that demonstrates the ChatGPT Apps SDK.",
+      "I'd be happy to show you around! This is an interactive app that demonstrates the ChatGPT Apps SDK.",
   };
   return (
     responses[toolName] ??

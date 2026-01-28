@@ -26,7 +26,7 @@ const STEPS: OnboardingStep[] = [
     icon: <Layers className="size-5 text-blue-500" />,
     title: "Tool Input",
     description:
-      "Data passed to your widget via MCP tool calls. Edit these to test different inputs from the model.",
+      "Data passed to your app via MCP tool calls. Edit these to test different inputs from the model.",
   },
   {
     icon: <Wand2 className="size-5 text-purple-500" />,
@@ -36,9 +36,9 @@ const STEPS: OnboardingStep[] = [
   },
   {
     icon: <Database className="size-5 text-green-500" />,
-    title: "Widget State",
+    title: "App State",
     description:
-      "Persistent state your widget maintains across interactions. Visible to the model in follow-up turns.",
+      "Persistent state your app maintains across interactions. Visible to the model in follow-up turns.",
   },
 ];
 

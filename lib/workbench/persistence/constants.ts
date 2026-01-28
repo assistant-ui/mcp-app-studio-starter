@@ -5,7 +5,6 @@ export const STORAGE_KEYS = {
 } as const;
 
 export const URL_PARAMS = {
-  COMPONENT: "component",
   MODE: "mode",
   DEVICE: "device",
   THEME: "theme",

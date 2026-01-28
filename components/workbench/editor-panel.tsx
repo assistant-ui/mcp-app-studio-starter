@@ -34,21 +34,21 @@ const EDITOR_SECTIONS: EditorSectionConfig[] = [
     key: "toolInput",
     title: "Tool Input",
     tooltip:
-      "Data passed to your widget when a tool is called. Edit to test different inputs.",
+      "Data passed to your app when a tool is called. Edit to test different inputs.",
     tab: "toolInput",
   },
   {
     key: "widgetState",
-    title: "Widget State",
+    title: "App State",
     tooltip:
-      "State your widget persists between interactions. Restored when the widget reopens.",
+      "State your app persists between interactions. Restored when the app reopens.",
     tab: "widgetState",
   },
   {
     key: "toolResponseMetadata",
     title: "Private Metadata",
     tooltip:
-      "Data only your widget sees. Hidden from the model and not included in responses.",
+      "Data only your app sees. Hidden from the model and not included in responses.",
     tab: "toolResponseMetadata",
   },
 ];
@@ -235,7 +235,7 @@ interface WidgetStateSectionProps {
 }
 
 function WidgetStateSection({ value, onChange }: WidgetStateSectionProps) {
-  return <JsonEditor label="Widget State" value={value} onChange={onChange} />;
+  return <JsonEditor label="App State" value={value} onChange={onChange} />;
 }
 
 export function EditorPanel() {

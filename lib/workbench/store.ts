@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { create } from "zustand";
-import { clearFiles } from "./file-store";
 import type {
   MockConfigState,
   MockResponse,
@@ -82,7 +81,6 @@ interface WorkbenchState {
   conversationMode: boolean;
 
   setPlatform: (platform: Platform) => void;
-  setSelectedComponent: (id: string) => void;
   setDisplayMode: (mode: DisplayMode) => void;
   setTransitioning: (transitioning: boolean) => void;
   setTheme: (theme: Theme) => void;
@@ -225,23 +223,6 @@ export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
   simulation: DEFAULT_SIMULATION_STATE,
   useIframePreview: false,
   conversationMode: false,
-  setSelectedComponent: (id) => {
-    clearFiles();
-    // Dynamic import to avoid circular dependency
-    import("./component-registry").then(({ getComponent }) => {
-      const entry = getComponent(id) ?? null;
-      set(() => ({
-        selectedComponent: id,
-        toolInput: entry?.defaultProps ?? {},
-        toolOutput: null,
-        widgetState: null,
-        intrinsicHeight: null,
-        toolResponseMetadata: null,
-        isWidgetClosed: false,
-        widgetSessionId: crypto.randomUUID(),
-      }));
-    });
-  },
   setDisplayMode: (mode) =>
     set((state) => {
       if (mode === "fullscreen" && state.displayMode !== "fullscreen") {

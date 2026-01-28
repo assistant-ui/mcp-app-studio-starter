@@ -1,114 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { workbenchComponents } from "./component-registry";
+import { appComponent } from "./component-registry";
 import { useWorkbenchStore } from "./store";
 
 describe("Workbench Store", () => {
-  // Reset store before each test
   beforeEach(() => {
     const store = useWorkbenchStore.getState();
-    // Reset to initial state by selecting the first component
-    const defaultComponent = workbenchComponents[0];
-    store.setSelectedComponent(defaultComponent?.id ?? "chart");
-  });
-
-  describe("setSelectedComponent", () => {
-    it("should update selectedComponent to the given id", () => {
-      const store = useWorkbenchStore.getState();
-      const targetComponent = workbenchComponents[1]; // Pick second component
-
-      if (!targetComponent) {
-        throw new Error("Test requires at least 2 components in registry");
-      }
-
-      store.setSelectedComponent(targetComponent.id);
-
-      expect(useWorkbenchStore.getState().selectedComponent).toBe(
-        targetComponent.id,
-      );
-    });
-
-    it("should reset toolInput to component's defaultProps", () => {
-      const store = useWorkbenchStore.getState();
-      const targetComponent = workbenchComponents[1];
-
-      if (!targetComponent) {
-        throw new Error("Test requires at least 2 components in registry");
-      }
-
-      store.setSelectedComponent(targetComponent.id);
-
-      expect(useWorkbenchStore.getState().toolInput).toEqual(
-        targetComponent.defaultProps,
-      );
-    });
-
-    it("should reset toolOutput to null", () => {
-      const store = useWorkbenchStore.getState();
-
-      // First set toolOutput to something non-null
-      store.setToolOutput({ someKey: "someValue" });
-      expect(useWorkbenchStore.getState().toolOutput).not.toBeNull();
-
-      // Switch component - should reset to null
-      const targetComponent = workbenchComponents[0];
-      if (!targetComponent) {
-        throw new Error("Test requires at least 1 component in registry");
-      }
-
-      store.setSelectedComponent(targetComponent.id);
-
-      expect(useWorkbenchStore.getState().toolOutput).toBeNull();
-    });
-
-    it("should reset widgetState to null", () => {
-      const store = useWorkbenchStore.getState();
-
-      // First set widgetState to something non-null
-      store.setWidgetState({ someKey: "someValue" });
-      expect(useWorkbenchStore.getState().widgetState).not.toBeNull();
-
-      // Switch component - should reset to null
-      const targetComponent = workbenchComponents[0];
-      if (!targetComponent) {
-        throw new Error("Test requires at least 1 component in registry");
-      }
-
-      store.setSelectedComponent(targetComponent.id);
-
-      expect(useWorkbenchStore.getState().widgetState).toBeNull();
-    });
-
-    it("should reset toolResponseMetadata to null", () => {
-      const store = useWorkbenchStore.getState();
-
-      // First set toolResponseMetadata to something non-null
-      store.setToolResponseMetadata({ someKey: "someValue" });
-      expect(useWorkbenchStore.getState().toolResponseMetadata).not.toBeNull();
-
-      // Switch component - should reset to null
-      const targetComponent = workbenchComponents[0];
-      if (!targetComponent) {
-        throw new Error("Test requires at least 1 component in registry");
-      }
-
-      store.setSelectedComponent(targetComponent.id);
-
-      expect(useWorkbenchStore.getState().toolResponseMetadata).toBeNull();
-    });
-
-    it("should handle non-existent component gracefully", () => {
-      const store = useWorkbenchStore.getState();
-
-      store.setSelectedComponent("non-existent-component-id");
-
-      expect(useWorkbenchStore.getState().selectedComponent).toBe(
-        "non-existent-component-id",
-      );
-      expect(useWorkbenchStore.getState().toolInput).toEqual({});
-      expect(useWorkbenchStore.getState().toolOutput).toBeNull();
-      expect(useWorkbenchStore.getState().widgetState).toBeNull();
-      expect(useWorkbenchStore.getState().toolResponseMetadata).toBeNull();
-    });
+    store.setToolInput(appComponent.defaultProps);
+    store.setToolOutput(null);
+    store.setWidgetState(null);
+    store.setToolResponseMetadata(null);
   });
 
   describe("getOpenAIGlobals", () => {

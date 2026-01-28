@@ -5,35 +5,24 @@ import { useTheme } from "next-themes";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/ui/logo";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/ui/cn";
-import { workbenchComponents } from "@/lib/workbench/component-registry";
+import { appComponent } from "@/lib/workbench/component-registry";
 import { useWorkbenchPersistence } from "@/lib/workbench/persistence";
 import {
   useDisplayMode,
   useIsLeftPanelOpen,
   useIsRightPanelOpen,
   useIsSDKGuideOpen,
-  useSelectedComponent,
   useWorkbenchStore,
 } from "@/lib/workbench/store";
 import { ExportPopover } from "./export-popover";
 import { OnboardingModal } from "./onboarding-modal";
 import { LeftPanelIcon, RightPanelIcon } from "./panel-toggle-icons";
 import { SDKGuideModal } from "./sdk-guide/sdk-guide-modal";
-import { COMPACT_SMALL_TEXT_CLASSES, SELECT_CLASSES } from "./styles";
 import { WorkbenchLayout } from "./workbench-layout";
 
 export function WorkbenchShell() {
   const [mounted, setMounted] = React.useState(false);
-  const selectedComponent = useSelectedComponent();
-  const setSelectedComponent = useWorkbenchStore((s) => s.setSelectedComponent);
   const setDisplayMode = useWorkbenchStore((s) => s.setDisplayMode);
   const setLeftPanelOpen = useWorkbenchStore((s) => s.setLeftPanelOpen);
   const setRightPanelOpen = useWorkbenchStore((s) => s.setRightPanelOpen);
@@ -110,22 +99,7 @@ export function WorkbenchShell() {
           <span className="select-none font-mono">Workbench</span>
         </div>
 
-        <Select value={selectedComponent} onValueChange={setSelectedComponent}>
-          <SelectTrigger className={`${SELECT_CLASSES} font-medium text-sm`}>
-            <SelectValue placeholder="Select component" />
-          </SelectTrigger>
-          <SelectContent>
-            {workbenchComponents.map((comp) => (
-              <SelectItem
-                className={`${COMPACT_SMALL_TEXT_CLASSES} text-sm`}
-                key={comp.id}
-                value={comp.id}
-              >
-                {comp.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <span className="font-medium text-sm">{appComponent.label}</span>
 
         <div className="flex items-center justify-end gap-1">
           <Button
