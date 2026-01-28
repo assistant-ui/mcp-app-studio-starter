@@ -38,8 +38,8 @@ const SDK_SUGGESTIONS = [
   },
   {
     title: "How do I persist",
-    label: "widget state?",
-    prompt: "How do I persist widget state between sessions?",
+    label: "app state?",
+    prompt: "How do I persist app state between sessions?",
   },
   {
     title: "What _meta fields",

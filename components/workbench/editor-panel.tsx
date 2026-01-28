@@ -34,7 +34,7 @@ const EDITOR_SECTIONS: EditorSectionConfig[] = [
     key: "toolInput",
     title: "Tool Input",
     tooltip:
-      "Data passed to your widget when a tool is called. Edit to test different inputs.",
+      "Data passed to your app when a tool is called. Edit to test different inputs.",
     tab: "toolInput",
   },
   {
@@ -48,7 +48,7 @@ const EDITOR_SECTIONS: EditorSectionConfig[] = [
     key: "toolResponseMetadata",
     title: "Private Metadata",
     tooltip:
-      "Data only your widget sees. Hidden from the model and not included in responses.",
+      "Data only your app sees. Hidden from the model and not included in responses.",
     tab: "toolResponseMetadata",
   },
 ];
