@@ -65,7 +65,7 @@ function DemoModeContent() {
       </div>
 
       <p className="text-[11px] text-muted-foreground leading-relaxed">
-        Export bundles your widget as a self-contained HTML file with all
+        Export bundles your app as a self-contained HTML file with all
         dependencies inlined, ready to deploy to ChatGPT.
       </p>
 
@@ -172,7 +172,7 @@ function CompatibilitySection({
 
       {platformSpecificHooks.length === 0 && (
         <p className="mt-1 text-[10px] text-muted-foreground">
-          Your widget uses universal hooks and will work on both platforms.
+          Your app uses universal hooks and will work on both platforms.
         </p>
       )}
     </div>
@@ -274,7 +274,7 @@ function ExportContent({ isOpen }: { isOpen: boolean }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <div className="font-medium">Export Widget</div>
+        <div className="font-medium">Export App</div>
         <Button
           size="sm"
           onClick={handleExport}

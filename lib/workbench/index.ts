@@ -1,4 +1,5 @@
 export {
+  appComponent,
   type ComponentCategory,
   getComponent,
   getComponentIds,

@@ -39,9 +39,9 @@ const EDITOR_SECTIONS: EditorSectionConfig[] = [
   },
   {
     key: "widgetState",
-    title: "Widget State",
+    title: "App State",
     tooltip:
-      "State your widget persists between interactions. Restored when the widget reopens.",
+      "State your app persists between interactions. Restored when the app reopens.",
     tab: "widgetState",
   },
   {
@@ -235,7 +235,7 @@ interface WidgetStateSectionProps {
 }
 
 function WidgetStateSection({ value, onChange }: WidgetStateSectionProps) {
-  return <JsonEditor label="Widget State" value={value} onChange={onChange} />;
+  return <JsonEditor label="App State" value={value} onChange={onChange} />;
 }
 
 export function EditorPanel() {
