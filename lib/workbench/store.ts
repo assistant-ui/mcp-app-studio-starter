@@ -45,8 +45,11 @@ interface ActiveToolCall {
   cancelFn?: () => void;
 }
 
+export type Platform = "chatgpt" | "mcp";
+
 interface WorkbenchState {
   selectedComponent: string;
+  platform: Platform;
   displayMode: DisplayMode;
   previousDisplayMode: DisplayMode;
   theme: Theme;
@@ -78,6 +81,7 @@ interface WorkbenchState {
   useIframePreview: boolean;
   conversationMode: boolean;
 
+  setPlatform: (platform: Platform) => void;
   setSelectedComponent: (id: string) => void;
   setDisplayMode: (mode: DisplayMode) => void;
   setTransitioning: (transitioning: boolean) => void;
@@ -190,6 +194,7 @@ function buildOpenAIGlobals(
 
 export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
   selectedComponent: "welcome",
+  platform: "chatgpt",
   displayMode: "inline",
   previousDisplayMode: "inline",
   theme: "light",
@@ -323,6 +328,7 @@ export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
   setResizableWidth: (width) => set(() => ({ resizableWidth: width })),
   setIframePreview: (enabled) => set(() => ({ useIframePreview: enabled })),
   setConversationMode: (enabled) => set(() => ({ conversationMode: enabled })),
+  setPlatform: (platform) => set(() => ({ platform })),
   selectSimTool: (toolName) =>
     set((state) => ({
       simulation: { ...state.simulation, selectedTool: toolName },
@@ -677,3 +683,4 @@ export const useServerUrl = () =>
   useWorkbenchStore((s) => s.mockConfig.serverUrl);
 export const useConversationMode = () =>
   useWorkbenchStore((s) => s.conversationMode);
+export const useWorkbenchPlatform = () => useWorkbenchStore((s) => s.platform);

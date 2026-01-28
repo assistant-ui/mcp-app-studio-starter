@@ -31,12 +31,23 @@ export {
   useWidgetState,
 } from "./openai-context";
 export {
+  useCapabilities,
+  useFeature,
+  useLog,
+  usePlatform,
+  useToolInputPartial,
+  useUpdateModelContext,
+  type WorkbenchCapabilities,
+} from "./platform-hooks";
+export {
+  type Platform,
   useConsoleLogs,
   useDeviceType,
   useDisplayMode as useWorkbenchDisplayMode,
   useSelectedComponent,
   useToolInput as useWorkbenchToolInput,
   useToolOutput as useWorkbenchToolOutput,
+  useWorkbenchPlatform,
   useWorkbenchStore,
   useWorkbenchTheme,
 } from "./store";

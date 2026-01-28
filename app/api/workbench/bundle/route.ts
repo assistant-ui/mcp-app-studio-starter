@@ -16,7 +16,7 @@ function toImportPath(fromDir: string, absoluteTargetPath: string): string {
 const ENTRY_TEMPLATE = `
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { ProductionOpenAIProvider } from "@/lib/export/production-provider";
+import { ProductionProvider } from "@/lib/export/production-provider";
 WIDGET_IMPORT_LINE
 
 function App() {
@@ -25,7 +25,7 @@ function App() {
     : {};
 
   return React.createElement(
-    ProductionOpenAIProvider,
+    ProductionProvider,
     null,
     React.createElement(Widget, props)
   );

@@ -20,6 +20,7 @@ import {
   useTheme,
   useWidgetState,
 } from "@/lib/workbench/openai-context";
+import { useCapabilities } from "@/lib/workbench/platform-hooks";
 import type { DisplayMode, View } from "@/lib/workbench/types";
 
 const DEFAULT_WIDGET_STATE: POIMapViewState = {
@@ -42,6 +43,7 @@ export function POIMapSDK(props: Record<string, unknown>) {
   const openExternal = useOpenExternal();
   const sendFollowUpMessage = useSendFollowUpMessage();
   const [localView, setLocalView] = useState<View | null>(null);
+  const capabilities = useCapabilities();
 
   const currentWidgetState = useMemo<POIMapViewState>(
     () => ({
@@ -55,12 +57,14 @@ export function POIMapSDK(props: Record<string, unknown>) {
 
   const handleWidgetStateChange = useCallback(
     (partialState: Partial<POIMapViewState>) => {
-      setWidgetState({
-        ...currentWidgetState,
-        ...partialState,
-      });
+      if (capabilities.widgetState) {
+        setWidgetState({
+          ...currentWidgetState,
+          ...partialState,
+        });
+      }
     },
-    [setWidgetState, currentWidgetState],
+    [setWidgetState, currentWidgetState, capabilities.widgetState],
   );
 
   const handleRequestDisplayMode = useCallback(
