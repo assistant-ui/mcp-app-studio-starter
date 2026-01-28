@@ -24,21 +24,21 @@ interface OnboardingStep {
 const STEPS: OnboardingStep[] = [
   {
     icon: <Layers className="size-5 text-blue-500" />,
-    title: "Component Props",
+    title: "Tool Input",
     description:
-      "Data the model passes to your widget via tool calls. Edit these to test different inputs.",
+      "Data passed to your widget via MCP tool calls. Edit these to test different inputs from the model.",
   },
   {
     icon: <Wand2 className="size-5 text-purple-500" />,
     title: "Response Scenarios",
     description:
-      "Simulate different server responses: success, error, slow network. Test edge cases without a backend.",
+      "Simulate different tool responses: success, error, slow network. Test edge cases without a live MCP server.",
   },
   {
     icon: <Database className="size-5 text-green-500" />,
     title: "Widget State",
     description:
-      "State your widget persists between interactions. The model sees this in follow-up turns.",
+      "Persistent state your widget maintains across interactions. Visible to the model in follow-up turns.",
   },
 ];
 
@@ -69,10 +69,11 @@ export function OnboardingModal() {
       <DialogContent className="max-w-md" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle className="text-xl">
-            Welcome to Tool UI Workbench
+            Welcome to MCP App Studio
           </DialogTitle>
           <DialogDescription className="text-sm">
-            Test how your widget behaves inside ChatGPT—without deploying.
+            Build and test MCP widgets locally before deploying to Claude
+            Desktop, ChatGPT, or any MCP-compatible host.
           </DialogDescription>
         </DialogHeader>
 
