@@ -4,6 +4,14 @@ Starter template for building interactive apps for AI assistants with [MCP App S
 
 > **Note:** This template is automatically downloaded when you run `npx mcp-app-studio`. You don't need to clone this repo directly.
 
+## Supported Platforms
+
+Build once, deploy anywhere:
+
+- **ChatGPT** — via the ChatGPT Apps SDK
+- **Claude Desktop** — via the Model Context Protocol (MCP)
+- **Any MCP Host** — compatible with any MCP-supporting AI assistant
+
 ## Quick Start
 
 ```bash
@@ -12,6 +20,8 @@ npm run dev
 ```
 
 Open http://localhost:3002 — you're in the workbench.
+
+The workbench includes a **Platform Toggle** that lets you preview your widget's behavior on both ChatGPT and MCP platforms.
 
 ## Commands
 
@@ -30,6 +40,7 @@ components/
 ├── workbench/              Workbench UI components
 └── ui/                     Shared UI components
 lib/
+├── sdk/                    SDK exports for production
 ├── workbench/              React hooks + dev environment
 └── export/                 Production bundler
 server/                     MCP server (if included)
@@ -41,12 +52,20 @@ server/                     MCP server (if included)
 
 ```tsx
 // components/my-widget/index.tsx
-import { useToolInput, useCallTool, useTheme } from "@/lib/workbench";
+import {
+  useToolInput,
+  useCallTool,
+  useTheme,
+  usePlatform,
+  useCapabilities,
+} from "@/lib/workbench";
 
 export function MyWidget() {
   const input = useToolInput<{ query: string }>();
   const callTool = useCallTool();
   const theme = useTheme();
+  const platform = usePlatform();
+  const capabilities = useCapabilities();
 
   const handleSearch = async () => {
     const result = await callTool("search", { query: input.query });
@@ -56,7 +75,16 @@ export function MyWidget() {
   return (
     <div className={theme === "dark" ? "dark" : ""}>
       <p>Query: {input.query}</p>
+      <p>Running on: {platform}</p>
       <button onClick={handleSearch}>Search</button>
+
+      {/* Platform-specific features */}
+      {capabilities.widgetState && (
+        <p>Widget state is available (ChatGPT only)</p>
+      )}
+      {capabilities.modelContext && (
+        <p>Model context updates available (MCP only)</p>
+      )}
     </div>
   );
 }
@@ -74,18 +102,39 @@ Configure mock tool responses in `lib/workbench/mock-config/`.
 
 Full documentation: [`lib/workbench/README.md`](lib/workbench/README.md)
 
+**Platform detection:**
+- `usePlatform()` — `"chatgpt"` or `"mcp"`
+- `useCapabilities()` — Platform-specific capabilities object
+- `useFeature(name)` — Check if a specific feature is available
+
 **Reading state:**
 - `useToolInput<T>()` — Input from the tool call
+- `useToolInputPartial<T>()` — Partial input during streaming (MCP only)
 - `useToolOutput<T>()` — Response from most recent tool call
 - `useTheme()` — `"light"` or `"dark"`
 - `useDisplayMode()` — `"inline"`, `"pip"`, or `"fullscreen"`
-- `useWidgetState<T>()` — Persistent widget state
+- `useWidgetState<T>()` — Persistent widget state (ChatGPT only)
 
 **Calling methods:**
 - `useCallTool()` — Call MCP tools
 - `useRequestDisplayMode()` — Request display mode change
 - `useSendFollowUpMessage()` — Send message to assistant
 - `useOpenExternal()` — Open URL in new tab
+- `useUpdateModelContext()` — Update model context (MCP only)
+- `useLog()` — Structured logging (MCP only)
+
+## Platform-Specific Features
+
+| Feature | ChatGPT | MCP |
+| ------- | ------- | --- |
+| Widget State | Yes | No |
+| Tool Input Partial | No | Yes |
+| Model Context Updates | No | Yes |
+| Structured Logging | No | Yes |
+| File Upload | Yes | No |
+| Display Mode Transitions | Yes | Yes |
+
+Use `useCapabilities()` or `useFeature()` to conditionally enable features.
 
 ## Exporting for Production
 
@@ -102,6 +151,8 @@ export/
 ├── manifest.json       App manifest
 └── README.md           Deployment instructions
 ```
+
+The exported widget uses the `mcp-app-studio` SDK which automatically detects the host platform and uses the appropriate bridge.
 
 ## Deploying
 

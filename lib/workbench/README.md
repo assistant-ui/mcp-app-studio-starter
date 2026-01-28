@@ -1,6 +1,15 @@
 # Workbench SDK
 
-React hooks for building ChatGPT App widgets. These hooks provide access to the OpenAI Apps SDK, which is simulated locally in the workbench and works in production when deployed to ChatGPT.
+React hooks for building widgets that run on ChatGPT and MCP hosts (Claude Desktop, etc.). These hooks provide access to platform APIs, which are simulated locally in the workbench and work in production when deployed.
+
+## Supported Platforms
+
+The workbench supports development for:
+
+- **ChatGPT** — via the ChatGPT Apps SDK
+- **MCP Hosts** — via the Model Context Protocol (Claude Desktop, etc.)
+
+Use the **Platform Toggle** in the workbench toolbar to preview behavior on each platform.
 
 ## Quick Start
 
@@ -9,14 +18,16 @@ import {
   useToolInput,
   useTheme,
   useCallTool,
-  useWidgetState,
+  usePlatform,
+  useCapabilities,
 } from "@/lib/workbench";
 
 function MyWidget() {
   const input = useToolInput<{ query: string }>();
   const theme = useTheme();
   const callTool = useCallTool();
-  const [state, setState] = useWidgetState({ count: 0 });
+  const platform = usePlatform();
+  const capabilities = useCapabilities();
 
   const handleSearch = async () => {
     const result = await callTool("search", { query: input.query });
@@ -26,7 +37,12 @@ function MyWidget() {
   return (
     <div className={theme === "dark" ? "dark" : ""}>
       <p>Query: {input.query}</p>
+      <p>Platform: {platform}</p>
       <button onClick={handleSearch}>Search</button>
+
+      {capabilities.widgetState && (
+        <p>Widget state available (ChatGPT only)</p>
+      )}
     </div>
   );
 }
@@ -35,6 +51,47 @@ function MyWidget() {
 ---
 
 ## Hooks Reference
+
+### Platform Detection
+
+#### `usePlatform()`
+
+Returns the current platform: `"chatgpt"` or `"mcp"`.
+
+```tsx
+const platform = usePlatform();
+if (platform === "mcp") {
+  // Use MCP-specific features
+}
+```
+
+#### `useCapabilities()`
+
+Returns an object describing platform-specific capabilities.
+
+```tsx
+const capabilities = useCapabilities();
+// capabilities.widgetState - ChatGPT only
+// capabilities.toolInputPartial - MCP only
+// capabilities.modelContext - MCP only
+// capabilities.fileUpload - ChatGPT only
+// capabilities.sendMessage - Both
+// capabilities.displayModes - Both
+// capabilities.log - MCP only
+```
+
+#### `useFeature(name)`
+
+Check if a specific feature is available.
+
+```tsx
+const hasWidgetState = useFeature("widgetState");
+if (hasWidgetState) {
+  // Use widget state
+}
+```
+
+---
 
 ### Reading State
 
@@ -45,6 +102,19 @@ Returns the input passed to your widget from the MCP tool call.
 ```tsx
 const input = useToolInput<{ city: string; units?: "metric" | "imperial" }>();
 // input.city, input.units
+```
+
+#### `useToolInputPartial<T>()` (MCP only)
+
+Returns partial input as it streams in. Useful for real-time updates.
+
+```tsx
+const partial = useToolInputPartial<{ query: string }>();
+const final = useToolInput<{ query: string }>();
+
+if (partial && !final) {
+  return <div className="opacity-50">{partial.query}...</div>;
+}
 ```
 
 #### `useToolOutput<T>()`
@@ -92,7 +162,7 @@ const locale = useLocale();
 const formatted = new Intl.NumberFormat(locale).format(1234.56);
 ```
 
-#### `useWidgetState<T>(defaultState?)`
+#### `useWidgetState<T>(defaultState?)` (ChatGPT only)
 
 Returns a tuple `[state, setState]` for persistent widget state that survives across tool calls.
 
@@ -105,6 +175,8 @@ setState({ ...state, selectedId: "abc" });
 // Or use updater function
 setState((prev) => ({ ...prev, selectedId: "abc" }));
 ```
+
+> **Note:** On MCP, this hook logs a warning and returns `[null, no-op]`. Use `useUpdateModelContext()` instead for MCP-specific context sharing.
 
 #### `useView()`
 
@@ -164,7 +236,7 @@ const handleCollapse = () => requestDisplayMode({ mode: "inline" });
 
 #### `useSendFollowUpMessage()`
 
-Returns a function to send a message to ChatGPT on behalf of the user.
+Returns a function to send a message to the assistant on behalf of the user.
 
 ```tsx
 const sendFollowUpMessage = useSendFollowUpMessage();
@@ -186,7 +258,7 @@ const handleOpenWebsite = (url: string) => {
 };
 ```
 
-#### `useUploadFile()`
+#### `useUploadFile()` (ChatGPT only)
 
 Returns a function to upload a file. Returns `{ fileId: string }`.
 
@@ -199,7 +271,7 @@ const handleUpload = async (file: File) => {
 };
 ```
 
-#### `useGetFileDownloadUrl()`
+#### `useGetFileDownloadUrl()` (ChatGPT only)
 
 Returns a function to get a download URL for an uploaded file.
 
@@ -212,9 +284,67 @@ const handleDownload = async (fileId: string) => {
 };
 ```
 
+#### `useUpdateModelContext()` (MCP only)
+
+Returns a function to update the model's context with structured data.
+
+```tsx
+const updateContext = useUpdateModelContext();
+
+const handleDataChange = async (data: object) => {
+  await updateContext({
+    structuredContent: { currentData: data },
+  });
+};
+```
+
+> **Note:** On ChatGPT, this hook logs a warning and returns a no-op. Use `useWidgetState()` instead for ChatGPT-specific state persistence.
+
+#### `useLog()` (MCP only)
+
+Returns a function for structured logging to the MCP host.
+
+```tsx
+const log = useLog();
+
+const handleAction = () => {
+  log("info", "User clicked button");
+  log("debug", `Processing data: ${JSON.stringify(data)}`);
+};
+```
+
 ---
 
 ## Common Patterns
+
+### Platform-Specific Features
+
+```tsx
+function CrossPlatformWidget() {
+  const platform = usePlatform();
+  const capabilities = useCapabilities();
+  const [state, setState] = useWidgetState({ count: 0 });
+  const updateContext = useUpdateModelContext();
+
+  const handleChange = async (data: object) => {
+    if (capabilities.widgetState) {
+      // ChatGPT: persist in widget state
+      setState(data);
+    }
+    if (capabilities.modelContext) {
+      // MCP: update model context
+      await updateContext({ structuredContent: data });
+    }
+  };
+
+  return (
+    <div>
+      <p>Running on: {platform}</p>
+      <button onClick={() => handleChange({ count: 1 })}>Update</button>
+    </div>
+  );
+}
+```
 
 ### Loading State When Calling Tools
 
@@ -279,7 +409,7 @@ function ExpandableWidget() {
 }
 ```
 
-### Persisting User Preferences
+### Persisting User Preferences (ChatGPT)
 
 ```tsx
 interface WidgetPrefs {
@@ -337,6 +467,10 @@ See complete widget implementations:
 
 ## Workbench Features
 
+### Platform Toggle
+
+Switch between ChatGPT and MCP platforms to preview how your widget behaves on each. The toggle is in the workbench toolbar next to the display mode buttons.
+
 ### Display Modes
 
 The workbench toolbar lets you preview your widget in different display modes:
@@ -360,7 +494,7 @@ Test responsive layouts by switching between device presets:
 
 ### Conversation Mode
 
-Conversation Mode (chat bubble icon, inline mode only) shows your widget in a simulated ChatGPT conversation context:
+Conversation Mode (chat bubble icon, inline mode only) shows your widget in a simulated conversation context:
 
 ```
 ┌─────────────────────────────────────┐
