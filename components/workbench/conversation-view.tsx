@@ -62,14 +62,14 @@ function ToolIndicator({
 
   return (
     <div className="flex justify-start">
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
         <div
           className={cn(
-            "flex size-8 items-center justify-center rounded-full",
-            isDark ? "bg-blue-600" : "bg-blue-500",
+            "flex size-6 items-center justify-center rounded-full",
+            isDark ? "bg-amber-600" : "bg-amber-500",
           )}
         >
-          <Icon className="size-4 text-white" />
+          <Icon className="size-3 text-white" />
         </div>
         <span
           className={cn(
