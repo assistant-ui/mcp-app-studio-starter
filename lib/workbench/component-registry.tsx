@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentType } from "react";
-import { WelcomeCardSDK } from "./wrappers";
+import { POIMapSDK, WelcomeCardSDK } from "./wrappers";
 
 export type ComponentCategory = "cards" | "lists" | "forms" | "data";
 
@@ -29,6 +29,19 @@ export interface WorkbenchComponentEntry {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const appComponent: WorkbenchComponentEntry = {
+  id: "poi-map",
+  label: "Places App Demo",
+  description: "An interactive places discovery app with map and search",
+  category: "data",
+  component: POIMapSDK,
+  defaultProps: {},
+  exportConfig: {
+    entryPoint: "lib/workbench/wrappers/poi-map-sdk.tsx",
+    exportName: "POIMapSDK",
+  },
+};
+
+const welcomeComponent: WorkbenchComponentEntry = {
   id: "welcome",
   label: "Welcome",
   description: "A simple starter app - the perfect starting point",
@@ -45,7 +58,10 @@ export const appComponent: WorkbenchComponentEntry = {
   },
 };
 
-export const workbenchComponents: WorkbenchComponentEntry[] = [appComponent];
+export const workbenchComponents: WorkbenchComponentEntry[] = [
+  appComponent,
+  welcomeComponent,
+];
 
 export function getComponent(id: string): WorkbenchComponentEntry | undefined {
   return workbenchComponents.find((c) => c.id === id);
