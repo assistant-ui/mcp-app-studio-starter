@@ -60,7 +60,7 @@ export const SDKGuideThread: FC = () => {
         <div className="flex size-7 items-center justify-center rounded-full bg-primary/10">
           <MessageCircle className="size-3.5 text-primary" />
         </div>
-        <span className="font-medium text-sm">MCP App Guide</span>
+        <span className="font-medium text-sm">MCP App Assistant</span>
       </div>
 
       <ThreadPrimitive.Viewport
@@ -110,7 +110,7 @@ const SDKGuideWelcome: FC = () => {
           <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
             <MessageCircle className="size-6 text-primary" />
           </div>
-          <h1 className="font-semibold text-lg">MCP App Guide</h1>
+          <h1 className="font-semibold text-lg">MCP App Assistant</h1>
           <p className="max-w-xs text-muted-foreground text-sm">
             I can help you build MCP Apps. I have access to the SDK docs and
             can inspect your current configuration.

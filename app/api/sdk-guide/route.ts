@@ -25,7 +25,7 @@ interface WorkbenchContext {
 }
 
 function buildSystemPrompt(context: WorkbenchContext): string {
-  return `You are MCP App Guide, an assistant that helps developers build MCP Apps that work across multiple platforms including ChatGPT and Claude Desktop.
+  return `You are MCP App Assistant, an assistant that helps developers build MCP Apps that work across multiple platforms including ChatGPT and Claude Desktop.
 
 ## Your Role
 - Answer questions about the MCP Apps SDK and protocol

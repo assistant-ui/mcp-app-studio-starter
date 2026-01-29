@@ -150,12 +150,12 @@ export function WorkbenchShell() {
 
           <Button
             variant="ghost"
-            aria-label="SDK Assistant (⌘/)"
+            aria-label="Assistant (⌘/)"
             className="h-7 gap-1.5 rounded-md px-2 text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
             onClick={toggleSDKGuide}
           >
             <MessageCircle className="size-4" />
-            <span>SDK Assistant</span>
+            <span>Assistant</span>
           </Button>
 
           <ExportPopover />
