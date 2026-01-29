@@ -190,8 +190,14 @@ function buildOpenAIGlobals(
   };
 }
 
+function getInitialComponent(): string {
+  if (typeof window === "undefined") return "welcome";
+  const params = new URLSearchParams(window.location.search);
+  return params.get("component") ?? "welcome";
+}
+
 export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
-  selectedComponent: "poi-map",
+  selectedComponent: getInitialComponent(),
   platform: "chatgpt",
   displayMode: "inline",
   previousDisplayMode: "inline",
