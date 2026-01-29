@@ -5,8 +5,8 @@ import { ThemeProvider } from "@/app/components/theme/theme-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Create ChatGPT App",
-  description: "Design and test ChatGPT Apps",
+  title: "MCP App Studio",
+  description: "Design and test MCP Apps",
 };
 
 export const viewport: Viewport = {

@@ -20,7 +20,7 @@ function parseArgs(): ExportArgs {
   const parsed: ExportArgs = {
     entryPoint: "lib/workbench/wrappers/poi-map-sdk.tsx",
     exportName: "POIMapSDK",
-    name: "My ChatGPT App",
+    name: "My MCP App",
     outputDir: "export",
     inline: false,
   };
@@ -69,7 +69,7 @@ Usage: tsx scripts/export.ts [options]
 Options:
   -e, --entry <path>      Widget entry point (default: lib/workbench/wrappers/poi-map-sdk.tsx)
   --export-name <name>    Export name from entry file (default: POIMapSDK)
-  -n, --name <name>       Widget name for manifest (default: My ChatGPT App)
+  -n, --name <name>       App name for manifest (default: My MCP App)
   -o, --output <dir>      Output directory (default: export)
   --inline                Inline JS/CSS into HTML
   -h, --help              Show this help message
@@ -84,7 +84,7 @@ Examples:
 async function main() {
   const args = parseArgs();
 
-  console.log("\n🚀 ChatGPT App Export\n");
+  console.log("\n🚀 MCP App Export\n");
   console.log(`   Entry: ${args.entryPoint}`);
   console.log(`   Export: ${args.exportName}`);
   console.log(`   Name: ${args.name}`);

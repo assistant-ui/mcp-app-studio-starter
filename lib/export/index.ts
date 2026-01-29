@@ -82,7 +82,7 @@ export async function exportWidget(
     console.log("📄 Generating HTML...");
     const htmlPath = path.join(outputDir, "widget", "index.html");
     const widgetName =
-      config.manifest?.name ?? config.widget.name ?? "ChatGPT App";
+      config.manifest?.name ?? config.widget.name ?? "MCP App";
 
     await writeHtml({
       outputPath: htmlPath,
@@ -212,14 +212,14 @@ export function createDefaultExportConfig(
   return {
     widget: {
       entryPoint: widgetEntryPoint,
-      name: name ?? "My ChatGPT App",
+      name: name ?? "My MCP App",
     },
     output: {
       dir: "export",
       inline: false,
     },
     manifest: {
-      name: name ?? "My ChatGPT App",
+      name: name ?? "My MCP App",
       version: "1.0.0",
     },
   };

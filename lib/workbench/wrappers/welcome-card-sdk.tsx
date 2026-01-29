@@ -21,7 +21,7 @@ export function WelcomeCardSDK(props: Record<string, unknown>) {
   const title = input.title ?? "Welcome!";
   const message =
     input.message ??
-    "This is your ChatGPT App. Edit this component to build something amazing.";
+    "This is your MCP App. Edit this component to build something amazing.";
 
   const handleExpand = () => {
     requestDisplayMode({ mode: "fullscreen" });

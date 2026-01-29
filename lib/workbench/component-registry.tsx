@@ -50,7 +50,7 @@ const welcomeComponent: WorkbenchComponentEntry = {
   defaultProps: {
     title: "Welcome!",
     message:
-      "This is your ChatGPT App. Edit this component to build something amazing.",
+      "This is your MCP App. Edit this component to build something amazing.",
   },
   exportConfig: {
     entryPoint: "lib/workbench/wrappers/welcome-card-sdk.tsx",

@@ -38,7 +38,7 @@ function createAppServer() {
     "example_tool",
     {
       title: "Example Tool",
-      description: "An example tool for your ChatGPT app",
+      description: "An example tool for your MCP app",
       inputSchema: {
         query: z.string().describe("The search query"),
       },

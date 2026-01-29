@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const widgetEntryPoint =
       body.widgetEntryPoint ?? "lib/workbench/wrappers/poi-map-sdk.tsx";
     const widgetExportName = body.widgetExportName ?? "POIMapSDK";
-    const widgetName = body.widgetName ?? "My ChatGPT App";
+    const widgetName = body.widgetName ?? "My MCP App";
     const outputDir = body.outputDir ?? "export";
 
     const projectRoot = process.cwd();

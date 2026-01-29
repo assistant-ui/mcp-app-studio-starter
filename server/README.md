@@ -1,6 +1,6 @@
 # MCP Server
 
-MCP server for your ChatGPT app.
+MCP server for your MCP app.
 
 ## Quick Start
 
@@ -32,7 +32,7 @@ vercel deploy
 
 ## Tools
 
-- **example_tool**: An example tool for your ChatGPT app
+- **example_tool**: An example tool for your MCP app
 
 ## Adding New Tools
 

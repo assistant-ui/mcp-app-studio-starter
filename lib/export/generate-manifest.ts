@@ -13,7 +13,7 @@ export function generateManifest(
 
   const manifest: ChatGPTAppManifest = {
     schema_version: "1.0",
-    name: manifestConfig.name ?? config.widget.name ?? "My ChatGPT App",
+    name: manifestConfig.name ?? config.widget.name ?? "My MCP App",
     widget: {
       url: widgetUrl,
     },

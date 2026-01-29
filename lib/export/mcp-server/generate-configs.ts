@@ -87,7 +87,7 @@ dist/
 export function generateServerReadme(config: MCPServerConfig): string {
   return `# ${config.name} MCP Server
 
-MCP server for ${config.name} ChatGPT App.
+MCP server for ${config.name}.
 
 ## Quick Start
 
