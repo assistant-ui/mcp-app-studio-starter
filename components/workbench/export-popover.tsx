@@ -65,7 +65,7 @@ function DemoModeContent() {
 
       <p className="text-[11px] text-muted-foreground leading-relaxed">
         Export bundles your app as a self-contained HTML file with all
-        dependencies inlined, ready to deploy to ChatGPT.
+        dependencies inlined, ready to deploy as a ChatGPT App or MCP App.
       </p>
 
       <div className="space-y-2">
