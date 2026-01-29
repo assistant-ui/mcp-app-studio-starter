@@ -32,7 +32,7 @@ interface EditorSectionConfig {
 const EDITOR_SECTIONS: EditorSectionConfig[] = [
   {
     key: "toolInput",
-    title: "Tool Input",
+    title: "App Props",
     tooltip:
       "Data passed to your app when a tool is called. Edit to test different inputs.",
     tab: "toolInput",

@@ -24,7 +24,7 @@ interface OnboardingStep {
 const STEPS: OnboardingStep[] = [
   {
     icon: <Layers className="size-5 text-blue-500" />,
-    title: "Tool Input",
+    title: "App Props",
     description:
       "Data passed to your app via MCP tool calls. Edit these to test different inputs from the model.",
   },
