@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { create } from "zustand";
-import { appComponent } from "./component-registry";
 import type {
   MockConfigState,
   MockResponse,
@@ -192,7 +191,7 @@ function buildOpenAIGlobals(
 }
 
 export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
-  selectedComponent: appComponent.id,
+  selectedComponent: "poi-map",
   platform: "chatgpt",
   displayMode: "inline",
   previousDisplayMode: "inline",
