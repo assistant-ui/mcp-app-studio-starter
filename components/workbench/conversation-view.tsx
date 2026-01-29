@@ -43,22 +43,22 @@ function MessageBubble({ sender, content, isDark }: MessageBubbleProps) {
   );
 }
 
-function ToolIndicator({
-  toolName,
+function AppIndicator({
+  appId,
   isDark,
 }: {
-  toolName: string;
+  appId: string;
   isDark: boolean;
 }) {
-  const component = workbenchComponents.find((c) => c.id === toolName);
-  const appName = component?.label ?? toolName;
+  const component = workbenchComponents.find((c) => c.id === appId);
+  const appName = component?.label ?? appId;
 
   const iconMap: Record<string, typeof MapPin> = {
     "poi-map": MapPin,
     welcome: MessageCircle,
   };
 
-  const Icon = iconMap[toolName] || MessageCircle;
+  const Icon = iconMap[appId] || MessageCircle;
 
   return (
     <div className="flex justify-start">
@@ -101,9 +101,9 @@ export function ConversationView({
   const mockConfig = useWorkbenchStore((s) => s.mockConfig);
 
   const component = workbenchComponents.find((c) => c.id === selectedComponent);
-  const toolName = component?.id ?? "tool";
+  const appId = component?.id ?? "app";
 
-  const toolConfig = mockConfig.tools[toolName];
+  const toolConfig = mockConfig.tools[appId];
   const activeVariant = toolConfig?.variants.find(
     (v) => v.id === toolConfig.activeVariantId,
   );
@@ -111,9 +111,9 @@ export function ConversationView({
     activeVariant?.conversation;
 
   const userMessage =
-    conversation?.userMessage ?? getDefaultUserMessage(toolName);
+    conversation?.userMessage ?? getDefaultUserMessage(appId);
   const assistantResponse =
-    conversation?.assistantResponse ?? getDefaultAssistantResponse(toolName);
+    conversation?.assistantResponse ?? getDefaultAssistantResponse(appId);
 
   return (
     <div
@@ -127,7 +127,7 @@ export function ConversationView({
         <div className="mx-auto flex max-w-[770px] flex-col gap-4 p-4 pb-24">
           <MessageBubble sender="user" content={userMessage} isDark={isDark} />
 
-          <ToolIndicator toolName={toolName} isDark={isDark} />
+          <AppIndicator appId={appId} isDark={isDark} />
 
           <MorphContainer
             className={cn(
@@ -150,7 +150,7 @@ export function ConversationView({
   );
 }
 
-function getDefaultUserMessage(toolName: string): string {
+function getDefaultUserMessage(appId: string): string {
   const messages: Record<string, string> = {
     "poi-map":
       "Can you show me some interesting places to visit in San Francisco?",
@@ -158,10 +158,10 @@ function getDefaultUserMessage(toolName: string): string {
     chart: "Show me a chart of the data",
     form: "Help me fill out this form",
   };
-  return messages[toolName] ?? "Can you help me with this?";
+  return messages[appId] ?? "Can you help me with this?";
 }
 
-function getDefaultAssistantResponse(toolName: string): string {
+function getDefaultAssistantResponse(appId: string): string {
   const responses: Record<string, string> = {
     "poi-map":
       "Here's an interactive map with some great spots to check out. Tap any location for more details!",
@@ -169,7 +169,7 @@ function getDefaultAssistantResponse(toolName: string): string {
       "I'd be happy to show you around! This is an interactive app that demonstrates the MCP Apps SDK.",
   };
   return (
-    responses[toolName] ??
+    responses[appId] ??
     "Here's what I found. Let me know if you need anything else!"
   );
 }
