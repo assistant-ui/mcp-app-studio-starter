@@ -39,11 +39,16 @@ function CodeBlockCode({
   className,
   ...props
 }: CodeBlockCodeProps) {
-  const { theme: browserTheme } = useTheme();
-
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
 
-  const theme = browserTheme === "dark" ? "github-dark" : "github-light";
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const theme =
+    mounted && resolvedTheme === "dark" ? "github-dark" : "github-light";
 
   useEffect(() => {
     async function highlight() {

@@ -6,7 +6,7 @@ import { EditorView, tooltips } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import CodeMirror from "@uiw/react-codemirror";
 import { useTheme } from "next-themes";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,7 +92,14 @@ export function MockVariantEditor({
   );
   const [hasError, setHasError] = useState(false);
   const [lastParsed, setLastParsed] = useState<MockResponse>(variant.response);
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
 
   if (variant.id !== prevVariantId) {
     setPrevVariantId(variant.id);
@@ -157,7 +164,7 @@ export function MockVariantEditor({
           height="180px"
           extensions={extensions}
           onChange={handleResponseChange}
-          theme={theme === "dark" ? githubDark : githubLight}
+          theme={isDark ? githubDark : githubLight}
           editable={!disabled}
           basicSetup={{
             lineNumbers: false,
@@ -236,7 +243,7 @@ export function MockVariantEditor({
               height="120px"
               extensions={extensions}
               onChange={handleResponseChange}
-              theme={theme === "dark" ? githubDark : githubLight}
+              theme={isDark ? githubDark : githubLight}
               basicSetup={{
                 lineNumbers: false,
                 foldGutter: false,

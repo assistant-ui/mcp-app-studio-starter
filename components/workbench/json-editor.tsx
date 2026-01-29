@@ -6,7 +6,7 @@ import { EditorView, placeholder, tooltips } from "@codemirror/view";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import CodeMirror from "@uiw/react-codemirror";
 import { useTheme } from "next-themes";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/ui/cn";
 
 const jsonLinterWithNullSupport = linter((view): Diagnostic[] => {
@@ -139,10 +139,17 @@ function computeText(value: Record<string, unknown>): string {
 }
 
 export function JsonEditor({ value, onChange }: JsonEditorProps) {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const valueStr = JSON.stringify(value);
   const [prevValueStr, setPrevValueStr] = useState(valueStr);
   const [text, setText] = useState(() => computeText(value));
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
 
   if (valueStr !== prevValueStr) {
     setPrevValueStr(valueStr);
@@ -156,10 +163,10 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
       lintGutter(),
       tooltips({ position: "fixed" }),
       EditorView.lineWrapping,
-      theme === "dark" ? customEditorStyleDark : customEditorStyleLight,
+      isDark ? customEditorStyleDark : customEditorStyleLight,
       placeholder("null"),
     ],
-    [theme],
+    [isDark],
   );
 
   const handleChange = (newText: string) => {
@@ -191,7 +198,7 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
         height="100%"
         extensions={extensions}
         onChange={handleChange}
-        theme={theme === "dark" ? githubDark : githubLight}
+        theme={isDark ? githubDark : githubLight}
         basicSetup={{
           lineNumbers: true,
           foldGutter: false,
@@ -259,7 +266,14 @@ interface ReadOnlyJsonViewProps {
 
 export function ReadOnlyJsonView({ value }: ReadOnlyJsonViewProps) {
   const jsonString = JSON.stringify(value, null, 2);
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
 
   const extensions = useMemo(
     () => [
@@ -277,7 +291,7 @@ export function ReadOnlyJsonView({ value }: ReadOnlyJsonViewProps) {
         value={jsonString}
         height="100%"
         extensions={extensions}
-        theme={theme === "dark" ? githubDark : githubLight}
+        theme={isDark ? githubDark : githubLight}
         editable={false}
         basicSetup={{
           lineNumbers: true,
