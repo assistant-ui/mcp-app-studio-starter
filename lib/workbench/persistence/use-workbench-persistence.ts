@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { useDemoMode } from "@/hooks/use-demo-mode";
+import { getComponent } from "../component-registry";
 import { useWorkbenchStore } from "../store";
 import {
   readLocalStorageMockConfig,
@@ -53,6 +54,15 @@ export function useWorkbenchPersistence() {
     if (urlState.device) store.setDeviceType(urlState.device);
     if (urlState.theme) store.setTheme(urlState.theme);
     isUpdatingFromUrl.current = false;
+
+    // Initialize toolInput with component's defaultProps if empty
+    const currentToolInput = store.toolInput;
+    if (Object.keys(currentToolInput).length === 0) {
+      const component = getComponent(store.selectedComponent);
+      if (component?.defaultProps) {
+        store.setToolInput(component.defaultProps);
+      }
+    }
   }, []);
 
   useEffect(() => {
