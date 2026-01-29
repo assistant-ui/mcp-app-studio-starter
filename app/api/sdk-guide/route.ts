@@ -6,6 +6,7 @@ import { checkRateLimit } from "@/lib/integrations/rate-limit/upstash";
 
 export const runtime = "edge";
 
+const MCP_APPS_DOCS_URL = "https://modelcontextprotocol.github.io/ext-apps/api/";
 const OPENAI_DOCS_MCP_URL = "https://developers.openai.com/mcp";
 
 interface WorkbenchContext {
@@ -24,19 +25,23 @@ interface WorkbenchContext {
 }
 
 function buildSystemPrompt(context: WorkbenchContext): string {
-  return `You are SDK Guide, an assistant that helps developers build ChatGPT Apps using the OpenAI Apps SDK.
+  return `You are MCP App Guide, an assistant that helps developers build MCP Apps that work across multiple platforms including ChatGPT and Claude Desktop.
 
 ## Your Role
-- Answer questions about the ChatGPT Apps SDK
+- Answer questions about the MCP Apps SDK and protocol
 - Help debug configuration issues
-- Explain SDK concepts with practical examples
+- Explain MCP concepts with practical examples
 - Use the available tools to search and fetch documentation when needed
 
 ## Scope
-ONLY answer questions about the ChatGPT Apps SDK. For unrelated topics, politely redirect by saying something like "I'm focused on helping with the ChatGPT Apps SDK. For that question, you might want to check [relevant resource]."
+Focus on helping with MCP Apps development. This includes:
+- The MCP Apps SDK (ext-apps) for building interactive UI components
+- ChatGPT Apps SDK compatibility
+- Tool definitions, widget state, display modes
+- Cross-platform compatibility between MCP hosts
 
 ## Current Workbench Context
-The user is working in a Tool UI workbench with the following state:
+The user is working in an MCP App workbench with the following state:
 - Component: ${context.selectedComponent || "none loaded"}
 - Display mode: ${context.displayMode}
 - Has tool input: ${!!context.toolInput && Object.keys(context.toolInput).length > 0}
@@ -45,14 +50,14 @@ The user is working in a Tool UI workbench with the following state:
 
 ## Available Tools
 You have tools to:
-1. \`search_openai_docs\` - Search the OpenAI documentation for relevant content
-2. \`fetch_openai_doc\` - Fetch a specific documentation page by URL
-3. \`list_openai_docs\` - Browse available documentation pages
+1. \`fetch_mcp_apps_docs\` - Fetch the MCP Apps SDK documentation
+2. \`search_openai_docs\` - Search the OpenAI/ChatGPT Apps documentation
+3. \`fetch_openai_doc\` - Fetch a specific OpenAI documentation page
 4. \`inspect_workbench\` - Get the user's current configuration (tool input, output, widget state)
 5. \`get_console_logs\` - See recent SDK method calls
 6. \`validate_config\` - Check for common configuration issues
 
-Use the documentation tools proactively to find accurate, up-to-date information. Always search or fetch docs before answering technical questions about the SDK.
+Use the documentation tools proactively to find accurate, up-to-date information. Always search or fetch docs before answering technical questions.
 
 ## Guidelines
 1. Be direct and practical—developers value their time
@@ -60,7 +65,8 @@ Use the documentation tools proactively to find accurate, up-to-date information
 3. Use the inspect tools to ground your answers in the user's actual configuration
 4. For configuration issues, explain both what's wrong AND how to fix it
 5. Keep responses concise but complete
-6. Prefer searching docs over relying on general knowledge`;
+6. Prefer searching docs over relying on general knowledge
+7. When discussing platform differences, clarify which platform(s) support each feature`;
 }
 
 let mcpClientPromise: Promise<
@@ -151,6 +157,47 @@ export async function POST(req: Request) {
     }
 
     const workbenchTools = {
+      fetch_mcp_apps_docs: {
+        description:
+          "Fetch the official MCP Apps SDK documentation. Use this to answer questions about the MCP ext-apps protocol, widget lifecycle, display modes, tool integration, and cross-platform compatibility.",
+        inputSchema: z.object({
+          section: z
+            .string()
+            .optional()
+            .describe(
+              "Optional section to focus on (e.g., 'widget', 'tools', 'lifecycle')",
+            ),
+        }),
+        execute: async ({ section }: { section?: string }) => {
+          try {
+            const response = await fetch(MCP_APPS_DOCS_URL);
+            if (!response.ok) {
+              return {
+                error: `Failed to fetch MCP Apps docs: ${response.status}`,
+              };
+            }
+            const html = await response.text();
+            // Extract text content from HTML (basic extraction)
+            const textContent = html
+              .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+              .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+              .replace(/<[^>]+>/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+
+            return {
+              url: MCP_APPS_DOCS_URL,
+              content: textContent.slice(0, 15000), // Limit content size
+              section: section || "full",
+            };
+          } catch (error) {
+            return {
+              error: `Error fetching MCP Apps docs: ${error instanceof Error ? error.message : "Unknown error"}`,
+            };
+          }
+        },
+      },
+
       inspect_workbench: {
         description:
           "Get the current workbench configuration including the selected component, tool input/output, and widget state. Use this to understand what the user is working on.",

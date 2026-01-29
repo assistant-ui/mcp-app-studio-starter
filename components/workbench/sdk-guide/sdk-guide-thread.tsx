@@ -24,12 +24,12 @@ import { Button } from "@/components/ui/button";
 import { ContextIndicator } from "./context-indicator";
 import { SDKGuideMarkdownText } from "./markdown-text";
 
-const SDK_SUGGESTIONS = [
+const MCP_SUGGESTIONS = [
   {
-    title: "What's structuredContent",
-    label: "vs content in tool results?",
+    title: "What's the MCP Apps SDK",
+    label: "and how does it work?",
     prompt:
-      "What's the difference between structuredContent and content in tool results?",
+      "What is the MCP Apps SDK (ext-apps) and how does it work?",
   },
   {
     title: "Check my configuration",
@@ -37,14 +37,14 @@ const SDK_SUGGESTIONS = [
     prompt: "Check my current configuration for issues",
   },
   {
-    title: "How do I persist",
-    label: "app state?",
-    prompt: "How do I persist app state between sessions?",
+    title: "How do display modes",
+    label: "work across platforms?",
+    prompt: "How do display modes work across different MCP host platforms?",
   },
   {
-    title: "What _meta fields",
-    label: "should I set?",
-    prompt: "What are the _meta fields I should set on my tool descriptor?",
+    title: "ChatGPT vs MCP hosts",
+    label: "compatibility differences?",
+    prompt: "What are the differences between ChatGPT Apps and other MCP hosts?",
   },
 ] as const;
 
@@ -60,7 +60,7 @@ export const SDKGuideThread: FC = () => {
         <div className="flex size-7 items-center justify-center rounded-full bg-primary/10">
           <MessageCircle className="size-3.5 text-primary" />
         </div>
-        <span className="font-medium text-sm">SDK Assistant</span>
+        <span className="font-medium text-sm">MCP App Guide</span>
       </div>
 
       <ThreadPrimitive.Viewport
@@ -110,9 +110,9 @@ const SDKGuideWelcome: FC = () => {
           <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
             <MessageCircle className="size-6 text-primary" />
           </div>
-          <h1 className="font-semibold text-lg">SDK Assistant</h1>
+          <h1 className="font-semibold text-lg">MCP App Guide</h1>
           <p className="max-w-xs text-muted-foreground text-sm">
-            I can help you build ChatGPT Apps. I have access to the SDK docs and
+            I can help you build MCP Apps. I have access to the SDK docs and
             can inspect your current configuration.
           </p>
         </div>
@@ -125,7 +125,7 @@ const SDKGuideWelcome: FC = () => {
 const SDKGuideSuggestions: FC = () => {
   return (
     <div className="aui-thread-welcome-suggestions grid w-full grid-cols-2 gap-2 pb-4">
-      {SDK_SUGGESTIONS.map((suggestion) => (
+      {MCP_SUGGESTIONS.map((suggestion) => (
         <ThreadPrimitive.Suggestion
           key={suggestion.prompt}
           prompt={suggestion.prompt}
@@ -151,7 +151,7 @@ const SDKGuideComposer: FC = () => {
     <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col">
       <div className="flex w-full flex-col rounded-xl border border-input px-1 pt-2 outline-none transition-shadow has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:ring-2 has-[textarea:focus-visible]:ring-ring/20">
         <ComposerPrimitive.Input
-          placeholder="Ask about the Apps SDK..."
+          placeholder="Ask about MCP Apps..."
           className="aui-composer-input mb-1 max-h-24 min-h-10 w-full resize-none bg-transparent px-3 pt-1 pb-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-0"
           rows={1}
           autoFocus
