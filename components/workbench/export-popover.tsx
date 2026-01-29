@@ -18,10 +18,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useDemoMode } from "@/hooks/use-demo-mode";
 import { getComponent } from "@/lib/workbench/component-registry";
 import { useSelectedComponent } from "@/lib/workbench/store";
-
-const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 type ExportStatus = "idle" | "exporting" | "success" | "error";
 
@@ -358,6 +357,7 @@ function ExportContent({ isOpen }: { isOpen: boolean }) {
 
 export function ExportPopover() {
   const [isOpen, setIsOpen] = useState(false);
+  const isDemoMode = useDemoMode();
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>

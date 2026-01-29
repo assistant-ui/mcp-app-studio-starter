@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { useDemoMode } from "@/hooks/use-demo-mode";
 import { useWorkbenchStore } from "../store";
 import {
   readLocalStorageMockConfig,
@@ -14,13 +15,12 @@ import {
 import type { UrlState } from "./types";
 import { buildUrlParams, parseUrlParams } from "./url";
 
-const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
-
 export function useWorkbenchPersistence() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isInitialized = useRef(false);
   const isUpdatingFromUrl = useRef(false);
+  const isDemoMode = useDemoMode();
 
   const store = useWorkbenchStore();
 

@@ -16,12 +16,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useDemoMode } from "@/hooks/use-demo-mode";
 import { cn } from "@/lib/ui/cn";
 import { fetchMcpTools } from "@/lib/workbench/mcp-client";
 import { useMockConfig, useWorkbenchStore } from "@/lib/workbench/store";
 import { MockVariantEditor } from "./mock-variant-editor";
-
-const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 type ServerStatus = "idle" | "connecting" | "connected" | "error";
 
@@ -125,6 +124,7 @@ function FetchToolsButton({
   variant = "default",
   onDemoModeClick,
 }: FetchToolsButtonProps) {
+  const isDemoMode = useDemoMode();
   const handleClick = isDemoMode && onDemoModeClick ? onDemoModeClick : onClick;
   const icon = isLoading ? (
     <Loader2 className="size-3.5 animate-spin" />

@@ -11,9 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useDemoMode } from "@/hooks/use-demo-mode";
 
 const ONBOARDING_KEY = "mcp-app-studio-workbench-onboarded";
-const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 interface OnboardingStep {
   icon: React.ReactNode;
@@ -44,6 +44,7 @@ const STEPS: OnboardingStep[] = [
 
 export function OnboardingModal() {
   const [open, setOpen] = useState(false);
+  const isDemoMode = useDemoMode();
 
   useEffect(() => {
     if (isDemoMode) return;
@@ -52,7 +53,7 @@ export function OnboardingModal() {
       const timer = setTimeout(() => setOpen(true), 500);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isDemoMode]);
 
   const handleDismiss = (markComplete: boolean) => {
     if (markComplete) {
