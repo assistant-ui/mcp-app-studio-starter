@@ -6,7 +6,8 @@ import { checkRateLimit } from "@/lib/integrations/rate-limit/upstash";
 
 export const runtime = "edge";
 
-const MCP_APPS_DOCS_URL = "https://modelcontextprotocol.github.io/ext-apps/api/";
+const MCP_APPS_DOCS_URL =
+  "https://modelcontextprotocol.github.io/ext-apps/api/";
 const OPENAI_DOCS_MCP_URL = "https://developers.openai.com/mcp";
 
 interface WorkbenchContext {

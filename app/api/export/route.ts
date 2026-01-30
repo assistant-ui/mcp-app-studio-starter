@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
 import type { ExportConfig } from "@/lib/export";
@@ -12,6 +13,21 @@ function isPathWithinProjectRoot(
   const absolutePath = path.resolve(projectRoot, userPath);
   const relative = path.relative(projectRoot, absolutePath);
   return !(relative.startsWith("..") || path.isAbsolute(relative));
+}
+
+function readPackageDescription(projectRoot: string): string | undefined {
+  try {
+    const pkgPath = path.join(projectRoot, "package.json");
+    if (!fs.existsSync(pkgPath)) return undefined;
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
+      description?: unknown;
+    };
+    const desc =
+      typeof pkg.description === "string" ? pkg.description.trim() : "";
+    return desc.length > 0 ? desc : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export interface ExportRequestBody {
@@ -81,6 +97,14 @@ export async function POST(request: NextRequest) {
       config.manifest = {
         ...config.manifest,
         ...body.manifest,
+      };
+    }
+
+    const packageDescription = readPackageDescription(projectRoot);
+    if (packageDescription && !config.manifest?.description) {
+      config.manifest = {
+        ...config.manifest,
+        description: packageDescription,
       };
     }
 

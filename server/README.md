@@ -9,13 +9,23 @@ npm install
 npm run dev
 ```
 
-Server runs at `http://localhost:3001/mcp`
+Server runs at `http://localhost:3001/mcp` by default.
+
+To change the port:
+
+```bash
+PORT=3003 npm run dev
+```
+
+If the port is already in use, the server will fall back to the next available port and print the actual URL.
 
 ## Test with MCP Inspector
 
 ```bash
 npm run inspect
 ```
+
+`npm run inspect` will use `PORT` if set, otherwise it will try to read `.mcp-port` (written by the dev server).
 
 ## Deploy
 

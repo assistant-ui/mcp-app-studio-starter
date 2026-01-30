@@ -49,7 +49,7 @@ const ACCORDION_EASING = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 
 function truncateMessage(message: string, maxLength: number): string {
   return message.length > maxLength
-    ? message.slice(0, maxLength) + "…"
+    ? `${message.slice(0, maxLength)}…`
     : message;
 }
 

@@ -17,9 +17,9 @@
  */
 
 import fs from "node:fs/promises";
-import path from "node:path";
 import http from "node:http";
-import { chromium, type Browser, type Page } from "playwright";
+import path from "node:path";
+import { type Browser, chromium, type Page } from "playwright";
 
 // Extend Window type for test harness globals
 declare global {
@@ -162,28 +162,38 @@ console.log('[mock-openai] Bridge initialized');
 `;
 
 // Test page HTML that loads the widget directly (not in iframe) with mock bridge
-function createTestPageHtml(widgetHtml: string, _widgetJs: string, widgetCss?: string): string {
+function createTestPageHtml(
+  widgetHtml: string,
+  _widgetJs: string,
+  widgetCss?: string,
+): string {
   // Inject the mock bridge directly into the widget HTML before any other scripts
   const bridgeScript = `<script>${MOCK_OPENAI_BRIDGE}
 // Signal that widget is ready for testing
 window.__widgetLoaded = true;
 </script>`;
-  const cssStyle = widgetCss ? `<style>${widgetCss}</style>` : '';
+  const cssStyle = widgetCss ? `<style>${widgetCss}</style>` : "";
 
   // Insert bridge script and CSS into the widget HTML
   let fullWidgetHtml = widgetHtml;
 
   // Add CSS to head
-  if (fullWidgetHtml.includes('</head>')) {
-    fullWidgetHtml = fullWidgetHtml.replace('</head>', `${cssStyle}</head>`);
+  if (fullWidgetHtml.includes("</head>")) {
+    fullWidgetHtml = fullWidgetHtml.replace("</head>", `${cssStyle}</head>`);
   }
 
   // Add bridge script at the very beginning of body, before any other scripts
-  if (fullWidgetHtml.includes('<body>')) {
-    fullWidgetHtml = fullWidgetHtml.replace('<body>', `<body>\n${bridgeScript}\n`);
-  } else if (fullWidgetHtml.includes('<body')) {
+  if (fullWidgetHtml.includes("<body>")) {
+    fullWidgetHtml = fullWidgetHtml.replace(
+      "<body>",
+      `<body>\n${bridgeScript}\n`,
+    );
+  } else if (fullWidgetHtml.includes("<body")) {
     // Handle <body class="..."> etc
-    fullWidgetHtml = fullWidgetHtml.replace(/<body[^>]*>/, `$&\n${bridgeScript}\n`);
+    fullWidgetHtml = fullWidgetHtml.replace(
+      /<body[^>]*>/,
+      `$&\n${bridgeScript}\n`,
+    );
   }
 
   return fullWidgetHtml;
@@ -192,7 +202,7 @@ window.__widgetLoaded = true;
 async function startTestServer(
   widgetDir: string,
   modifiedHtml: string,
-  port: number
+  port: number,
 ): Promise<http.Server> {
   return new Promise((resolve, reject) => {
     const server = http.createServer(async (req, res) => {
@@ -271,7 +281,10 @@ async function runWidgetTests(widgetDir: string): Promise<WidgetTestResults> {
   results.tests.push({
     name: "load-files",
     passed: true,
-    details: [`HTML: ${widgetHtml.length} bytes`, `JS: ${widgetJs.length} bytes`],
+    details: [
+      `HTML: ${widgetHtml.length} bytes`,
+      `JS: ${widgetJs.length} bytes`,
+    ],
   });
 
   // Start test server
@@ -315,7 +328,9 @@ async function runWidgetTests(widgetDir: string): Promise<WidgetTestResults> {
     results.tests.push({ name: "widget-loaded", passed: true });
 
     // Check for widget errors
-    const widgetError = await page.evaluate(() => (window as any).__widgetError);
+    const widgetError = await page.evaluate(
+      () => (window as any).__widgetError,
+    );
     if (widgetError) {
       results.tests.push({
         name: "widget-no-errors",
@@ -349,23 +364,25 @@ async function runWidgetTests(widgetDir: string): Promise<WidgetTestResults> {
 
     // Check for console errors (exclude our mock logs)
     const widgetErrors = results.consoleErrors.filter(
-      (e) => !e.includes("[mock-openai]") && !e.includes("[harness]")
+      (e) => !e.includes("[mock-openai]") && !e.includes("[harness]"),
     );
 
     if (widgetErrors.length > 0) {
       // Check for common issues
       const hasContextError = widgetErrors.some(
-        (e) => e.includes("must be used within") || e.includes("Provider")
+        (e) => e.includes("must be used within") || e.includes("Provider"),
       );
       const hasPayloadError = widgetErrors.some(
-        (e) => e.includes("Invalid") && e.includes("payload")
+        (e) => e.includes("Invalid") && e.includes("payload"),
       );
 
       let errorHint = "";
       if (hasContextError) {
-        errorHint = "\n      HINT: Widget may be using workbench-specific hooks instead of production SDK hooks.";
+        errorHint =
+          "\n      HINT: Widget may be using workbench-specific hooks instead of production SDK hooks.";
       } else if (hasPayloadError) {
-        errorHint = "\n      HINT: Update MOCK_TOOL_INPUT in test harness with valid widget data.";
+        errorHint =
+          "\n      HINT: Update MOCK_TOOL_INPUT in test harness with valid widget data.";
       }
 
       results.tests.push({
@@ -380,15 +397,17 @@ async function runWidgetTests(widgetDir: string): Promise<WidgetTestResults> {
     }
 
     // Wait for React to render (check for content in #root)
-    await page.waitForFunction(
-      () => {
-        const root = document.getElementById("root");
-        return root && root.innerHTML.length > 50;
-      },
-      { timeout: 10000 }
-    ).catch(() => {
-      // If timeout, we'll still check and report
-    });
+    await page
+      .waitForFunction(
+        () => {
+          const root = document.getElementById("root");
+          return root && root.innerHTML.length > 50;
+        },
+        { timeout: 10000 },
+      )
+      .catch(() => {
+        // If timeout, we'll still check and report
+      });
 
     // Check if widget rendered something (direct page, no iframe)
     const contentInfo = await page.evaluate(() => {
@@ -397,7 +416,9 @@ async function runWidgetTests(widgetDir: string): Promise<WidgetTestResults> {
       const rootLength = rootHtml.length;
       const body = document.body;
       const bodyHtml = body?.innerHTML || "";
-      const nonScriptContent = bodyHtml.replace(/<script[\s\S]*?<\/script>/gi, "").trim();
+      const nonScriptContent = bodyHtml
+        .replace(/<script[\s\S]*?<\/script>/gi, "")
+        .trim();
       return {
         rootExists: !!root,
         rootLength,
@@ -432,7 +453,11 @@ async function runWidgetTests(widgetDir: string): Promise<WidgetTestResults> {
     }
 
     // Take screenshot for debugging
-    const screenshotPath = path.join(widgetDir, "..", "widget-test-screenshot.png");
+    const screenshotPath = path.join(
+      widgetDir,
+      "..",
+      "widget-test-screenshot.png",
+    );
     await page.screenshot({ path: screenshotPath, fullPage: true });
     results.tests.push({
       name: "screenshot",
@@ -457,7 +482,7 @@ async function runWidgetTests(widgetDir: string): Promise<WidgetTestResults> {
 }
 
 function printResults(results: WidgetTestResults): void {
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
   console.log("Widget Test Results");
   console.log("=".repeat(60));
   console.log(`\nWidget: ${results.widgetDir}\n`);
@@ -485,17 +510,21 @@ function printResults(results: WidgetTestResults): void {
     }
   }
 
-  console.log("\n" + "-".repeat(60));
+  console.log(`\n${"-".repeat(60)}`);
   console.log(`Overall: ${results.passed ? "✅ PASSED" : "❌ FAILED"}`);
-  console.log("-".repeat(60) + "\n");
+  console.log(`${"-".repeat(60)}\n`);
 }
 
 async function main() {
   const widgetDir = process.argv[2];
 
   if (!widgetDir) {
-    console.error("Usage: npx tsx scripts/widget-test-harness.ts <path-to-widget-dir>");
-    console.error("Example: npx tsx scripts/widget-test-harness.ts /tmp/test/export/widget");
+    console.error(
+      "Usage: npx tsx scripts/widget-test-harness.ts <path-to-widget-dir>",
+    );
+    console.error(
+      "Example: npx tsx scripts/widget-test-harness.ts /tmp/test/export/widget",
+    );
     process.exit(1);
   }
 

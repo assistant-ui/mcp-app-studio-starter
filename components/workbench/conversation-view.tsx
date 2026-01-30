@@ -43,13 +43,7 @@ function MessageBubble({ sender, content, isDark }: MessageBubbleProps) {
   );
 }
 
-function AppIndicator({
-  appId,
-  isDark,
-}: {
-  appId: string;
-  isDark: boolean;
-}) {
+function AppIndicator({ appId, isDark }: { appId: string; isDark: boolean }) {
   const component = workbenchComponents.find((c) => c.id === appId);
   const appName = component?.label ?? appId;
 
@@ -110,8 +104,7 @@ export function ConversationView({
   const conversation: ConversationContext | undefined =
     activeVariant?.conversation;
 
-  const userMessage =
-    conversation?.userMessage ?? getDefaultUserMessage(appId);
+  const userMessage = conversation?.userMessage ?? getDefaultUserMessage(appId);
   const assistantResponse =
     conversation?.assistantResponse ?? getDefaultAssistantResponse(appId);
 
