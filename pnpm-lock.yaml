@@ -120,8 +120,8 @@ importers:
         specifier: ^0.562.0
         version: 0.562.0(react@19.2.3)
       mcp-app-studio:
-        specifier: ^0.3.2
-        version: 0.3.2(@modelcontextprotocol/ext-apps@1.0.1(@modelcontextprotocol/sdk@1.25.3(hono@4.11.7)(zod@4.3.6))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.6))(react@19.2.3)
+        specifier: ^0.5.0
+        version: 0.5.0(@modelcontextprotocol/ext-apps@1.0.1(@modelcontextprotocol/sdk@1.25.3(hono@4.11.7)(zod@4.3.6))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.6))(react@19.2.3)
       motion:
         specifier: ^12.23.26
         version: 12.29.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -2229,8 +2229,8 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
-  mcp-app-studio@0.3.2:
-    resolution: {integrity: sha512-6+rtHv2VMog/711/D7+UFMVODfIDQVCbdSr/vWFOlZ5OgXJIfuE6XlnY1KnftcS2+g7OO4zTECcrKBgQanRA0A==}
+  mcp-app-studio@0.5.0:
+    resolution: {integrity: sha512-KOkxk+UiuDsWFDudVLsxeoQclPA06eGKYvYmVusyLw35Ps4TJNVJkGT8z6q5NsOI4JsTEaIr9Y5NahoglkFSlA==}
     engines: {node: '>=20.9.0'}
     hasBin: true
     peerDependencies:
@@ -4886,7 +4886,7 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
-  mcp-app-studio@0.3.2(@modelcontextprotocol/ext-apps@1.0.1(@modelcontextprotocol/sdk@1.25.3(hono@4.11.7)(zod@4.3.6))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.6))(react@19.2.3):
+  mcp-app-studio@0.5.0(@modelcontextprotocol/ext-apps@1.0.1(@modelcontextprotocol/sdk@1.25.3(hono@4.11.7)(zod@4.3.6))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.6))(react@19.2.3):
     dependencies:
       '@clack/prompts': 0.11.0
       picocolors: 1.1.1
