@@ -1,0 +1,8 @@
+{
+  "widget": {
+    "entryPoint": "lib/workbench/wrappers/poi-map-sdk.tsx",
+    "exportName": "POIMapSDK",
+    "name": "My MCP App"
+  }
+}
+

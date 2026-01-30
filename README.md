@@ -15,11 +15,14 @@ Build once, deploy anywhere:
 ## Quick Start
 
 ```bash
+# npm (default)
 npm install
 npm run dev
 ```
 
 Open http://localhost:3002 — you're in the workbench.
+
+This project also works with pnpm/yarn/bun (use the equivalent install + run commands).
 
 The workbench operates in **universal mode**, where all platform features are available for testing. Your widget will automatically adapt to the actual platform when deployed.
 
@@ -152,6 +155,8 @@ Use `useCapabilities()` or `useFeature()` to conditionally enable features.
 npm run export
 ```
 
+Defaults for `--entry` and `--export-name` are read from `mcp-app-studio.config.json` (written by the CLI when you scaffold a project). You can override them via flags.
+
 Generates:
 
 ```
@@ -209,8 +214,9 @@ npm run build
 The workbench includes an AI-powered SDK guide. To enable:
 
 ```bash
-# .env.local
-OPENAI_API_KEY="your-key"
+cp .env.example .env.local
+# then set:
+# OPENAI_API_KEY="your-key"
 ```
 
 ### MCP Server CORS
@@ -218,8 +224,9 @@ OPENAI_API_KEY="your-key"
 For production, restrict CORS to your widget domain:
 
 ```bash
-# server/.env
-CORS_ORIGIN=https://your-widget-domain.com
+cp server/.env.example server/.env
+# then set:
+# CORS_ORIGIN=https://your-widget-domain.com
 ```
 
 ### Dark Mode
