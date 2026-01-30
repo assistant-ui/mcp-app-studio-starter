@@ -69,6 +69,9 @@ export function generateEnvExample(): string {
   return `# Server Configuration
 PORT=3001
 
+# In production, restrict CORS to your widget domain.
+CORS_ORIGIN=*
+
 # Add your API keys and secrets here
 # DATABASE_URL=
 # API_KEY=
@@ -131,7 +134,7 @@ cp .env.example .env
 
 ---
 
-Generated with [MCP App Studio](https://github.com/assistant-ui/mcp-app-studio)
+Generated with [MCP App Studio](https://github.com/assistant-ui/assistant-ui/tree/main/packages/mcp-app-studio)
 `;
 }
 

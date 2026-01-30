@@ -19,7 +19,8 @@
     "start": "next start",
     "lint": "biome check",
     "lint:fix": "biome check --write",
-    "export": "tsx scripts/export.ts"
+    "export": "tsx scripts/export.ts",
+    "postinstall": "tsx scripts/postinstall.ts"
   },
   "dependencies": {
     "@ai-sdk/mcp": "^1.0.14",

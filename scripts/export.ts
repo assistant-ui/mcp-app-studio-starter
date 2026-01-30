@@ -1,4 +1,6 @@
 #!/usr/bin/env tsx
+import fs from "node:fs";
+import path from "node:path";
 import type { ExportConfig } from "../lib/export";
 import {
   createDefaultExportConfig,
@@ -6,6 +8,14 @@ import {
   generateExportSummary,
   printExportSummary,
 } from "../lib/export";
+
+interface StudioConfig {
+  widget?: {
+    entryPoint?: string;
+    exportName?: string;
+    name?: string;
+  };
+}
 
 interface ExportArgs {
   entryPoint: string;
@@ -15,15 +25,35 @@ interface ExportArgs {
   inline: boolean;
 }
 
-function parseArgs(): ExportArgs {
-  const args = process.argv.slice(2);
-  const parsed: ExportArgs = {
-    entryPoint: "lib/workbench/wrappers/poi-map-sdk.tsx",
-    exportName: "POIMapSDK",
-    name: "My MCP App",
+function loadStudioConfig(projectRoot: string): StudioConfig | null {
+  const configPath = path.join(projectRoot, "mcp-app-studio.config.json");
+  if (!fs.existsSync(configPath)) return null;
+
+  try {
+    const raw = fs.readFileSync(configPath, "utf-8");
+    return JSON.parse(raw) as StudioConfig;
+  } catch {
+    // Ignore config parse errors here; export will still work with defaults/flags.
+    return null;
+  }
+}
+
+function getDefaultArgs(projectRoot: string): ExportArgs {
+  const config = loadStudioConfig(projectRoot);
+  const widget = config?.widget;
+
+  return {
+    entryPoint: widget?.entryPoint ?? "lib/workbench/wrappers/poi-map-sdk.tsx",
+    exportName: widget?.exportName ?? "POIMapSDK",
+    name: widget?.name ?? "My MCP App",
     outputDir: "export",
     inline: false,
   };
+}
+
+function parseArgs(defaults: ExportArgs): ExportArgs {
+  const args = process.argv.slice(2);
+  const parsed: ExportArgs = { ...defaults };
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -54,7 +84,7 @@ function parseArgs(): ExportArgs {
         break;
       case "--help":
       case "-h":
-        printHelp();
+        printHelp(defaults);
         process.exit(0);
     }
   }
@@ -62,14 +92,14 @@ function parseArgs(): ExportArgs {
   return parsed;
 }
 
-function printHelp() {
+function printHelp(defaults: ExportArgs) {
   console.log(`
 Usage: tsx scripts/export.ts [options]
 
 Options:
-  -e, --entry <path>      Widget entry point (default: lib/workbench/wrappers/poi-map-sdk.tsx)
-  --export-name <name>    Export name from entry file (default: POIMapSDK)
-  -n, --name <name>       App name for manifest (default: My MCP App)
+  -e, --entry <path>      Widget entry point (default: ${defaults.entryPoint})
+  --export-name <name>    Export name from entry file (default: ${defaults.exportName})
+  -n, --name <name>       App name for manifest (default: ${defaults.name})
   -o, --output <dir>      Output directory (default: export)
   --inline                Inline JS/CSS into HTML
   -h, --help              Show this help message
@@ -82,7 +112,9 @@ Examples:
 }
 
 async function main() {
-  const args = parseArgs();
+  const projectRoot = process.cwd();
+  const defaults = getDefaultArgs(projectRoot);
+  const args = parseArgs(defaults);
 
   console.log("\n🚀 MCP App Export\n");
   console.log(`   Entry: ${args.entryPoint}`);
@@ -106,7 +138,7 @@ async function main() {
 
   const result = await exportWidget({
     config,
-    projectRoot: process.cwd(),
+    projectRoot,
   });
 
   if (!result.success) {
