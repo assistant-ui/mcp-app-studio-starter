@@ -81,8 +81,7 @@ export async function exportWidget(
 
     console.log("📄 Generating HTML...");
     const htmlPath = path.join(outputDir, "widget", "index.html");
-    const widgetName =
-      config.manifest?.name ?? config.widget.name ?? "MCP App";
+    const widgetName = config.manifest?.name ?? config.widget.name ?? "MCP App";
 
     await writeHtml({
       outputPath: htmlPath,

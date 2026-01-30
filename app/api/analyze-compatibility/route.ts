@@ -130,7 +130,10 @@ function extractImportedHooks(content: string): Set<string> {
   return importedHooks;
 }
 
-function detectHookCalls(content: string, importedHooks: Set<string>): Set<string> {
+function detectHookCalls(
+  content: string,
+  importedHooks: Set<string>,
+): Set<string> {
   const usedHooks = new Set<string>();
 
   for (const hook of importedHooks) {

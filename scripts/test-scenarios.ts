@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+
 /**
  * Test script for mcp-app-studio CLI scenarios.
  *
@@ -23,12 +24,12 @@
  *   --with-inspectors Run Phase 3 inspector tests (MCPJam + MCP Inspector)
  */
 
-import fs from "node:fs/promises";
-import path from "node:path";
-import { execFileSync, spawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
-import os from "node:os";
+import { execFileSync, spawn } from "node:child_process";
+import fs from "node:fs/promises";
 import http from "node:http";
+import os from "node:os";
+import path from "node:path";
 
 // Parse CLI args
 const ARGS = {
@@ -140,7 +141,7 @@ function execFile(
   file: string,
   args: string[],
   cwd: string,
-  timeout = 300000
+  timeout = 300000,
 ): { stdout: string; stderr: string } {
   try {
     const stdout = execFileSync(file, args, {
@@ -159,7 +160,7 @@ function execFile(
 
 async function runScenario(
   scenario: Scenario,
-  testDir: string
+  testDir: string,
 ): Promise<TestResult> {
   const startTime = Date.now();
   const steps: StepResult[] = [];
@@ -473,7 +474,11 @@ async function runScenario(
       logSuccess("Inspector validation passed");
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      steps.push({ name: "inspector-validation", passed: false, error: errorMsg });
+      steps.push({
+        name: "inspector-validation",
+        passed: false,
+        error: errorMsg,
+      });
       logError(`Inspector validation failed: ${errorMsg}`);
       // Don't fail the whole test for inspector issues
       log("Continuing despite inspector error...");
@@ -491,7 +496,7 @@ async function runScenario(
 // Simple static file server for testing
 function startServer(
   dir: string,
-  port: number
+  port: number,
 ): Promise<{ server: http.Server; url: string }> {
   return new Promise((resolve, reject) => {
     const server = http.createServer(async (req, res) => {
@@ -534,7 +539,7 @@ interface RuntimeTestResult {
 
 async function runRuntimeTests(
   widgetDir: string,
-  _scenarioName: string
+  _scenarioName: string,
 ): Promise<RuntimeTestResult> {
   // Find an available port
   const port = 9000 + Math.floor(Math.random() * 1000);
@@ -547,7 +552,10 @@ async function runRuntimeTests(
     // Test 1: HTML loads successfully
     const htmlResponse = await fetch(`${url}/index.html`);
     if (!htmlResponse.ok) {
-      return { passed: false, error: `HTML failed to load: ${htmlResponse.status}` };
+      return {
+        passed: false,
+        error: `HTML failed to load: ${htmlResponse.status}`,
+      };
     }
     const html = await htmlResponse.text();
 
@@ -559,7 +567,10 @@ async function runRuntimeTests(
     // Test 3: JS bundle loads
     const jsResponse = await fetch(`${url}/widget.js`);
     if (!jsResponse.ok) {
-      return { passed: false, error: `JS bundle failed to load: ${jsResponse.status}` };
+      return {
+        passed: false,
+        error: `JS bundle failed to load: ${jsResponse.status}`,
+      };
     }
     const jsContent = await jsResponse.text();
 
@@ -580,22 +591,24 @@ async function runRuntimeTests(
     }
 
     // Test 5: Bundle contains expected hooks
-    const expectedHooks = [
-      "useDisplayMode",
-      "useTheme",
-    ];
+    const expectedHooks = ["useDisplayMode", "useTheme"];
     const missingHooks = expectedHooks.filter(
-      (hook) => !jsContent.includes(hook)
+      (hook) => !jsContent.includes(hook),
     );
     if (missingHooks.length > 0) {
-      log(`Note: Some hooks not found in bundle (may be minified): ${missingHooks.join(", ")}`);
+      log(
+        `Note: Some hooks not found in bundle (may be minified): ${missingHooks.join(", ")}`,
+      );
     }
 
     // Test 6: CSS loads if referenced
     if (html.includes("widget.css")) {
       const cssResponse = await fetch(`${url}/widget.css`);
       if (!cssResponse.ok) {
-        return { passed: false, error: `CSS failed to load: ${cssResponse.status}` };
+        return {
+          passed: false,
+          error: `CSS failed to load: ${cssResponse.status}`,
+        };
       }
     }
 
@@ -620,10 +633,10 @@ async function main() {
   if (!(await fileExists(cliPath))) {
     console.error(`\n❌ CLI not found at: ${cliPath}`);
     console.error(
-      "Please set MCP_CLI_PATH to the mcp-app-studio package directory."
+      "Please set MCP_CLI_PATH to the mcp-app-studio package directory.",
     );
     console.error(
-      "Example: MCP_CLI_PATH=/path/to/packages/mcp-app-studio npx tsx scripts/test-scenarios.ts"
+      "Example: MCP_CLI_PATH=/path/to/packages/mcp-app-studio npx tsx scripts/test-scenarios.ts",
     );
     process.exit(1);
   }
@@ -642,9 +655,9 @@ async function main() {
   }
 
   // Summary
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
   console.log("Test Summary");
-  console.log("=".repeat(60) + "\n");
+  console.log(`${"=".repeat(60)}\n`);
 
   let allPassed = true;
   for (const result of results) {
@@ -663,13 +676,13 @@ async function main() {
     }
   }
 
-  console.log("\n" + "-".repeat(60));
+  console.log(`\n${"-".repeat(60)}`);
   const totalDuration = results.reduce((sum, r) => sum + r.duration, 0);
   console.log(
-    `Total: ${results.filter((r) => r.passed).length}/${results.length} passed (${(totalDuration / 1000).toFixed(1)}s)`
+    `Total: ${results.filter((r) => r.passed).length}/${results.length} passed (${(totalDuration / 1000).toFixed(1)}s)`,
   );
   console.log(`Test directory: ${testDir}`);
-  console.log("-".repeat(60) + "\n");
+  console.log(`${"-".repeat(60)}\n`);
 
   if (allPassed) {
     console.log("🎉 All tests passed!\n");
@@ -685,7 +698,7 @@ async function main() {
     }
   } else {
     console.log(
-      "💥 Some tests failed. Test directory preserved for debugging.\n"
+      "💥 Some tests failed. Test directory preserved for debugging.\n",
     );
     process.exit(1);
   }
@@ -704,7 +717,7 @@ interface InspectorTestResult {
 
 async function checkInspectorAvailable(
   command: string,
-  args: string[]
+  args: string[],
 ): Promise<boolean> {
   try {
     execFileSync(command, args, {
@@ -719,7 +732,7 @@ async function checkInspectorAvailable(
 
 async function runMCPInspectorTest(
   serverDir: string,
-  _scenarioName: string
+  _scenarioName: string,
 ): Promise<InspectorTestResult> {
   // Test that the MCP server can be inspected with @modelcontextprotocol/inspector
   const serverIndexPath = path.join(serverDir, "src/index.ts");
@@ -784,7 +797,7 @@ async function runMCPInspectorTest(
           {
             cwd: serverDir,
             stdio: ["pipe", "pipe", "pipe"],
-          }
+          },
         );
         processRef.current = proc;
 
@@ -819,7 +832,7 @@ async function runMCPInspectorTest(
             reject(new Error(`Inspector exited with code ${code}: ${stderr}`));
           }
         });
-      }
+      },
     );
 
     // Check if inspector ran successfully
@@ -857,7 +870,7 @@ async function runMCPInspectorTest(
 async function runMCPJamInspectorTest(
   widgetDir: string,
   serverDir: string | null,
-  _scenarioName: string
+  _scenarioName: string,
 ): Promise<InspectorTestResult> {
   // Test that the widget can be loaded in MCPJam Inspector
   // MCPJam Inspector provides widget emulation for ChatGPT apps
@@ -910,7 +923,9 @@ async function runMCPJamInspectorTest(
   if (bundleSizeMB < 5) {
     checks.push(`Bundle size OK: ${bundleSizeMB.toFixed(2)}MB`);
   } else {
-    checks.push(`WARNING: Bundle size large: ${bundleSizeMB.toFixed(2)}MB (>5MB)`);
+    checks.push(
+      `WARNING: Bundle size large: ${bundleSizeMB.toFixed(2)}MB (>5MB)`,
+    );
   }
 
   // Check for OpenAI bridge markers (window.openai usage)
@@ -921,7 +936,9 @@ async function runMCPJamInspectorTest(
   ) {
     checks.push("Bundle contains OpenAI bridge integration");
   } else {
-    checks.push("Note: No direct window.openai reference found (may use wrapper)");
+    checks.push(
+      "Note: No direct window.openai reference found (may use wrapper)",
+    );
   }
 
   // If server exists, validate it could work with MCPJam
@@ -944,8 +961,11 @@ async function runMCPJamInspectorTest(
 
 async function runInspectorTests(
   projectDir: string,
-  scenario: Scenario
-): Promise<{ mcpInspector?: InspectorTestResult; mcpjamInspector?: InspectorTestResult }> {
+  scenario: Scenario,
+): Promise<{
+  mcpInspector?: InspectorTestResult;
+  mcpjamInspector?: InspectorTestResult;
+}> {
   const results: {
     mcpInspector?: InspectorTestResult;
     mcpjamInspector?: InspectorTestResult;
@@ -960,11 +980,13 @@ async function runInspectorTests(
   results.mcpjamInspector = await runMCPJamInspectorTest(
     widgetDir,
     hasServer ? serverDir : null,
-    scenario.name
+    scenario.name,
   );
 
   if (results.mcpjamInspector.passed) {
-    logSuccess(`MCPJam: ${results.mcpjamInspector.details?.join(", ") || "OK"}`);
+    logSuccess(
+      `MCPJam: ${results.mcpjamInspector.details?.join(", ") || "OK"}`,
+    );
   } else {
     logError(`MCPJam: ${results.mcpjamInspector.error}`);
   }
@@ -975,7 +997,9 @@ async function runInspectorTests(
     results.mcpInspector = await runMCPInspectorTest(serverDir, scenario.name);
 
     if (results.mcpInspector.passed) {
-      logSuccess(`MCP Inspector: ${results.mcpInspector.details?.join(", ") || "OK"}`);
+      logSuccess(
+        `MCP Inspector: ${results.mcpInspector.details?.join(", ") || "OK"}`,
+      );
     } else {
       logError(`MCP Inspector: ${results.mcpInspector.error}`);
     }

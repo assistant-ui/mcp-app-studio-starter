@@ -26,4 +26,3 @@ const result = spawnSync(cmd.command, cmd.args, {
 });
 
 process.exit(result.status ?? 1);
-

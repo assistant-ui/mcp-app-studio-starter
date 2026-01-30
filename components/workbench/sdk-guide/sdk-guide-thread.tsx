@@ -28,8 +28,7 @@ const MCP_SUGGESTIONS = [
   {
     title: "What's the MCP Apps SDK",
     label: "and how does it work?",
-    prompt:
-      "What is the MCP Apps SDK (ext-apps) and how does it work?",
+    prompt: "What is the MCP Apps SDK (ext-apps) and how does it work?",
   },
   {
     title: "Check my configuration",
@@ -44,7 +43,8 @@ const MCP_SUGGESTIONS = [
   {
     title: "ChatGPT vs MCP hosts",
     label: "compatibility differences?",
-    prompt: "What are the differences between ChatGPT Apps and other MCP hosts?",
+    prompt:
+      "What are the differences between ChatGPT Apps and other MCP hosts?",
   },
 ] as const;
 
@@ -112,8 +112,8 @@ const SDKGuideWelcome: FC = () => {
           </div>
           <h1 className="font-semibold text-lg">MCP App Assistant</h1>
           <p className="max-w-xs text-muted-foreground text-sm">
-            I can help you build MCP Apps. I have access to the SDK docs and
-            can inspect your current configuration.
+            I can help you build MCP Apps. I have access to the SDK docs and can
+            inspect your current configuration.
           </p>
         </div>
       </div>

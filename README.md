@@ -24,6 +24,10 @@ Open http://localhost:3002 — you're in the workbench.
 
 This project also works with pnpm/yarn/bun (use the equivalent install + run commands).
 
+If you switch package managers (e.g. `pnpm` → `npm`), delete `node_modules/` first to avoid confusing the installer.
+
+The MCP server (when `server/` exists) runs at `http://localhost:3001/mcp` by default. If 3001 is already in use, it will select the next available port and write it to `server/.mcp-port`.
+
 The workbench operates in **universal mode**, where all platform features are available for testing. Your widget will automatically adapt to the actual platform when deployed.
 
 ## Commands

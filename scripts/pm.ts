@@ -55,4 +55,3 @@ export function installArgs(
 ): { command: string; args: string[] } {
   return { command: pm, args: ["install", ...extraArgs] };
 }
-

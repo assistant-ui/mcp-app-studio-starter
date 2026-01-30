@@ -38,6 +38,21 @@ function loadStudioConfig(projectRoot: string): StudioConfig | null {
   }
 }
 
+function readPackageDescription(projectRoot: string): string | undefined {
+  try {
+    const pkgPath = path.join(projectRoot, "package.json");
+    if (!fs.existsSync(pkgPath)) return undefined;
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8")) as {
+      description?: unknown;
+    };
+    const desc =
+      typeof pkg.description === "string" ? pkg.description.trim() : "";
+    return desc.length > 0 ? desc : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function getDefaultArgs(projectRoot: string): ExportArgs {
   const config = loadStudioConfig(projectRoot);
   const widget = config?.widget;
@@ -135,6 +150,14 @@ async function main() {
       inline: args.inline,
     },
   };
+
+  const packageDescription = readPackageDescription(projectRoot);
+  if (packageDescription && !config.manifest?.description) {
+    config.manifest = {
+      ...config.manifest,
+      description: packageDescription,
+    };
+  }
 
   const result = await exportWidget({
     config,
