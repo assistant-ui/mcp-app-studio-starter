@@ -74,8 +74,12 @@ export function useWorkbenchPersistence() {
       theme: store.theme,
     };
 
-    const newParams = buildUrlParams(currentUrlState);
     const currentSearch = searchParams.toString();
+    const newParams = new URLSearchParams(currentSearch);
+    const persistedParams = buildUrlParams(currentUrlState);
+    for (const [key, value] of persistedParams.entries()) {
+      newParams.set(key, value);
+    }
     const newSearch = newParams.toString();
 
     if (currentSearch !== newSearch) {
