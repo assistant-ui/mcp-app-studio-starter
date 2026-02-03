@@ -20,7 +20,7 @@ import { useDemoMode } from "@/hooks/use-demo-mode";
 import { cn } from "@/lib/ui/cn";
 import { fetchMcpTools } from "@/lib/workbench/mcp-client";
 import { useMockConfig, useWorkbenchStore } from "@/lib/workbench/store";
-import { MockVariantEditor } from "./mock-variant-editor";
+import { InlineMockVariantEditor } from "./mock-variant-editor";
 
 type ServerStatus = "idle" | "connecting" | "connected" | "error";
 
@@ -231,11 +231,11 @@ function ToolAccordionItem({
                 Mock Response
               </div>
 
-              <MockVariantEditor
+              <InlineMockVariantEditor
                 variant={editorVariant}
-                onSave={(variant) => updateToolResponse(name, variant.response)}
-                onCancel={() => {}}
-                inline
+                onChange={(variant) =>
+                  updateToolResponse(name, variant.response)
+                }
                 disabled={!isSimulationEnabled}
               />
             </div>

@@ -1,23 +1,20 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { cn } from "@/lib/ui/cn";
 
 export interface WelcomeCardProps {
   title: string;
   message: string;
   theme?: "light" | "dark";
-  isFullscreen?: boolean;
-  onExpand?: () => void;
-  onCollapse?: () => void;
+  actions?: ReactNode;
 }
 
 export function WelcomeCard({
   title,
   message,
   theme = "light",
-  isFullscreen = false,
-  onExpand,
-  onCollapse,
+  actions,
 }: WelcomeCardProps) {
   const isDark = theme === "dark";
 
@@ -49,33 +46,7 @@ export function WelcomeCard({
           {message}
         </p>
 
-        {isFullscreen
-          ? onCollapse && (
-              <button
-                onClick={onCollapse}
-                className={cn(
-                  "rounded-lg px-4 py-2 font-medium text-sm transition-colors",
-                  isDark
-                    ? "bg-white text-zinc-900 hover:bg-zinc-200"
-                    : "bg-zinc-900 text-white hover:bg-zinc-700",
-                )}
-              >
-                Exit Fullscreen
-              </button>
-            )
-          : onExpand && (
-              <button
-                onClick={onExpand}
-                className={cn(
-                  "rounded-lg px-4 py-2 font-medium text-sm transition-colors",
-                  isDark
-                    ? "bg-white text-zinc-900 hover:bg-zinc-200"
-                    : "bg-zinc-900 text-white hover:bg-zinc-700",
-                )}
-              >
-                View Fullscreen
-              </button>
-            )}
+        {actions ? <div className="flex justify-center">{actions}</div> : null}
       </div>
     </div>
   );

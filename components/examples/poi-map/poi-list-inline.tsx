@@ -34,7 +34,12 @@ export function POIListInline({
     if (!el) return;
     const atStart = el.scrollLeft <= 1;
     const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
-    setScrollState({ atStart, atEnd });
+    setScrollState((prev) => {
+      if (prev.atStart === atStart && prev.atEnd === atEnd) {
+        return prev;
+      }
+      return { atStart, atEnd };
+    });
   }, []);
 
   useEffect(() => {

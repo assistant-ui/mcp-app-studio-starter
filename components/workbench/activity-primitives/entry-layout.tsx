@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { type ComponentProps, forwardRef, type ReactNode } from "react";
+import type { ComponentPropsWithRef, ReactNode } from "react";
 import { cn } from "@/lib/ui/cn";
 
 /**
@@ -51,7 +51,7 @@ function EntryRoot({
   );
 }
 
-interface EntryRowProps extends Omit<ComponentProps<"div">, "onClick"> {
+interface EntryRowProps extends Omit<ComponentPropsWithRef<"div">, "onClick"> {
   children: ReactNode;
   indicator?: IndicatorState;
   variant?: EntryVariant;
@@ -59,60 +59,57 @@ interface EntryRowProps extends Omit<ComponentProps<"div">, "onClick"> {
   onClick?: () => void;
 }
 
-const EntryRow = forwardRef<HTMLDivElement, EntryRowProps>(
-  (
-    {
-      children,
-      indicator = "none",
-      variant = "default",
-      className,
-      disabled,
-      onClick,
-      ...props
-    },
-    ref,
-  ) => {
-    const paddingY = variant === "response" ? "py-1" : "py-1.5";
+function EntryRow({
+  children,
+  indicator = "none",
+  variant = "default",
+  className,
+  disabled,
+  onClick,
+  ref,
+  ...props
+}: EntryRowProps) {
+  const paddingY = variant === "response" ? "py-1" : "py-1.5";
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (disabled) return;
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        onClick?.();
-      }
-    };
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (disabled) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
 
-    return (
-      <div
-        ref={ref}
-        role="button"
-        tabIndex={disabled ? -1 : 0}
-        aria-disabled={disabled}
-        onClick={disabled ? undefined : onClick}
-        onKeyDown={handleKeyDown}
+  return (
+    <div
+      ref={ref}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      aria-disabled={disabled}
+      onClick={disabled ? undefined : onClick}
+      onKeyDown={handleKeyDown}
+      className={cn(
+        "grid w-full items-center px-4 text-left",
+        GRID_TEMPLATE,
+        paddingY,
+        "pr-4",
+        !disabled && "hover:bg-muted/40",
+        disabled && "cursor-default",
+        className,
+      )}
+      {...props}
+    >
+      <span
         className={cn(
-          "grid w-full items-center px-4 text-left",
-          GRID_TEMPLATE,
-          paddingY,
-          "pr-4",
-          !disabled && "hover:bg-muted/40",
-          disabled && "cursor-default",
-          className,
+          "h-full w-0.5 justify-self-start rounded-full",
+          indicatorStyles[indicator],
         )}
-        {...props}
-      >
-        <span
-          className={cn(
-            "h-full w-0.5 justify-self-start rounded-full",
-            indicatorStyles[indicator],
-          )}
-          aria-hidden
-        />
-        {children}
-      </div>
-    );
-  },
-);
+        aria-hidden
+      />
+      {children}
+    </div>
+  );
+}
+
 EntryRow.displayName = "EntryRow";
 
 function EntryIcon({

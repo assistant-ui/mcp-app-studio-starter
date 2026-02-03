@@ -30,7 +30,11 @@ interface MockVariantEditorProps {
   variant: MockVariant;
   onSave: (variant: MockVariant) => void;
   onCancel: () => void;
-  inline?: boolean;
+}
+
+interface InlineMockVariantEditorProps {
+  variant: MockVariant;
+  onChange: (variant: MockVariant) => void;
   disabled?: boolean;
 }
 
@@ -80,10 +84,7 @@ export function MockVariantEditor({
   variant,
   onSave,
   onCancel,
-  inline = false,
-  disabled = false,
 }: MockVariantEditorProps) {
-  const [prevVariantId, setPrevVariantId] = useState(variant.id);
   const [name, setName] = useState(variant.name);
   const [type, setType] = useState<MockVariantType>(variant.type);
   const [delay, setDelay] = useState(variant.delay);
@@ -101,14 +102,14 @@ export function MockVariantEditor({
 
   const isDark = mounted && resolvedTheme === "dark";
 
-  if (variant.id !== prevVariantId) {
-    setPrevVariantId(variant.id);
+  useEffect(() => {
     setName(variant.name);
     setType(variant.type);
     setDelay(variant.delay);
     setResponseText(JSON.stringify(variant.response, null, 2));
     setLastParsed(variant.response);
-  }
+    setHasError(false);
+  }, [variant.id, variant.name, variant.type, variant.delay, variant.response]);
 
   const extensions = useMemo(
     () => [
@@ -128,12 +129,6 @@ export function MockVariantEditor({
       const parsed = JSON.parse(text);
       setLastParsed(parsed);
       setHasError(false);
-      if (inline) {
-        onSave({
-          ...variant,
-          response: parsed,
-        });
-      }
     } catch {
       setHasError(true);
     }
@@ -150,36 +145,6 @@ export function MockVariantEditor({
       response: lastParsed,
     });
   };
-
-  if (inline) {
-    return (
-      <div
-        className={cn(
-          "overflow-hidden rounded-md border bg-input/50",
-          disabled && "pointer-events-none",
-        )}
-      >
-        <CodeMirror
-          value={responseText}
-          height="180px"
-          extensions={extensions}
-          onChange={handleResponseChange}
-          theme={isDark ? githubDark : githubLight}
-          editable={!disabled}
-          basicSetup={{
-            lineNumbers: false,
-            foldGutter: false,
-            highlightActiveLineGutter: false,
-            highlightActiveLine: false,
-          }}
-          className={cn(
-            "[&_.cm-editor]:bg-transparent!",
-            "[&_.cm-gutters]:bg-transparent!",
-          )}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="border-t pt-4">
@@ -267,6 +232,85 @@ export function MockVariantEditor({
           </Button>
         </div>
       </div>
+    </div>
+  );
+}
+
+export function InlineMockVariantEditor({
+  variant,
+  onChange,
+  disabled = false,
+}: InlineMockVariantEditorProps) {
+  const [responseText, setResponseText] = useState(() =>
+    JSON.stringify(variant.response, null, 2),
+  );
+  const [hasError, setHasError] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
+
+  useEffect(() => {
+    setResponseText(JSON.stringify(variant.response, null, 2));
+    setHasError(false);
+  }, [variant.id, variant.response]);
+
+  const extensions = useMemo(
+    () => [
+      json(),
+      jsonLinterWithNullSupport,
+      lintGutter(),
+      tooltips({ position: "fixed" }),
+      EditorView.lineWrapping,
+      compactEditorStyle,
+    ],
+    [],
+  );
+
+  const handleResponseChange = (text: string) => {
+    setResponseText(text);
+    try {
+      const parsed = JSON.parse(text);
+      setHasError(false);
+      onChange({
+        ...variant,
+        response: parsed,
+      });
+    } catch {
+      setHasError(true);
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        "overflow-hidden rounded-md border bg-input/50",
+        disabled && "pointer-events-none",
+      )}
+      data-invalid={hasError || undefined}
+    >
+      <CodeMirror
+        value={responseText}
+        height="180px"
+        extensions={extensions}
+        onChange={handleResponseChange}
+        theme={isDark ? githubDark : githubLight}
+        editable={!disabled}
+        basicSetup={{
+          lineNumbers: false,
+          foldGutter: false,
+          highlightActiveLineGutter: false,
+          highlightActiveLine: false,
+        }}
+        className={cn(
+          "[&_.cm-editor]:bg-transparent!",
+          "[&_.cm-gutters]:bg-transparent!",
+        )}
+      />
     </div>
   );
 }
