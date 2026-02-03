@@ -1,6 +1,7 @@
 "use client";
 
 import { MessageCircle, Moon, Sun } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
@@ -18,8 +19,17 @@ import {
 import { ExportPopover } from "./export-popover";
 import { OnboardingModal } from "./onboarding-modal";
 import { LeftPanelIcon, RightPanelIcon } from "./panel-toggle-icons";
-import { SDKGuideModal } from "./sdk-guide/sdk-guide-modal";
 import { WorkbenchLayout } from "./workbench-layout";
+
+const SDKGuideModal = dynamic(
+  () =>
+    import("./sdk-guide/sdk-guide-modal").then(
+      (module) => module.SDKGuideModal,
+    ),
+  {
+    ssr: false,
+  },
+);
 
 export function WorkbenchShell() {
   const [mounted, setMounted] = React.useState(false);
@@ -166,7 +176,7 @@ export function WorkbenchShell() {
         <WorkbenchLayout />
       </div>
       <OnboardingModal />
-      <SDKGuideModal />
+      {isSDKGuideOpen ? <SDKGuideModal /> : null}
     </div>
   );
 }

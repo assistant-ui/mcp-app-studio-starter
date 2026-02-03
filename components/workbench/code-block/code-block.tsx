@@ -2,7 +2,7 @@
 
 import { Check, ChevronDown, ChevronUp, Copy } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createHighlighter, type Highlighter } from "shiki";
+import type { Highlighter } from "shiki";
 import {
   ActionButtons,
   normalizeActionsConfig,
@@ -19,10 +19,12 @@ let highlighterPromise: Promise<Highlighter> | null = null;
 
 function getHighlighter(): Promise<Highlighter> {
   if (!highlighterPromise) {
-    highlighterPromise = createHighlighter({
-      themes: ["github-dark", "github-light"],
-      langs: [],
-    });
+    highlighterPromise = import("shiki").then((shiki) =>
+      shiki.createHighlighter({
+        themes: ["github-dark", "github-light"],
+        langs: [],
+      }),
+    );
   }
   return highlighterPromise;
 }
@@ -172,13 +174,11 @@ export function CodeBlock({
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(
     () => htmlCache.get(cacheKey) ?? null,
   );
-  const [prevCacheKey, setPrevCacheKey] = useState(cacheKey);
 
-  const cachedHtml = htmlCache.get(cacheKey);
-  if (cacheKey !== prevCacheKey && cachedHtml) {
-    setPrevCacheKey(cacheKey);
-    setHighlightedHtml(cachedHtml);
-  }
+  useEffect(() => {
+    const cached = htmlCache.get(cacheKey);
+    setHighlightedHtml(cached ?? null);
+  }, [cacheKey]);
 
   useEffect(() => {
     const cached = htmlCache.get(cacheKey);
