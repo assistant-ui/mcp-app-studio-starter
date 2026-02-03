@@ -155,10 +155,7 @@ interface EditorSectionTriggerProps {
   badge?: React.ReactNode;
   isOpen: boolean;
   onToggle: () => void;
-  onAction?: () => void;
-  actionIcon?: React.ReactNode;
-  actionTooltip?: string;
-  showAction?: boolean;
+  action?: ReactNode;
 }
 
 function EditorSectionTrigger({
@@ -166,10 +163,7 @@ function EditorSectionTrigger({
   badge,
   isOpen,
   onToggle,
-  onAction,
-  actionIcon,
-  actionTooltip,
-  showAction = isOpen,
+  action,
 }: EditorSectionTriggerProps) {
   return (
     <div className="flex h-10 shrink-0 items-center justify-between gap-2 px-3 transition-colors hover:bg-muted/30">
@@ -190,24 +184,7 @@ function EditorSectionTrigger({
 
         {badge}
       </button>
-      {showAction && onAction && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="size-6"
-              onClick={(e) => {
-                e.stopPropagation();
-                onAction();
-              }}
-            >
-              {actionIcon}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left">{actionTooltip}</TooltipContent>
-        </Tooltip>
-      )}
+      {action}
     </div>
   );
 }
@@ -279,9 +256,26 @@ export function EditorPanel() {
             tooltip={section.tooltip}
             isOpen={openSections[section.key]}
             onToggle={() => toggleSection(section.key)}
-            onAction={() => handleReset(section.tab)}
-            actionIcon={<RotateCcw className="size-3" />}
-            actionTooltip="Reset"
+            action={
+              openSections[section.key] ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="size-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReset(section.tab);
+                      }}
+                    >
+                      <RotateCcw className="size-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">Reset</TooltipContent>
+                </Tooltip>
+              ) : null
+            }
           />
           <EditorSectionContent isOpen={openSections[section.key]}>
             {renderSectionContent(section)}
