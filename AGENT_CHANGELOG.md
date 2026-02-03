@@ -1,17 +1,56 @@
 # Agent Changelog
 
 > This file helps coding agents understand project evolution, key decisions,
-> and deprecated patterns. Updated: 2026-01-28
+> and deprecated patterns. Updated: 2026-02-03
 
 ## Current State Summary
 
-MCP App Studio Starter is a template for building widgets that run on both ChatGPT and MCP hosts (Claude Desktop, etc.). The workbench operates in **universal mode** where all platform features are available for testing. Widgets automatically adapt to the actual platform when deployed using the `mcp-app-studio` SDK.
+MCP App Studio Starter is a template for building widgets that run on both ChatGPT and MCP hosts (Claude Desktop, etc.). The workbench operates in **universal mode** where all platform features are available for testing. Widgets automatically adapt to the actual platform when deployed using the `mcp-app-studio` SDK. Recent work focused on composition-friendly component APIs and trimming initial bundle cost.
 
 ## Stale Information Detected
 
 None currently. Documentation was updated in the 2026-01-28 commit to reflect universal mode.
 
 ## Timeline
+
+### 2026-02-03 - Composition-Focused Component Refactors
+
+**What changed:**
+- Split `MockVariantEditor` into explicit variants: `MockVariantEditor` (full form) and `InlineMockVariantEditor` (inline auto-save)
+- `WelcomeCard` now accepts an `actions` slot instead of `isFullscreen/onExpand/onCollapse`
+- `EditorSectionTrigger` accepts an `action` slot instead of a boolean/optional prop matrix
+- Removed `forwardRef` usage in `Entry.Row` and `TooltipIconButton`, using React 19 `ref` prop instead
+
+**Why:** Reduce boolean prop proliferation, enable clearer composition, and align with React 19 component patterns.
+
+**Agent impact:**
+- Use `InlineMockVariantEditor` when you need the inline response editor
+- Provide `WelcomeCard` actions via `actions` slot instead of fullscreen props
+- Pass `action` nodes into `EditorSectionTrigger` instead of `showAction` + icon/tooltip props
+- Treat `Entry.Row` and `TooltipIconButton` as ref-prop components (no `forwardRef`)
+
+**Deprecated:**
+- `MockVariantEditor inline` prop
+- `WelcomeCard` `isFullscreen/onExpand/onCollapse` props
+- `EditorSectionTrigger` `showAction/onAction/actionIcon/actionTooltip` props
+
+---
+
+### 2026-02-03 - Workbench Performance & Bundle Trimming
+
+**What changed:**
+- Removed global `force-dynamic` from root layout to allow static optimization by default
+- Lazy-loaded SDK guide modal and deferred `shiki` loading for code blocks
+- Guarded scroll state updates in POI list to avoid re-rendering on every scroll event
+
+**Why:** Reduce initial bundle size and avoid unnecessary re-renders in frequently updating UI.
+
+**Agent impact:**
+- Default pages can be statically optimized unless a route opts into dynamic rendering
+- Heavy client-only components are now loaded on demand
+- Avoid scroll-driven state churn by guarding updates or batching them
+
+---
 
 ### 2026-01-28 - SDK Guide MCP Integration
 
@@ -98,6 +137,10 @@ None currently. Documentation was updated in the 2026-01-28 commit to reflect un
 
 | Don't | Do Instead | Deprecated Since |
 |-------|------------|------------------|
+| Use `MockVariantEditor inline` prop | Use `InlineMockVariantEditor` | 2026-02-03 |
+| Pass `isFullscreen/onExpand/onCollapse` into `WelcomeCard` | Pass `actions` slot instead | 2026-02-03 |
+| Pass `showAction/onAction/actionIcon/actionTooltip` into `EditorSectionTrigger` | Pass `action` node | 2026-02-03 |
+| Use `forwardRef` for `Entry.Row` / `TooltipIconButton` | Pass `ref` as a prop (React 19) | 2026-02-03 |
 | Check `platform === "mcp"` before calling hooks | All hooks work in workbench universal mode | 2026-01-28 |
 | Import from `chatgpt-app-studio` | Import from `mcp-app-studio` | 2026-01-26 |
 | Use platform toggle in workbench | All features available by default | 2026-01-28 |
