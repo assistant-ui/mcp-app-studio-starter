@@ -6,97 +6,96 @@ export const runtime = "nodejs";
 
 interface HookInfo {
   name: string;
-  platform: "universal" | "chatgpt-only" | "mcp-only";
+  category: "portable" | "chatgpt-extensions";
   description: string;
 }
 
-// All hooks exported by mcp-app-studio are universal - the SDK provides
-// implementations for both ChatGPT and MCP platforms. Some hooks have better
-// native support on one platform, but the SDK ensures they work everywhere.
+// All hooks exported by mcp-app-studio are portable across MCP Apps hosts.
+// Some capabilities depend on the host, and a small set are optional
+// ChatGPT-only extensions (via `window.openai`).
 const HOOK_REGISTRY: Record<string, HookInfo> = {
   useToolInput: {
     name: "useToolInput",
-    platform: "universal",
+    category: "portable",
     description: "Get tool call input data",
   },
   useTheme: {
     name: "useTheme",
-    platform: "universal",
+    category: "portable",
     description: "Get current theme",
   },
   useCallTool: {
     name: "useCallTool",
-    platform: "universal",
+    category: "portable",
     description: "Call backend tools",
   },
   useDisplayMode: {
     name: "useDisplayMode",
-    platform: "universal",
+    category: "portable",
     description: "Get/set display mode",
   },
   useSendMessage: {
     name: "useSendMessage",
-    platform: "universal",
+    category: "portable",
     description: "Send messages to conversation",
   },
   useCapabilities: {
     name: "useCapabilities",
-    platform: "universal",
+    category: "portable",
     description: "Check platform capabilities",
   },
   usePlatform: {
     name: "usePlatform",
-    platform: "universal",
+    category: "portable",
     description: "Get current platform",
   },
   useFeature: {
     name: "useFeature",
-    platform: "universal",
+    category: "portable",
     description: "Check specific feature availability",
   },
   useOpenLink: {
     name: "useOpenLink",
-    platform: "universal",
+    category: "portable",
     description: "Open external links",
   },
   useHostContext: {
     name: "useHostContext",
-    platform: "universal",
+    category: "portable",
     description: "Get host context information",
   },
   useWidgetState: {
     name: "useWidgetState",
-    platform: "universal",
+    category: "chatgpt-extensions",
     description: "Persistent widget state",
   },
   useToolInputPartial: {
     name: "useToolInputPartial",
-    platform: "universal",
+    category: "portable",
     description: "Streaming tool input",
   },
   useUpdateModelContext: {
     name: "useUpdateModelContext",
-    platform: "universal",
+    category: "portable",
     description: "Update model context",
   },
   useLog: {
     name: "useLog",
-    platform: "universal",
+    category: "portable",
     description: "Structured logging",
   },
   useToolResult: {
     name: "useToolResult",
-    platform: "universal",
+    category: "portable",
     description: "Get/set tool result",
   },
 };
 
 export interface CompatibilityResult {
-  chatgptCompatible: boolean;
-  mcpCompatible: boolean;
+  usesChatGPTExtensions: boolean;
   hooksUsed: Array<{
     name: string;
-    platform: "universal" | "chatgpt-only" | "mcp-only";
+    category: "portable" | "chatgpt-extensions";
   }>;
   warnings: string[];
 }
@@ -180,23 +179,23 @@ export async function POST(req: NextRequest) {
 
     const hookInfos = Array.from(usedHooks).map((name) => ({
       name,
-      platform: HOOK_REGISTRY[name]?.platform ?? ("universal" as const),
+      category: HOOK_REGISTRY[name]?.category ?? ("portable" as const),
     }));
 
-    const hasChatGPTOnly = hookInfos.some((h) => h.platform === "chatgpt-only");
-    const hasMCPOnly = hookInfos.some((h) => h.platform === "mcp-only");
+    const usesChatGPTExtensions = hookInfos.some(
+      (h) => h.category === "chatgpt-extensions",
+    );
 
     const warnings: string[] = [];
 
-    if (hasChatGPTOnly && hasMCPOnly) {
+    if (usesChatGPTExtensions) {
       warnings.push(
-        "Widget uses both ChatGPT-only and MCP-only hooks. Consider using feature detection.",
+        "Widget uses ChatGPT-only extensions (window.openai). Feature-detect with useFeature(...) and provide fallbacks for other MCP hosts.",
       );
     }
 
     const result: CompatibilityResult = {
-      chatgptCompatible: !hasMCPOnly,
-      mcpCompatible: !hasChatGPTOnly,
+      usesChatGPTExtensions,
       hooksUsed: hookInfos,
       warnings,
     };

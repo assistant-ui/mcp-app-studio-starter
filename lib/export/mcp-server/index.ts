@@ -94,6 +94,10 @@ export function extractToolsFromMockConfig(
         idempotentHint?: boolean;
       };
       descriptorMeta?: {
+        ui?: { resourceUri?: string };
+        /**
+         * @deprecated Legacy ChatGPT Apps SDK key. Prefer `ui.resourceUri`.
+         */
         "openai/outputTemplate"?: string;
         "openai/widgetAccessible"?: boolean;
         "openai/visibility"?: "public" | "private";
@@ -122,7 +126,26 @@ export function extractToolsFromMockConfig(
       inputSchema: toolConfig.schemas?.inputSchema,
       outputSchema: toolConfig.schemas?.outputSchema,
       annotations: toolConfig.annotations,
-      meta: toolConfig.descriptorMeta,
+      meta: (() => {
+        const meta = toolConfig.descriptorMeta;
+        if (!meta) return meta;
+
+        // One-way migration shim: accept legacy `openai/outputTemplate` on input,
+        // but normalize to the MCP-standard `ui.resourceUri`.
+        const legacy = (meta as Record<string, unknown>)[
+          "openai/outputTemplate"
+        ];
+        if (typeof legacy === "string") {
+          return {
+            ...meta,
+            ui: {
+              ...(meta.ui ?? {}),
+              resourceUri: meta.ui?.resourceUri ?? legacy,
+            },
+          };
+        }
+        return meta;
+      })(),
       defaultResponse: activeVariant?.response,
     });
   }

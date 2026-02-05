@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -10,18 +10,21 @@ import {
   parseSerializablePOIMap,
 } from "@/components/examples/poi-map";
 import {
+  type DisplayMode,
   useCallTool,
   useDisplayMode,
-  useOpenAI,
-  useOpenExternal,
-  usePreviousDisplayMode,
-  useRequestDisplayMode,
-  useSendFollowUpMessage,
+  useFeature,
+  useOpenLink,
+  useSendMessage,
   useTheme,
+  useToolInput,
   useWidgetState,
-} from "@/lib/workbench/openai-context";
-import { useCapabilities } from "@/lib/workbench/platform-hooks";
-import type { DisplayMode, View } from "@/lib/workbench/types";
+} from "@/lib/sdk";
+
+type View = {
+  mode: "modal" | "inline";
+  params: Record<string, unknown> | null;
+};
 
 const DEFAULT_WIDGET_STATE: POIMapViewState = {
   selectedPoiId: null,
@@ -31,45 +34,78 @@ const DEFAULT_WIDGET_STATE: POIMapViewState = {
   categoryFilter: null,
 };
 
-export function POIMapSDK(props: Record<string, unknown>) {
-  const parsed = parseSerializablePOIMap(props);
-  const { setWidgetState } = useOpenAI();
-  const [widgetState] = useWidgetState<POIMapViewState>(DEFAULT_WIDGET_STATE);
-  const displayMode = useDisplayMode();
-  const previousDisplayMode = usePreviousDisplayMode();
-  const requestDisplayMode = useRequestDisplayMode();
-  const callTool = useCallTool();
-  const theme = useTheme();
-  const openExternal = useOpenExternal();
-  const sendFollowUpMessage = useSendFollowUpMessage();
-  const [localView, setLocalView] = useState<View | null>(null);
-  const capabilities = useCapabilities();
+/**
+ * Workbench + export wrapper for the POI map widget.
+ *
+ * Notes on ChatGPT-specific behavior:
+ * - ChatGPT may provide additional APIs via `window.openai` (widgetState, files, etc).
+ * - The universal SDK treats those as optional extensions; this widget checks
+ *   `useFeature('widgetState')` and falls back to local state when unavailable.
+ */
+export function POIMapSDK() {
+  const toolInput = useToolInput<Record<string, unknown>>();
+  const parsed = useMemo(
+    () => parseSerializablePOIMap(toolInput ?? {}),
+    [toolInput],
+  );
 
-  const currentWidgetState = useMemo<POIMapViewState>(
+  const [mode, requestDisplayMode] = useDisplayMode();
+  const previousDisplayModeRef = useRef<DisplayMode | null>(null);
+  const lastModeRef = useRef(mode);
+
+  useEffect(() => {
+    if (lastModeRef.current !== mode) {
+      previousDisplayModeRef.current = lastModeRef.current as DisplayMode;
+      lastModeRef.current = mode;
+    }
+  }, [mode]);
+
+  const theme = useTheme();
+  const openLink = useOpenLink();
+  const sendMessage = useSendMessage();
+  const callTool = useCallTool();
+
+  const hasWidgetState = useFeature("widgetState");
+  const [persistedState, setPersistedState] = useWidgetState<POIMapViewState>();
+  const [localState, setLocalState] =
+    useState<POIMapViewState>(DEFAULT_WIDGET_STATE);
+
+  const baseState = hasWidgetState
+    ? (persistedState ?? DEFAULT_WIDGET_STATE)
+    : localState;
+
+  const derivedDefaults = useMemo(
     () => ({
       ...DEFAULT_WIDGET_STATE,
       mapCenter: parsed.initialCenter ?? DEFAULT_CENTER,
       mapZoom: parsed.initialZoom ?? DEFAULT_ZOOM,
-      ...widgetState,
     }),
-    [widgetState, parsed.initialCenter, parsed.initialZoom],
+    [parsed.initialCenter, parsed.initialZoom],
+  );
+
+  const currentWidgetState = useMemo<POIMapViewState>(
+    () => ({
+      ...derivedDefaults,
+      ...baseState,
+    }),
+    [baseState, derivedDefaults],
   );
 
   const handleWidgetStateChange = useCallback(
     (partialState: Partial<POIMapViewState>) => {
-      if (capabilities.widgetState) {
-        setWidgetState({
-          ...currentWidgetState,
-          ...partialState,
-        });
+      const next = { ...currentWidgetState, ...partialState };
+      if (hasWidgetState) {
+        setPersistedState(next);
+      } else {
+        setLocalState(next);
       }
     },
-    [setWidgetState, currentWidgetState, capabilities.widgetState],
+    [currentWidgetState, hasWidgetState, setPersistedState],
   );
 
   const handleRequestDisplayMode = useCallback(
-    async (mode: DisplayMode) => {
-      await requestDisplayMode({ mode });
+    async (nextMode: DisplayMode) => {
+      await requestDisplayMode(nextMode);
     },
     [requestDisplayMode],
   );
@@ -100,6 +136,7 @@ export function POIMapSDK(props: Record<string, unknown>) {
     [callTool],
   );
 
+  const [localView, setLocalView] = useState<View | null>(null);
   const handleViewDetails = useCallback((poiId: string) => {
     setLocalView({
       mode: "modal",
@@ -113,16 +150,16 @@ export function POIMapSDK(props: Record<string, unknown>) {
 
   const handleOpenExternal = useCallback(
     (url: string) => {
-      openExternal({ href: url });
+      void openLink(url);
     },
-    [openExternal],
+    [openLink],
   );
 
   const handleSendFollowUpMessage = useCallback(
     async (prompt: string) => {
-      await sendFollowUpMessage({ prompt });
+      await sendMessage(prompt);
     },
-    [sendFollowUpMessage],
+    [sendMessage],
   );
 
   return (
@@ -132,8 +169,8 @@ export function POIMapSDK(props: Record<string, unknown>) {
       initialCenter={parsed.initialCenter}
       initialZoom={parsed.initialZoom}
       title={parsed.title}
-      displayMode={displayMode}
-      previousDisplayMode={previousDisplayMode ?? undefined}
+      displayMode={mode as unknown as DisplayMode}
+      previousDisplayMode={previousDisplayModeRef.current ?? undefined}
       widgetState={currentWidgetState}
       theme={theme}
       view={localView}

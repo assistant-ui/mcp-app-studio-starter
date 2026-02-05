@@ -256,7 +256,10 @@ export function installOpenAIBridge(): WindowOpenAI {
 
   if (existing) {
     console.warn(
-      "[OpenAI Bridge] window.openai already exists; skipping installation.",
+      // This file is used by the exported widget to communicate with the parent
+      // host frame in development/test harnesses. In real ChatGPT / MCP hosts,
+      // the host owns `window.openai` (optional ChatGPT extensions API).
+      "[ChatGPT Extensions Shim] window.openai already exists; skipping installation.",
     );
     return existing;
   }

@@ -1,17 +1,41 @@
 # Agent Changelog
 
 > This file helps coding agents understand project evolution, key decisions,
-> and deprecated patterns. Updated: 2026-02-03
+> and deprecated patterns. Updated: 2026-02-05
 
 ## Current State Summary
 
-MCP App Studio Starter is a template for building widgets that run on both ChatGPT and MCP hosts (Claude Desktop, etc.). The workbench operates in **universal mode** where all platform features are available for testing. Widgets automatically adapt to the actual platform when deployed using the `mcp-app-studio` SDK. Recent work focused on composition-friendly component APIs and trimming initial bundle cost.
+MCP App Studio Starter is a template for building **portable MCP Apps UIs**.
+
+- The workbench previews widgets in an iframe and simulates an MCP Apps host via
+  `AppBridge` (`ui/*` JSON-RPC over `postMessage`).
+- ChatGPT is treated as an MCP Apps host. Any `window.openai` usage is considered
+  **ChatGPT-only extensions** (optional, non-standard).
+- Production widgets import hooks from `mcp-app-studio` (MCP-first, with optional
+  ChatGPT extensions layered on when available).
 
 ## Stale Information Detected
 
 None currently. Documentation was updated in the 2026-01-28 commit to reflect universal mode.
 
 ## Timeline
+
+### 2026-02-05 - MCP-First Workbench Host Simulation
+
+**What changed:**
+- The workbench iframe now simulates an MCP Apps host using `AppBridge` +
+  `PostMessageTransport` (instead of relying on a ChatGPT-specific bridge model).
+- Workbench can still install a `window.openai` shim inside the iframe to test
+  ChatGPT-only extensions, but those are explicitly documented as extensions.
+
+**Why:** ChatGPT now supports MCP Apps natively; the workbench should be MCP-first
+to match the real runtime model across hosts.
+
+**Agent impact:**
+- Prefer the MCP Apps bridge (`ui/*`) as the primary contract.
+- Only use `window.openai` for ChatGPT-only extensions and feature-detect.
+
+---
 
 ### 2026-02-03 - Composition-Focused Component Refactors
 
@@ -79,8 +103,7 @@ None currently. Documentation was updated in the 2026-01-28 commit to reflect un
 
 **What changed:**
 - Removed platform toggle from workbench toolbar
-- `useCapabilities()` now returns ALL features (superset of both platforms)
-- Added mock implementations for unified hooks: `usePersistentState`, `useModelContext`, `useToolInputStatus`, `useChatGPTBridge`, `useMCPBridge`
+- `useCapabilities()` is used for feature detection (host-dependent)
 - Added platform compatibility section to export dialog
 - Updated README and lib/workbench/README.md to document universal mode
 
@@ -106,7 +129,7 @@ None currently. Documentation was updated in the 2026-01-28 commit to reflect un
 - Updated POI Map example to use capabilities for conditional features
 - `lib/sdk/index.ts` now re-exports from `mcp-app-studio` package
 
-**Why:** Enable building widgets that work on both ChatGPT Apps SDK and MCP hosts with the same codebase.
+**Why:** Enable building widgets that work on ChatGPT MCP Apps and other MCP hosts with the same codebase.
 
 **Agent impact:**
 - Import production hooks from `@/lib/sdk` or `mcp-app-studio`
@@ -144,7 +167,7 @@ None currently. Documentation was updated in the 2026-01-28 commit to reflect un
 | Check `platform === "mcp"` before calling hooks | All hooks work in workbench universal mode | 2026-01-28 |
 | Import from `chatgpt-app-studio` | Import from `mcp-app-studio` | 2026-01-26 |
 | Use platform toggle in workbench | All features available by default | 2026-01-28 |
-| Gate features with `if (platform === "chatgpt")` in workbench | Use `useCapabilities()` / `useFeature()` for production, all work in workbench | 2026-01-28 |
+| Gate features with `if (platform === "chatgpt")` | Use `useCapabilities()` / `useFeature()` | 2026-01-28 |
 | Import from `lib/workbench/sdk-guide/retrieve-docs` | SDK Guide now uses MCP server directly | 2026-01-28 |
 | Bundle SDK documentation in `docs-index.ts` | Documentation served from OpenAI Docs MCP server | 2026-01-28 |
 
@@ -158,15 +181,15 @@ None currently. Documentation was updated in the 2026-01-28 commit to reflect un
 - `useSendMessage()` - Send messages to conversation
 
 ### Level 2: Feature Detection (When Needed)
-- `usePlatform()` - Returns "chatgpt" or "mcp"
+- `usePlatform()` - Returns `"mcp" | "unknown"` (host-protocol focused)
 - `useCapabilities()` - Full capability object
 - `useFeature(name)` - Check specific feature
 
 ### Level 3: Platform-Specific (Advanced)
-- `useWidgetState()` - ChatGPT only, persistent state
-- `useUpdateModelContext()` - MCP only, model context updates
-- `useToolInputPartial()` - MCP only, streaming input
-- `useLog()` - MCP only, structured logging
+- `useWidgetState()` - ChatGPT extensions only, persistent state (optional `window.openai`)
+- `useUpdateModelContext()` - Host-dependent, model context updates (standard MCP Apps)
+- `useToolInputPartial()` - Host-dependent, streaming input
+- `useLog()` - Host-dependent, structured logging
 
 ## Trajectory
 
@@ -181,8 +204,8 @@ The project is moving toward **platform-agnostic development**:
 | File | Purpose |
 |------|---------|
 | `app/api/sdk-guide/route.ts` | SDK Guide API - connects to OpenAI Docs MCP server |
-| `lib/workbench/platform-hooks.ts` | Platform detection and unified hook mocks |
-| `lib/workbench/openai-context.tsx` | ChatGPT bridge simulation |
 | `lib/sdk/index.ts` | Production SDK re-exports |
 | `components/workbench/preview-toolbar.tsx` | Workbench toolbar (no platform toggle) |
 | `components/workbench/export-popover.tsx` | Export with compatibility info |
+| `lib/workbench/iframe/widget-iframe-host.tsx` | MCP Apps host simulation (AppBridge) |
+| `lib/workbench/iframe/generate-iframe-html.ts` | Workbench-only `window.openai` shim (ChatGPT extensions) |

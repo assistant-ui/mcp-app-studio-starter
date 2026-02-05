@@ -25,11 +25,10 @@ import { useSelectedComponent } from "@/lib/workbench/store";
 type ExportStatus = "idle" | "exporting" | "success" | "error";
 
 interface CompatibilityResult {
-  chatgptCompatible: boolean;
-  mcpCompatible: boolean;
+  usesChatGPTExtensions: boolean;
   hooksUsed: Array<{
     name: string;
-    platform: "universal" | "chatgpt-only" | "mcp-only";
+    category: "portable" | "chatgpt-extensions";
   }>;
   warnings: string[];
 }
@@ -65,7 +64,8 @@ function DemoModeContent() {
 
       <p className="text-[11px] text-muted-foreground leading-relaxed">
         Export bundles your app as a self-contained HTML file with all
-        dependencies inlined, ready to deploy as a ChatGPT App or MCP App.
+        dependencies inlined, ready to deploy as a ChatGPT MCP App or any other
+        MCP Apps host.
       </p>
 
       <div className="space-y-2">
@@ -110,50 +110,40 @@ function CompatibilitySection({
   if (!compatibility) return null;
 
   const platformSpecificHooks = compatibility.hooksUsed.filter(
-    (h) => h.platform !== "universal",
+    (h) => h.category !== "portable",
   );
 
   return (
     <div className="space-y-2 border-t pt-3">
-      <div className="font-medium text-[11px]">Platform Compatibility</div>
+      <div className="font-medium text-[11px]">Compatibility Notes</div>
       <div className="space-y-1 text-[11px]">
         <div className="flex items-center gap-1.5">
-          {compatibility.chatgptCompatible ? (
-            <CheckCircle2 className="size-3 text-green-500" />
-          ) : (
+          {compatibility.usesChatGPTExtensions ? (
             <AlertTriangle className="size-3 text-amber-500" />
-          )}
-          <span>ChatGPT Apps</span>
-          {!compatibility.chatgptCompatible && (
-            <span className="text-muted-foreground">(limited)</span>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5">
-          {compatibility.mcpCompatible ? (
-            <CheckCircle2 className="size-3 text-green-500" />
           ) : (
-            <AlertTriangle className="size-3 text-amber-500" />
+            <CheckCircle2 className="size-3 text-green-500" />
           )}
-          <span>MCP Hosts (Claude, etc.)</span>
-          {!compatibility.mcpCompatible && (
-            <span className="text-muted-foreground">(limited)</span>
-          )}
+          <span>
+            {compatibility.usesChatGPTExtensions
+              ? "Uses ChatGPT-only extensions"
+              : "Portable MCP App (no ChatGPT extensions detected)"}
+          </span>
         </div>
       </div>
 
       {platformSpecificHooks.length > 0 && (
         <div className="mt-2 space-y-1">
           <div className="text-[10px] text-muted-foreground">
-            Platform-specific hooks detected:
+            Extension hooks detected:
           </div>
           <div className="flex flex-wrap gap-1">
             {platformSpecificHooks.map((hook) => (
               <span
                 key={hook.name}
                 className={`rounded px-1.5 py-0.5 text-[10px] ${
-                  hook.platform === "chatgpt-only"
-                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                    : "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                  hook.category === "chatgpt-extensions"
+                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {hook.name}
@@ -171,7 +161,7 @@ function CompatibilitySection({
 
       {platformSpecificHooks.length === 0 && (
         <p className="mt-1 text-[10px] text-muted-foreground">
-          Your app uses universal hooks and will work on both platforms.
+          Your app uses portable hooks and should work across MCP Apps hosts.
         </p>
       )}
     </div>

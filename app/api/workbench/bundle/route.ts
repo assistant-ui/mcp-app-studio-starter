@@ -20,14 +20,13 @@ import { ProductionProvider } from "@/lib/export/production-provider";
 WIDGET_IMPORT_LINE
 
 function App() {
-  const props = typeof window !== "undefined" && window.openai?.toolInput
-    ? window.openai.toolInput
-    : {};
-
   return React.createElement(
     ProductionProvider,
     null,
-    React.createElement(Widget, props)
+    // Tool input should be read from the host via SDK hooks (e.g. useToolInput()).
+    // In the local workbench we simulate the ChatGPT extensions API ("window.openai")
+    // so the universal SDK can still function, but we don't pass toolInput as props.
+    React.createElement(Widget, null)
   );
 }
 

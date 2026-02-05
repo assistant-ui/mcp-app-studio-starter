@@ -29,6 +29,10 @@ export interface ToolAnnotations {
 }
 
 export interface ToolDescriptorMeta {
+  ui?: { resourceUri?: string };
+  /**
+   * @deprecated Legacy ChatGPT Apps SDK key. Prefer `ui.resourceUri`.
+   */
   "openai/outputTemplate"?: string;
   "openai/widgetAccessible"?: boolean;
   "openai/visibility"?: "public" | "private";

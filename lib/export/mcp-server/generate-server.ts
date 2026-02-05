@@ -159,8 +159,19 @@ function generateToolRegistration(tool: MCPToolConfig): string {
 }
 
 function buildToolMeta(tool: MCPToolConfig): Record<string, unknown> {
+  const legacyOutputTemplate = tool.meta
+    ? ((tool.meta as unknown as Record<string, unknown>)[
+        "openai/outputTemplate"
+      ] as string | undefined)
+    : undefined;
+
   const meta: Record<string, unknown> = {
-    "openai/outputTemplate": "ui://widget/main.html",
+    ui: {
+      resourceUri:
+        tool.meta?.ui?.resourceUri ??
+        legacyOutputTemplate ??
+        "ui://widget/main.html",
+    },
   };
 
   if (tool.meta) {

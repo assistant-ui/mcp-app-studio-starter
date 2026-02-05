@@ -1,9 +1,12 @@
 "use client";
 
+import { PostMessageTransport } from "@modelcontextprotocol/ext-apps";
+import { AppBridge } from "@modelcontextprotocol/ext-apps/app-bridge";
 import {
   type CSSProperties,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -36,6 +39,57 @@ export interface WidgetIframeHostProps {
   style?: CSSProperties;
 }
 
+function mapDeviceTypeToMcpPlatform(
+  deviceType: OpenAIGlobals["userAgent"]["device"]["type"],
+): "web" | "desktop" | "mobile" {
+  if (deviceType === "mobile" || deviceType === "tablet") return "mobile";
+  return "web";
+}
+
+function buildMcpHostContext(globals: OpenAIGlobals): Record<string, unknown> {
+  return {
+    theme: globals.theme,
+    locale: globals.locale,
+    displayMode: globals.displayMode,
+    availableDisplayModes: ["pip", "inline", "fullscreen"],
+    containerDimensions: { maxHeight: globals.maxHeight },
+    platform: mapDeviceTypeToMcpPlatform(globals.userAgent.device.type),
+    deviceCapabilities: globals.userAgent.capabilities,
+    safeAreaInsets: globals.safeArea.insets,
+    userAgent: "MCP App Studio Workbench",
+  };
+}
+
+function toMcpToolResultParams(
+  result: CallToolResponse,
+): Record<string, unknown> {
+  const content: Array<Record<string, unknown>> = [];
+  if (typeof result.content === "string" && result.content.length > 0) {
+    content.push({ type: "text", text: result.content });
+  } else if (Array.isArray(result.content)) {
+    for (const block of result.content) {
+      if (!block || typeof block !== "object") continue;
+      const type = (block as any).type;
+      const text = (block as any).text;
+      if (type === "text" && typeof text === "string") {
+        content.push({ type: "text", text });
+      }
+    }
+  }
+
+  const params: Record<string, unknown> = { content };
+  if (result.structuredContent !== undefined) {
+    params.structuredContent = result.structuredContent;
+  }
+  if (result.isError !== undefined) {
+    params.isError = result.isError;
+  }
+  if (result._meta) {
+    params._meta = result._meta;
+  }
+  return params;
+}
+
 export function WidgetIframeHost({
   widgetBundle,
   cssBundle,
@@ -44,6 +98,8 @@ export function WidgetIframeHost({
 }: WidgetIframeHostProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const bridgeRef = useRef<WorkbenchMessageBridge | null>(null);
+  const mcpBridgeRef = useRef<AppBridge | null>(null);
+  const mcpInitializedRef = useRef(false);
   const store = useWorkbenchStore();
   const reducedMotion = useReducedMotion();
   const [iframeKey, setIframeKey] = useState(0);
@@ -52,6 +108,8 @@ export function WidgetIframeHost({
     () => store.getOpenAIGlobals(),
     [store],
   );
+  const globalsRef = useRef(globals);
+  globalsRef.current = globals;
 
   const handleCallTool = useCallback(
     async (
@@ -127,6 +185,10 @@ export function WidgetIframeHost({
         let result: CallToolResponse;
         const modeLabel = simConfig.responseMode.toUpperCase();
 
+        // ChatGPT/workbench compatibility metadata:
+        // `openai/*` keys are **not** part of the MCP Apps standard; the workbench
+        // uses them to correlate events with a preview session and to simulate
+        // host-driven actions like closing the widget.
         switch (simConfig.responseMode) {
           case "error":
             result = {
@@ -184,6 +246,7 @@ export function WidgetIframeHost({
         store.setActiveToolCall(null);
       }
 
+      // ChatGPT/workbench compatibility metadata (see comment above).
       const enrichedMeta = {
         ...(result._meta ?? {}),
         "openai/widgetSessionId": store.widgetSessionId,
@@ -422,6 +485,118 @@ export function WidgetIframeHost({
     });
   }, [widgetBundle, cssBundle, globals]);
 
+  useLayoutEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe?.contentWindow) return;
+
+    let cancelled = false;
+    mcpInitializedRef.current = false;
+
+    const bridge = new AppBridge(
+      null,
+      { name: "mcp-app-studio-workbench", version: "0.0.0" },
+      {
+        openLinks: {},
+        serverTools: {},
+        logging: {},
+        // Support sending follow-up messages + model context updates from the view.
+        message: { text: {}, structuredContent: {} },
+        updateModelContext: { text: {}, structuredContent: {} },
+      },
+      { hostContext: buildMcpHostContext(globalsRef.current) as any },
+    );
+
+    mcpBridgeRef.current = bridge;
+
+    bridge.onsizechange = ({ height }) => {
+      // Mirrors the legacy `window.openai.notifyIntrinsicHeight(height)` behavior.
+      const nextHeight =
+        typeof height === "number" && Number.isFinite(height)
+          ? Math.max(0, height)
+          : null;
+      store.setIntrinsicHeight(nextHeight);
+    };
+
+    bridge.onloggingmessage = ({ level, logger, data }) => {
+      store.addConsoleEntry({
+        type: "event",
+        method: `notifications/message (${logger ?? "widget"})`,
+        args: { level, data },
+      });
+    };
+
+    bridge.onopenlink = async ({ url }) => {
+      handleOpenExternal({ href: url });
+      return {};
+    };
+
+    bridge.onrequestdisplaymode = async ({ mode }) => {
+      return handleRequestDisplayMode({ mode: mode as DisplayMode });
+    };
+
+    bridge.onmessage = async ({ role, content }) => {
+      store.addConsoleEntry({
+        type: "event",
+        method: "ui/message",
+        args: { role, content },
+      });
+      return {};
+    };
+
+    bridge.onupdatemodelcontext = async ({ content, structuredContent }) => {
+      store.addConsoleEntry({
+        type: "event",
+        method: "ui/update-model-context",
+        args: { content, structuredContent },
+      });
+      return {};
+    };
+
+    bridge.oncalltool = async (params) => {
+      const name = params.name as string;
+      const args = (params.arguments ?? {}) as Record<string, unknown>;
+      const result = await handleCallTool(name, args);
+      return toMcpToolResultParams(result) as any;
+    };
+
+    bridge.oninitialized = () => {
+      if (cancelled) return;
+      mcpInitializedRef.current = true;
+      void bridge.sendToolInput({ arguments: globalsRef.current.toolInput });
+      if (globalsRef.current.toolOutput) {
+        void bridge.sendToolResult(
+          toMcpToolResultParams({
+            structuredContent: globalsRef.current.toolOutput,
+            _meta: globalsRef.current.toolResponseMetadata ?? undefined,
+          }) as any,
+        );
+      }
+    };
+
+    const transport = new PostMessageTransport(
+      iframe.contentWindow,
+      iframe.contentWindow,
+    );
+
+    bridge.connect(transport).catch((error) => {
+      if (cancelled) return;
+      console.error("[workbench] MCP host bridge connect failed:", error);
+    });
+
+    return () => {
+      cancelled = true;
+      mcpInitializedRef.current = false;
+      mcpBridgeRef.current = null;
+      void bridge.close();
+    };
+  }, [
+    iframeKey,
+    handleCallTool,
+    handleOpenExternal,
+    handleRequestDisplayMode,
+    store,
+  ]);
+
   useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
@@ -450,6 +625,38 @@ export function WidgetIframeHost({
       bridgeRef.current.sendGlobals(globals);
     }
   }, [globals]);
+
+  useEffect(() => {
+    const bridge = mcpBridgeRef.current;
+    if (!bridge) return;
+    bridge.setHostContext(buildMcpHostContext(globals) as any);
+  }, [
+    globals.theme,
+    globals.locale,
+    globals.displayMode,
+    globals.maxHeight,
+    globals.safeArea,
+    globals.userAgent,
+  ]);
+
+  useEffect(() => {
+    const bridge = mcpBridgeRef.current;
+    if (!bridge || !mcpInitializedRef.current) return;
+    void bridge.sendToolInput({ arguments: globals.toolInput });
+  }, [globals.toolInput]);
+
+  useEffect(() => {
+    const bridge = mcpBridgeRef.current;
+    if (!bridge || !mcpInitializedRef.current) return;
+    if (!globals.toolOutput) return;
+
+    void bridge.sendToolResult(
+      toMcpToolResultParams({
+        structuredContent: globals.toolOutput,
+        _meta: globals.toolResponseMetadata ?? undefined,
+      }) as any,
+    );
+  }, [globals.toolOutput, globals.toolResponseMetadata]);
 
   useEffect(() => {
     setIframeKey((k) => k + 1);

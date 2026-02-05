@@ -11,14 +11,14 @@ import { ProductionProvider } from "@/lib/export/production-provider";
 WIDGET_IMPORT_LINE
 
 function App() {
-  const props = typeof window !== "undefined" && (window as any).openai?.toolInput
-    ? (window as any).openai.toolInput
-    : {};
-
   return React.createElement(
     ProductionProvider,
     null,
-    React.createElement(Widget, props)
+    // Tool input should be read from the host via SDK hooks (e.g. useToolInput()).
+    // We intentionally avoid passing "window.openai.toolInput" as props so this
+    // bundle stays MCP-first (ChatGPT may still provide "window.openai" as optional
+    // extensions, but it's not the primary contract).
+    React.createElement(Widget, null)
   );
 }
 

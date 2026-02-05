@@ -11,14 +11,12 @@ import { cn } from "@/lib/ui/cn";
 import {
   useDeviceType,
   useDisplayMode,
-  useIframePreview,
   useIsTransitioning,
   useResizableWidth,
   useWorkbenchStore,
 } from "@/lib/workbench/store";
 import { DEVICE_PRESETS } from "@/lib/workbench/types";
 import { ChatThread } from "./chat-thread";
-import { ComponentContent } from "./component-renderer";
 import { DeviceFrame } from "./device-frame";
 import { IframeComponentContent } from "./iframe-component-content";
 import { MockComposer } from "./mock-composer";
@@ -50,13 +48,9 @@ function PreviewResizeHandle({
 }
 
 function WidgetContent() {
-  const useIframe = useIframePreview();
-
-  if (useIframe) {
-    return <IframeComponentContent className="h-full" />;
-  }
-
-  return <ComponentContent className="h-full" />;
+  // MCP Apps UIs run in an iframe. The workbench always previews widgets in an
+  // iframe so the runtime contract matches production.
+  return <IframeComponentContent className="h-full" />;
 }
 
 function ChatWithComposer() {
