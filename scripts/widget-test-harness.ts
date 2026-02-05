@@ -2,14 +2,14 @@
 /**
  * Widget Test Harness
  *
- * Tests exported ChatGPT widgets in a sandboxed iframe environment that simulates
- * the ChatGPT hosting context using safe-content-frame.
+ * Tests exported MCP Apps widgets in a sandboxed iframe environment that simulates
+ * an MCP Apps host, plus optional ChatGPT extensions (`window.openai`).
  *
  * This validates that:
  * 1. The widget HTML/JS/CSS loads correctly in a sandboxed iframe
  * 2. The widget initializes without errors
- * 3. The widget responds to the window.openai bridge correctly
- * 4. The UniversalProvider detects the ChatGPT platform
+ * 3. The widget responds to the optional ChatGPT extensions API (`window.openai`) correctly
+ * 4. The UniversalProvider can run with an MCP-first bridge + extensions layered on when present
  *
  * Usage:
  *   npx tsx scripts/widget-test-harness.ts <path-to-export-dir>
@@ -46,7 +46,9 @@ interface WidgetTestResults {
   consoleLogs: string[];
 }
 
-// Mock window.openai implementation that matches ChatGPT's bridge
+// Mock `window.openai` implementation that matches ChatGPT's extensions API shape.
+// Note: MCP hosts do not require `window.openai`. This exists for tests and
+// local simulation only.
 const MOCK_OPENAI_BRIDGE = `
 // Enable debug mode for mcp-app-studio
 window.__MCP_APP_STUDIO_DEBUG__ = true;

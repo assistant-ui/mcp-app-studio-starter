@@ -2,7 +2,8 @@
 
 import { cn } from "@/lib/ui/cn";
 import { useWidgetBundle, WidgetIframeHost } from "@/lib/workbench/iframe";
-import { useSelectedComponent } from "@/lib/workbench/store";
+import { useSelectedComponent, useToolInput } from "@/lib/workbench/store";
+import { ComponentErrorBoundary } from "./component-error-boundary";
 import { IsolatedThemeWrapper } from "./isolated-theme-wrapper";
 
 function LoadingState() {
@@ -44,10 +45,14 @@ function IframeComponentRenderer() {
 }
 
 export function IframeComponentContent({ className }: { className?: string }) {
+  const toolInput = useToolInput();
+
   return (
     <IsolatedThemeWrapper className={cn("flex", className)}>
       <div className="h-full w-full">
-        <IframeComponentRenderer />
+        <ComponentErrorBoundary toolInput={toolInput}>
+          <IframeComponentRenderer />
+        </ComponentErrorBoundary>
       </div>
     </IsolatedThemeWrapper>
   );

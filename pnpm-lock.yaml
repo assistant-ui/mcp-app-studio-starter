@@ -120,8 +120,8 @@ importers:
         specifier: ^0.562.0
         version: 0.562.0(react@19.2.3)
       mcp-app-studio:
-        specifier: ^0.5.0
-        version: 0.5.0(@modelcontextprotocol/ext-apps@1.0.1(@modelcontextprotocol/sdk@1.25.3(hono@4.11.7)(zod@4.3.6))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.6))(react@19.2.3)
+        specifier: ^0.5.2
+        version: 0.5.2(@modelcontextprotocol/ext-apps@1.0.1(@modelcontextprotocol/sdk@1.25.3(hono@4.11.7)(zod@4.3.6))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.6))(react@19.2.3)
       motion:
         specifier: ^12.23.26
         version: 12.29.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -361,11 +361,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@clack/core@0.5.0':
-    resolution: {integrity: sha512-p3y0FIOwaYRUPRcMO7+dlmLh8PSRcrjuTndsiA0WAFbWES0mLZlrjVoBRZ9DzkPFJZG6KGkJmoEAY0ZcVWTkow==}
+  '@clack/core@1.0.0':
+    resolution: {integrity: sha512-Orf9Ltr5NeiEuVJS8Rk2XTw3IxNC2Bic3ash7GgYeA8LJ/zmSNpSQ/m5UAhe03lA6KFgklzZ5KTHs4OAMA/SAQ==}
 
-  '@clack/prompts@0.11.0':
-    resolution: {integrity: sha512-pMN5FcrEw9hUkZA4f+zLlzivQSeQf5dRGJjSUbvVYDLvpKCdQx5OaknvKzgbtXOizhP+SJJJjqEbOe55uKKfAw==}
+  '@clack/prompts@1.0.0':
+    resolution: {integrity: sha512-rWPXg9UaCFqErJVQ+MecOaWsozjaxol4yjnmYcGNipAWzdaWa2x+VJmKfGq7L0APwBohQOYdHC+9RO4qRXej+A==}
 
   '@codemirror/autocomplete@6.20.0':
     resolution: {integrity: sha512-bOwvTOIJcG5FVo5gUUupiwYh8MioPLQ4UcqbcRf7UQ98X90tCa9E1kZ3Z7tqwpZxYyOvh1YTYbmZE9RTfTp5hg==}
@@ -2229,8 +2229,8 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
-  mcp-app-studio@0.5.0:
-    resolution: {integrity: sha512-KOkxk+UiuDsWFDudVLsxeoQclPA06eGKYvYmVusyLw35Ps4TJNVJkGT8z6q5NsOI4JsTEaIr9Y5NahoglkFSlA==}
+  mcp-app-studio@0.5.2:
+    resolution: {integrity: sha512-njRyQuPEZDCa3dIn7p65EVn6gpmB0NYzwaj5Bfk/Evw3ATNkSsiOC5gU38LNiM81d4gCHqlEDQL8ziaoUOWahg==}
     engines: {node: '>=20.9.0'}
     hasBin: true
     peerDependencies:
@@ -3123,14 +3123,14 @@ snapshots:
   '@biomejs/cli-win32-x64@2.3.13':
     optional: true
 
-  '@clack/core@0.5.0':
+  '@clack/core@1.0.0':
     dependencies:
       picocolors: 1.1.1
       sisteransi: 1.0.5
 
-  '@clack/prompts@0.11.0':
+  '@clack/prompts@1.0.0':
     dependencies:
-      '@clack/core': 0.5.0
+      '@clack/core': 1.0.0
       picocolors: 1.1.1
       sisteransi: 1.0.5
 
@@ -4886,9 +4886,9 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
-  mcp-app-studio@0.5.0(@modelcontextprotocol/ext-apps@1.0.1(@modelcontextprotocol/sdk@1.25.3(hono@4.11.7)(zod@4.3.6))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.6))(react@19.2.3):
+  mcp-app-studio@0.5.2(@modelcontextprotocol/ext-apps@1.0.1(@modelcontextprotocol/sdk@1.25.3(hono@4.11.7)(zod@4.3.6))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.6))(react@19.2.3):
     dependencies:
-      '@clack/prompts': 0.11.0
+      '@clack/prompts': 1.0.0
       picocolors: 1.1.1
       tar: 7.5.7
     optionalDependencies:

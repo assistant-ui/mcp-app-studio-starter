@@ -1,23 +1,30 @@
 "use client";
 
+import { useMemo } from "react";
 import { WelcomeCard } from "@/components/examples/welcome-card";
+import { useDisplayMode, useTheme, useToolInput } from "@/lib/sdk";
 import { cn } from "@/lib/ui/cn";
-import {
-  useDisplayMode,
-  useRequestDisplayMode,
-  useTheme,
-} from "@/lib/workbench/openai-context";
 
 interface WelcomeCardInput {
   title?: string;
   message?: string;
 }
 
-export function WelcomeCardSDK(props: Record<string, unknown>) {
-  const input = props as WelcomeCardInput;
+/**
+ * This wrapper is the widget "entry point" used by the workbench and export flow.
+ *
+ * Important:
+ * - Tool input should be read via `useToolInput()` (MCP-first).
+ * - In the local workbench we simulate an MCP Apps host. We also provide an
+ *   optional `window.openai` shim so widgets can exercise ChatGPT-only
+ *   extensions (files, widgetState, modals) during development.
+ */
+export function WelcomeCardSDK() {
+  const toolInput = useToolInput<WelcomeCardInput>();
+  const input = useMemo(() => toolInput ?? {}, [toolInput]);
+
   const theme = useTheme();
-  const displayMode = useDisplayMode();
-  const requestDisplayMode = useRequestDisplayMode();
+  const [displayMode, setDisplayMode] = useDisplayMode();
   const isDark = theme === "dark";
 
   const title = input.title ?? "Welcome!";
@@ -25,18 +32,14 @@ export function WelcomeCardSDK(props: Record<string, unknown>) {
     input.message ??
     "This is your MCP App. Edit this component to build something amazing.";
 
-  const handleExpand = () => {
-    requestDisplayMode({ mode: "fullscreen" });
-  };
-
-  const handleCollapse = () => {
-    requestDisplayMode({ mode: "inline" });
+  const handleToggleFullscreen = async () => {
+    await setDisplayMode(
+      displayMode === "fullscreen" ? "inline" : "fullscreen",
+    );
   };
 
   const actionLabel =
     displayMode === "fullscreen" ? "Exit Fullscreen" : "View Fullscreen";
-  const handleAction =
-    displayMode === "fullscreen" ? handleCollapse : handleExpand;
 
   return (
     <WelcomeCard
@@ -45,7 +48,7 @@ export function WelcomeCardSDK(props: Record<string, unknown>) {
       theme={theme}
       actions={
         <button
-          onClick={handleAction}
+          onClick={handleToggleFullscreen}
           className={cn(
             "rounded-lg px-4 py-2 font-medium text-sm transition-colors",
             isDark

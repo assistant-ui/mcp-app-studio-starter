@@ -46,7 +46,9 @@ function createAppServer() {
         query: z.string().describe("The search query"),
       },
       _meta: {
-        "openai/outputTemplate": "ui://widget/main.html",
+        ui: {
+          resourceUri: "ui://widget/main.html",
+        },
         "openai/widgetAccessible": true,
         "openai/toolInvocation/invoking": "Processing...",
         "openai/toolInvocation/invoked": "Done",

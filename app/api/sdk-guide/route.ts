@@ -37,7 +37,7 @@ function buildSystemPrompt(context: WorkbenchContext): string {
 ## Scope
 Focus on helping with MCP Apps development. This includes:
 - The MCP Apps SDK (ext-apps) for building interactive UI components
-- ChatGPT Apps SDK compatibility
+- ChatGPT as an MCP host (with optional ChatGPT-specific extensions)
 - Tool definitions, widget state, display modes
 - Cross-platform compatibility between MCP hosts
 
@@ -308,14 +308,35 @@ export async function POST(req: Request) {
           if (configType === "tool_descriptor") {
             const meta = (input._meta || {}) as Record<string, unknown>;
 
-            if (!meta["openai/outputTemplate"]) {
+            const ui = meta["ui"] as { resourceUri?: unknown } | undefined;
+            const resourceUri =
+              ui && typeof ui === "object"
+                ? (ui as { resourceUri?: unknown }).resourceUri
+                : undefined;
+
+            const hasUiResourceUri = typeof resourceUri === "string";
+            const hasLegacyOutputTemplate =
+              typeof meta["openai/outputTemplate"] === "string";
+
+            if (!hasUiResourceUri && !hasLegacyOutputTemplate) {
               issues.push({
                 severity: "error",
-                field: '_meta["openai/outputTemplate"]',
+                field: "_meta.ui.resourceUri",
                 message:
                   "Missing output template URI. Your component won't render without this.",
                 suggestion:
-                  'Add a _meta["openai/outputTemplate"] field pointing to your component HTML resource URI.',
+                  "Add _meta.ui.resourceUri pointing to your component HTML resource URI (e.g. ui://widget/main.html).",
+              });
+            }
+
+            if (hasLegacyOutputTemplate && !hasUiResourceUri) {
+              issues.push({
+                severity: "warning",
+                field: '_meta["openai/outputTemplate"]',
+                message:
+                  "Using legacy output template key. Prefer the MCP standard key for cross-host compatibility.",
+                suggestion:
+                  "Move the value to _meta.ui.resourceUri (and remove openai/outputTemplate).",
               });
             }
 

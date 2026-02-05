@@ -7,6 +7,19 @@ export interface IframeHtmlOptions {
   useTailwindCdn?: boolean;
 }
 
+/**
+ * Workbench-only `window.openai` shim.
+ *
+ * ChatGPT supports MCP Apps (standard `ui/*` bridge) and may also expose optional
+ * extensions via `window.openai` (files, widgetState, host modals, etc).
+ *
+ * The workbench previews widgets in an iframe using the MCP Apps bridge, and
+ * installs this shim purely to let widgets exercise those ChatGPT-only
+ * extensions during development.
+ *
+ * Portable MCP Apps UIs should not rely on `window.openai` for core
+ * functionality.
+ */
 const BRIDGE_SCRIPT = `
 (function() {
   const DEFAULT_GLOBALS = {

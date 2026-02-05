@@ -44,11 +44,8 @@ interface ActiveToolCall {
   cancelFn?: () => void;
 }
 
-export type Platform = "chatgpt" | "mcp";
-
 interface WorkbenchState {
   selectedComponent: string;
-  platform: Platform;
   displayMode: DisplayMode;
   previousDisplayMode: DisplayMode;
   theme: Theme;
@@ -77,10 +74,8 @@ interface WorkbenchState {
   isRightPanelOpen: boolean;
   isSDKGuideOpen: boolean;
   simulation: SimulationState;
-  useIframePreview: boolean;
   conversationMode: boolean;
 
-  setPlatform: (platform: Platform) => void;
   setDisplayMode: (mode: DisplayMode) => void;
   setTransitioning: (transitioning: boolean) => void;
   setTheme: (theme: Theme) => void;
@@ -147,7 +142,6 @@ interface WorkbenchState {
   setToolAnnotations: (toolName: string, annotations: ToolAnnotations) => void;
   setToolDescriptorMeta: (toolName: string, meta: ToolDescriptorMeta) => void;
   setToolSchemas: (toolName: string, schemas: ToolSchemas) => void;
-  setIframePreview: (enabled: boolean) => void;
   setConversationMode: (enabled: boolean) => void;
 }
 
@@ -198,7 +192,6 @@ function getInitialComponent(): string {
 
 export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
   selectedComponent: getInitialComponent(),
-  platform: "chatgpt",
   displayMode: "inline",
   previousDisplayMode: "inline",
   theme: "light",
@@ -227,7 +220,6 @@ export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
   isRightPanelOpen: true,
   isSDKGuideOpen: false,
   simulation: DEFAULT_SIMULATION_STATE,
-  useIframePreview: false,
   conversationMode: false,
   setDisplayMode: (mode) =>
     set((state) => {
@@ -313,9 +305,7 @@ export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
   setRightPanelOpen: (open) => set(() => ({ isRightPanelOpen: open })),
   setSDKGuideOpen: (open) => set(() => ({ isSDKGuideOpen: open })),
   setResizableWidth: (width) => set(() => ({ resizableWidth: width })),
-  setIframePreview: (enabled) => set(() => ({ useIframePreview: enabled })),
   setConversationMode: (enabled) => set(() => ({ conversationMode: enabled })),
-  setPlatform: (platform) => set(() => ({ platform })),
   selectSimTool: (toolName) =>
     set((state) => ({
       simulation: { ...state.simulation, selectedTool: toolName },
@@ -595,8 +585,6 @@ export const useClearConsole = () => useWorkbenchStore((s) => s.clearConsole);
 export const useToolInput = () => useWorkbenchStore((s) => s.toolInput);
 export const useToolOutput = () => useWorkbenchStore((s) => s.toolOutput);
 export const useMockConfig = () => useWorkbenchStore((s) => s.mockConfig);
-export const useIframePreview = () =>
-  useWorkbenchStore((s) => s.useIframePreview);
 
 export const useOpenAIGlobals = (): OpenAIGlobals => {
   const theme = useWorkbenchStore((s) => s.theme);
@@ -670,4 +658,3 @@ export const useServerUrl = () =>
   useWorkbenchStore((s) => s.mockConfig.serverUrl);
 export const useConversationMode = () =>
   useWorkbenchStore((s) => s.conversationMode);
-export const useWorkbenchPlatform = () => useWorkbenchStore((s) => s.platform);

@@ -4,8 +4,8 @@
  * Test script for mcp-app-studio CLI scenarios.
  *
  * Tests the CLI by scaffolding projects for different deployment scenarios:
- * - chatgpt-only: Widget deployed to ChatGPT (no MCP server)
- * - mcp-only: Widget deployed with MCP server (for Claude Desktop, etc.)
+ * - chatgpt-mcp: Widget deployed to ChatGPT as an MCP App (MCP server optional)
+ * - mcp-host: Widget deployed with an MCP server (for Claude Desktop, etc.)
  * - universal: Full-featured widget with MCP server (poi-map template)
  *
  * Phase 1: Scaffold → Build → Export pipeline validation
@@ -65,7 +65,7 @@ const MCP_CLI_PATH =
 
 const SCENARIOS: Scenario[] = [
   {
-    name: "chatgpt-only",
+    name: "chatgpt-mcp",
     cliArgs: ["-y", "--template", "minimal", "--no-server"],
     expectedFiles: [
       "export/widget/index.html",
@@ -76,7 +76,7 @@ const SCENARIOS: Scenario[] = [
     unexpectedFiles: ["server/"],
   },
   {
-    name: "mcp-only",
+    name: "mcp-host",
     cliArgs: ["-y", "--template", "minimal", "--include-server"],
     expectedFiles: [
       "export/widget/index.html",
@@ -928,13 +928,13 @@ async function runMCPJamInspectorTest(
     );
   }
 
-  // Check for OpenAI bridge markers (window.openai usage)
+  // Check for ChatGPT extensions API markers (`window.openai` usage)
   if (
     js.includes("window.openai") ||
     js.includes("openai.") ||
     js.includes("OpenAI")
   ) {
-    checks.push("Bundle contains OpenAI bridge integration");
+    checks.push("Bundle contains ChatGPT extensions API integration");
   } else {
     checks.push(
       "Note: No direct window.openai reference found (may use wrapper)",
@@ -975,8 +975,8 @@ async function runInspectorTests(
   const serverDir = path.join(projectDir, "server");
   const hasServer = scenario.cliArgs.includes("--include-server");
 
-  // Run MCPJam Inspector test (for ChatGPT widget validation)
-  log("Testing with MCPJam Inspector (ChatGPT emulator)...");
+  // Run MCPJam Inspector test (for ChatGPT MCP Apps validation)
+  log("Testing with MCPJam Inspector (ChatGPT MCP Apps emulator)...");
   results.mcpjamInspector = await runMCPJamInspectorTest(
     widgetDir,
     hasServer ? serverDir : null,

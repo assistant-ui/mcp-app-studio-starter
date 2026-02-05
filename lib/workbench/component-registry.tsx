@@ -23,9 +23,12 @@ export interface WorkbenchComponentEntry {
 // ─────────────────────────────────────────────────────────────────────────────
 // App Configuration
 // ─────────────────────────────────────────────────────────────────────────────
-// Each project has a single app configured here. This component uses the SDK
-// context (OpenAIProvider) to interact with the window.openai API - display
-// modes, widget state, tool calls, modals, etc.
+// Each project has a single app configured here.
+//
+// Workbench note:
+// - In production, the primary contract is MCP Apps (via `mcp-app-studio`).
+// - In the local workbench, we simulate ChatGPT's optional extensions API
+//   (`window.openai`) so widgets can still be exercised without an MCP host.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const appComponent: WorkbenchComponentEntry = {

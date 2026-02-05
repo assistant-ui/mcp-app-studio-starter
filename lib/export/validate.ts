@@ -176,11 +176,14 @@ export function generateExportSummary(
   if (includesServer) {
     nextSteps.push("Deploy server/ folder to a serverless host");
     nextSteps.push(
-      "Configure your MCP server URL in the ChatGPT Apps dashboard",
+      "Configure your MCP server URL for each host where you plan to publish",
     );
   }
 
-  nextSteps.push("Register your app at: https://platform.openai.com/apps");
+  nextSteps.push("Submit to ChatGPT Apps: https://platform.openai.com/apps");
+  nextSteps.push(
+    "Submit to Claude Remote MCP: https://support.claude.com/en/articles/12922490-remote-mcp-server-submission-guide",
+  );
 
   const fileList = files
     .filter((f) => !f.relativePath.startsWith("server/"))

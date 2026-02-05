@@ -8,9 +8,9 @@ Starter template for building interactive apps for AI assistants with [MCP App S
 
 Build once, deploy anywhere:
 
-- **ChatGPT** — via the ChatGPT Apps SDK
-- **Claude Desktop** — via the Model Context Protocol (MCP)
-- **Any MCP Host** — compatible with any MCP-supporting AI assistant
+- **ChatGPT** — as an MCP Apps host (standard `ui/*` bridge)
+- **Claude Desktop** — as an MCP Apps host
+- **Any MCP Apps host** — compatible with any MCP-supporting AI assistant
 
 ## Quick Start
 
@@ -28,7 +28,9 @@ If you switch package managers (e.g. `pnpm` → `npm`), delete `node_modules/` f
 
 The MCP server (when `server/` exists) runs at `http://localhost:3001/mcp` by default. If 3001 is already in use, it will select the next available port and write it to `server/.mcp-port`.
 
-The workbench operates in **universal mode**, where all platform features are available for testing. Your widget will automatically adapt to the actual platform when deployed.
+The workbench simulates an MCP Apps host in an iframe. It also installs a
+`window.openai` shim so you can exercise **ChatGPT-only extensions** during
+development (optional, non-standard).
 
 ## Commands
 
@@ -63,16 +65,18 @@ import {
   useToolInput,
   useCallTool,
   useTheme,
-  usePlatform,
   useCapabilities,
-} from "@/lib/workbench";
+  useUpdateModelContext,
+  useWidgetState,
+} from "@/lib/sdk";
 
 export function MyWidget() {
   const input = useToolInput<{ query: string }>();
   const callTool = useCallTool();
   const theme = useTheme();
-  const platform = usePlatform();
   const capabilities = useCapabilities();
+  const updateModelContext = useUpdateModelContext();
+  const [widgetState, setWidgetState] = useWidgetState();
 
   const handleSearch = async () => {
     const result = await callTool("search", { query: input.query });
@@ -82,15 +86,29 @@ export function MyWidget() {
   return (
     <div className={theme === "dark" ? "dark" : ""}>
       <p>Query: {input.query}</p>
-      <p>Running on: {platform}</p>
       <button onClick={handleSearch}>Search</button>
 
       {/* Platform-specific features */}
-      {capabilities.widgetState && (
-        <p>Widget state is available (ChatGPT only)</p>
-      )}
       {capabilities.modelContext && (
-        <p>Model context updates available (MCP only)</p>
+        <button
+          onClick={() =>
+            updateModelContext({ structuredContent: { query: input.query } })
+          }
+        >
+          Update model context (host-dependent)
+        </button>
+      )}
+      {capabilities.widgetState && (
+        <button
+          onClick={() =>
+            setWidgetState({
+              ...(widgetState ?? {}),
+              savedAt: Date.now(),
+            })
+          }
+        >
+          Save widget state (ChatGPT extensions)
+        </button>
       )}
     </div>
   );
@@ -111,7 +129,7 @@ Full documentation: [`lib/workbench/README.md`](lib/workbench/README.md)
 
 #### Universal Hooks (recommended)
 
-These hooks work identically on ChatGPT and MCP platforms:
+These hooks work identically across MCP hosts (including ChatGPT):
 
 | Hook | Description |
 | ---- | ----------- |
@@ -125,31 +143,34 @@ These hooks work identically on ChatGPT and MCP platforms:
 
 | Hook | Description |
 | ---- | ----------- |
-| `usePlatform()` | Returns "chatgpt", "mcp", or "unknown" |
 | `useCapabilities()` | Get full capability object |
 | `useFeature(name)` | Check if specific feature is available |
 
-#### Platform-Specific (advanced)
+#### Host-Dependent / Extensions (advanced)
 
 These hooks only work on specific platforms. Check availability first:
 
 | Hook | Platform | Description |
 | ---- | -------- | ----------- |
-| `useWidgetState()` | ChatGPT | Persistent state across sessions |
-| `useUpdateModelContext()` | MCP | Update model's context dynamically |
-| `useToolInputPartial()` | MCP | Streaming input during generation |
-| `useLog()` | MCP | Structured logging to host |
+| `useWidgetState()` | ChatGPT extensions | Persistent state across sessions |
+| `useUpdateModelContext()` | Host-dependent | Update model-visible context dynamically |
+| `useToolInputPartial()` | Host-dependent | Streaming input during generation |
+| `useLog()` | Host-dependent | Structured logging to host |
 
 ## Platform-Specific Features
 
-| Feature | ChatGPT | MCP |
-| ------- | ------- | --- |
-| Widget State | Yes | No |
-| Tool Input Partial | No | Yes |
-| Model Context Updates | No | Yes |
-| Structured Logging | No | Yes |
-| File Upload | Yes | No |
-| Display Mode Transitions | Yes | Yes |
+MCP App Studio is MCP-first: prefer the MCP Apps bridge (`ui/*`) and feature-detect
+optional ChatGPT extensions (`window.openai`) when needed.
+
+| Feature | MCP Apps standard | ChatGPT extensions (optional) |
+| ------- | ----------------- | ---------------------------- |
+| Tool input | Yes | (alias: `window.openai.toolInput`) |
+| Tool result | Yes | (alias: `window.openai.toolOutput`) |
+| Call tool | Yes | (alias: `window.openai.callTool`) |
+| Send message | Host-dependent | (alias: `window.openai.sendFollowUpMessage`) |
+| Update model context | Host-dependent | (extension: `window.openai.setWidgetState`) |
+| Widget state persistence | No | Yes |
+| File upload/download | No | Yes |
 
 Use `useCapabilities()` or `useFeature()` to conditionally enable features.
 
@@ -247,4 +268,4 @@ Exported widgets inherit the host's theme. Ensure your CSS responds to `.dark`:
 
 - [MCP App Studio](https://github.com/assistant-ui/assistant-ui/tree/main/packages/mcp-app-studio) — CLI and SDK documentation
 - [MCP Specification](https://modelcontextprotocol.io/specification/) — Model Context Protocol
-- [ChatGPT Apps SDK](https://developers.openai.com/apps-sdk/) — ChatGPT integration
+- [ChatGPT MCP Apps](https://developers.openai.com/apps-sdk/mcp-apps-in-chatgpt) — ChatGPT as an MCP host
