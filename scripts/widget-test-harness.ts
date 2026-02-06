@@ -27,7 +27,6 @@ declare global {
     __widgetLoaded?: boolean;
     __widgetError?: string;
     __openaiCalls?: Array<{ method: string; [key: string]: unknown }>;
-    openai?: Record<string, unknown>;
   }
 }
 
@@ -346,7 +345,7 @@ async function runWidgetTests(widgetDir: string): Promise<WidgetTestResults> {
 
     // Check if mock bridge was initialized (no iframe, direct page)
     const bridgeInitialized = await page.evaluate(() => {
-      return window.openai !== undefined;
+      return (window as Window & { openai?: unknown }).openai !== undefined;
     });
 
     if (bridgeInitialized) {

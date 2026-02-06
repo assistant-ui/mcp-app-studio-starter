@@ -10,6 +10,24 @@ interface BundleState {
 
 const bundleCache = new Map<string, string>();
 
+export function buildBundleRequestPath(
+  componentId: string,
+  currentLocationSearch: string,
+): string {
+  const requestParams = new URLSearchParams({ id: componentId });
+  const currentParams = new URLSearchParams(
+    currentLocationSearch.startsWith("?")
+      ? currentLocationSearch.slice(1)
+      : currentLocationSearch,
+  );
+
+  if (currentParams.get("demo") === "true") {
+    requestParams.set("demo", "true");
+  }
+
+  return `/api/workbench/bundle?${requestParams.toString()}`;
+}
+
 export function useWidgetBundle(componentId: string): BundleState {
   const [state, setState] = useState<BundleState>(() => {
     const cached = bundleCache.get(componentId);
@@ -36,10 +54,13 @@ export function useWidgetBundle(componentId: string): BundleState {
 
     async function fetchBundle() {
       try {
-        const response = await fetch(
-          `/api/workbench/bundle?id=${encodeURIComponent(componentId)}`,
-          { signal: controller.signal },
+        const requestPath = buildBundleRequestPath(
+          componentId,
+          typeof window === "undefined" ? "" : window.location.search,
         );
+        const response = await fetch(requestPath, {
+          signal: controller.signal,
+        });
 
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));

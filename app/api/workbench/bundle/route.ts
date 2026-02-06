@@ -57,7 +57,9 @@ const bundleCache = new Map<string, { bundle: string; timestamp: number }>();
 const CACHE_TTL = 5000;
 
 export async function GET(request: NextRequest) {
-  if (process.env.NODE_ENV !== "development") {
+  const isDemoRequest = request.nextUrl.searchParams.get("demo") === "true";
+
+  if (process.env.NODE_ENV !== "development" && !isDemoRequest) {
     return NextResponse.json(
       {
         error:
