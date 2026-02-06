@@ -483,7 +483,7 @@ export function WidgetIframeHost({
       widgetBundle,
       cssBundle,
       initialGlobals: globals,
-      useTailwindCdn: true,
+      useTailwindCdn: !demoMode,
       includeOpenAIShim: !demoMode,
     });
   }, [widgetBundle, cssBundle, globals, demoMode]);
