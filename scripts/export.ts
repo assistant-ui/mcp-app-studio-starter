@@ -176,6 +176,13 @@ async function main() {
     const summary = generateExportSummary(result.files, result.manifest, false);
     printExportSummary(summary);
 
+    if (result.warnings.length > 0) {
+      console.log("\n⚠️  Export warnings:");
+      for (const warning of result.warnings) {
+        console.log(`   ${warning}`);
+      }
+    }
+
     if (summary.manifestValidation.errors.length > 0) {
       process.exit(1);
     }

@@ -10,6 +10,7 @@ import {
 } from "@/components/examples/poi-map";
 import {
   type DisplayMode,
+  openModal,
   useCallTool,
   useDisplayMode,
   useFeature,
@@ -145,10 +146,18 @@ export function POIMapSDK() {
 
   const [localView, setLocalView] = useState<View | null>(null);
   const handleViewDetails = useCallback((poiId: string) => {
-    setLocalView({
-      mode: "modal",
-      params: { poiId },
-    });
+    void openModal(
+      {
+        title: "POI Details",
+        params: { poiId },
+      },
+      () => {
+        setLocalView({
+          mode: "modal",
+          params: { poiId },
+        });
+      },
+    );
   }, []);
 
   const handleDismissModal = useCallback(() => {

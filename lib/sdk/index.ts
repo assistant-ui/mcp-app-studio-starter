@@ -30,3 +30,8 @@ export type {
 } from "mcp-app-studio/core";
 
 export { imageBlock, textBlock } from "mcp-app-studio/core";
+export {
+  type HostModalOptions,
+  type OpenModalResult,
+  openModal,
+} from "./open-modal";

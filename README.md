@@ -156,6 +156,7 @@ These hooks only work on specific platforms. Check availability first:
 | `useUpdateModelContext()` | Host-dependent | Update model-visible context dynamically |
 | `useToolInputPartial()` | Host-dependent | Streaming input during generation |
 | `useLog()` | Host-dependent | Structured logging to host |
+| `openModal()` helper | ChatGPT extensions (fallback-safe) | Use host modal when available, fallback locally |
 
 ## Platform-Specific Features
 
@@ -169,10 +170,25 @@ optional ChatGPT extensions (`window.openai`) when needed.
 | Call tool | Yes | (alias: `window.openai.callTool`) |
 | Send message | Host-dependent | (alias: `window.openai.sendFollowUpMessage`) |
 | Update model context | Host-dependent | (extension: `window.openai.setWidgetState`) |
+| Host-managed modal | No | Yes (`window.openai.requestModal`) |
 | Widget state persistence | No | Yes |
 | File upload/download | No | Yes |
 
 Use `useCapabilities()` or `useFeature()` to conditionally enable features.
+
+### Modal Guidance
+
+- Prefer local/in-widget modals for cross-host compatibility.
+- Use `window.openai.requestModal()` only when you specifically need a ChatGPT-hosted modal template.
+- Always feature-detect and provide a fallback:
+
+```ts
+if (typeof window !== "undefined" && window.openai?.requestModal) {
+  await window.openai.requestModal({ title: "Details", params: { id } });
+} else {
+  // Fallback: local modal state or route navigation
+}
+```
 
 ## Exporting for Production
 

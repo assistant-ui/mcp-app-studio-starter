@@ -65,6 +65,21 @@ Before submitting your app, verify:
 - [ ] Widget works in both light and dark themes
 - [ ] Widget is responsive (test at different sizes)
 
+## MCP-First Extensions Policy
+
+This export is MCP-first. Prefer standard MCP Apps \`ui/*\` capabilities for core
+behavior and treat \`window.openai\` APIs as optional ChatGPT extensions.
+
+If you use \`window.openai.requestModal\`, always feature-detect and provide a fallback:
+
+~~~ts
+if (typeof window !== "undefined" && window.openai?.requestModal) {
+  await window.openai.requestModal({ title: "Details", params: { id } });
+} else {
+  // Fallback: local modal state or route navigation
+}
+~~~
+
 ## Troubleshooting
 
 **Widget shows blank page**
