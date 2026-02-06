@@ -3,7 +3,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { buildComponentBundle } from "../lib/workbench/bundles/build-component-bundle";
-import { WORKBENCH_COMPONENT_MAP } from "../lib/workbench/bundles/component-map";
+import { getWorkbenchComponentEntries } from "../lib/workbench/bundles/component-map";
 
 interface DemoBundleManifest {
   generatedAt: string;
@@ -22,9 +22,15 @@ async function buildDemoBundles() {
     bundles: {},
   };
 
-  const componentEntries = Object.entries(WORKBENCH_COMPONENT_MAP).sort(
+  const componentEntries = getWorkbenchComponentEntries(projectRoot).sort(
     ([a], [b]) => a.localeCompare(b),
   );
+
+  if (componentEntries.length === 0) {
+    throw new Error(
+      "No workbench components found. Ensure lib/workbench/wrappers contains at least one SDK wrapper.",
+    );
+  }
 
   for (const [componentId, config] of componentEntries) {
     const bundle = await buildComponentBundle(projectRoot, config, {
