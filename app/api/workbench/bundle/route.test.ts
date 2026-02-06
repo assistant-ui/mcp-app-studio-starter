@@ -23,17 +23,15 @@ describe("GET /api/workbench/bundle", () => {
     assert.match(await response.text(), /only available in development/i);
   });
 
-  it("allows production demo requests to continue past env gate", async () => {
+  it("blocks production demo requests", async () => {
     process.env.NODE_ENV = "production";
     const request = new NextRequest(
       "http://localhost/api/workbench/bundle?demo=true",
     );
     const response = await GET(request);
 
-    // If demo mode is permitted in production, the route should continue and
-    // fail on missing component id validation instead of the env gate.
-    assert.equal(response.status, 400);
-    assert.match(await response.text(), /missing component id parameter/i);
+    assert.equal(response.status, 403);
+    assert.match(await response.text(), /only available in development/i);
   });
 });
 

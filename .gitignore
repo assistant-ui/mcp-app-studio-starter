@@ -23,6 +23,7 @@
 # export artifacts
 /export/
 /.export-temp/
+/public/workbench-bundles/
 
 # misc
 .DS_Store
