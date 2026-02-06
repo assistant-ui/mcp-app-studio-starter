@@ -33,6 +33,20 @@ describe("GET /api/workbench/bundle", () => {
     assert.equal(response.status, 403);
     assert.match(await response.text(), /only available in development/i);
   });
+
+  it("returns static demo bundle in development when demo=true", async () => {
+    process.env.NODE_ENV = "development";
+    const request = new NextRequest(
+      "http://localhost/api/workbench/bundle?id=poi-map&demo=true",
+    );
+
+    const response = await GET(request);
+    const body = await response.text();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.includes("San Francisco Highlights"), true);
+    assert.equal(body.includes("ProductionProvider"), false);
+  });
 });
 
 describe("ensureWorkbenchTempDir", () => {

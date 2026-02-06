@@ -31,6 +31,12 @@ export function buildBundleRequestPath(
 
 function buildDevFallbackBundlePath(componentId: string): string {
   const requestParams = new URLSearchParams({ id: componentId });
+  if (
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("demo") === "true"
+  ) {
+    requestParams.set("demo", "true");
+  }
   return `/api/workbench/bundle?${requestParams.toString()}`;
 }
 

@@ -110,6 +110,7 @@
       "!**/dist",
       "!**/node_modules",
       "!**/.next",
+      "!**/.workbench-temp",
       "!**/.vercel",
       "!**/server"
     ]

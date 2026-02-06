@@ -3,6 +3,7 @@ import type { OpenAIGlobals } from "../types";
 export interface IframeHtmlOptions {
   widgetBundle: string;
   cssBundle?: string;
+  cssHref?: string;
   initialGlobals: OpenAIGlobals;
   useTailwindCdn?: boolean;
   includeOpenAIShim?: boolean;
@@ -295,7 +296,10 @@ const CSS_VARIABLES = `
   box-sizing: border-box;
 }
 
+html,
 body {
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -304,7 +308,8 @@ body {
 }
 
 #root {
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
 }
 `;
 
@@ -312,6 +317,7 @@ export function generateIframeHtml(options: IframeHtmlOptions): string {
   const {
     widgetBundle,
     cssBundle,
+    cssHref,
     initialGlobals,
     useTailwindCdn = true,
     includeOpenAIShim = true,
@@ -332,6 +338,7 @@ export function generateIframeHtml(options: IframeHtmlOptions): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Widget Preview</title>
   ${useTailwindCdn ? TAILWIND_CDN_SCRIPT : ""}
+  ${cssHref ? `<link rel="stylesheet" href="${cssHref}">` : ""}
   <style>${CSS_VARIABLES}</style>
   ${cssBundle ? `<style>${cssBundle}</style>` : ""}
 </head>
@@ -348,6 +355,7 @@ export function generateEmptyIframeHtml(
   initialGlobals: OpenAIGlobals,
   useTailwindCdn = true,
   includeOpenAIShim = true,
+  cssHref?: string,
 ): string {
   const themeClass = initialGlobals.theme === "dark" ? "dark" : "";
   const initScript = includeOpenAIShim
@@ -364,6 +372,7 @@ export function generateEmptyIframeHtml(
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Widget Preview</title>
   ${useTailwindCdn ? TAILWIND_CDN_SCRIPT : ""}
+  ${cssHref ? `<link rel="stylesheet" href="${cssHref}">` : ""}
   <style>${CSS_VARIABLES}</style>
 </head>
 <body>

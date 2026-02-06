@@ -1,10 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import {
   buildComponentBundle,
+  buildDemoBundle,
   createBundleBuildOptions,
   ensureWorkbenchTempDir,
 } from "@/lib/workbench/bundles/build-component-bundle";
 import { getWorkbenchComponentConfig } from "@/lib/workbench/bundles/component-map";
+import { getWorkbenchDemoComponentConfig } from "@/lib/workbench/bundles/demo-component-map";
 
 export const runtime = "nodejs";
 export { createBundleBuildOptions, ensureWorkbenchTempDir };
@@ -24,6 +26,7 @@ export async function GET(request: NextRequest) {
   }
 
   const componentId = request.nextUrl.searchParams.get("id");
+  const isDemoMode = request.nextUrl.searchParams.get("demo") === "true";
 
   if (!componentId) {
     return NextResponse.json(
@@ -32,15 +35,20 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const config = getWorkbenchComponentConfig(componentId);
+  const config = isDemoMode
+    ? getWorkbenchDemoComponentConfig(componentId)
+    : getWorkbenchComponentConfig(componentId);
   if (!config) {
     return NextResponse.json(
-      { error: `Unknown component: ${componentId}` },
+      {
+        error: `Unknown ${isDemoMode ? "demo " : ""}component: ${componentId}`,
+      },
       { status: 404 },
     );
   }
 
-  const cached = bundleCache.get(componentId);
+  const cacheKey = `${isDemoMode ? "demo" : "workbench"}:${componentId}`;
+  const cached = bundleCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return new NextResponse(cached.bundle, {
       headers: {
@@ -51,12 +59,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const bundle = await buildComponentBundle(process.cwd(), config, {
+    const bundleBuilder = isDemoMode ? buildDemoBundle : buildComponentBundle;
+    const bundle = await bundleBuilder(process.cwd(), config, {
       minify: false,
       nodeEnv: "development",
     });
 
-    bundleCache.set(componentId, { bundle, timestamp: Date.now() });
+    bundleCache.set(cacheKey, { bundle, timestamp: Date.now() });
 
     return new NextResponse(bundle, {
       headers: {
