@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, it } from "node:test";
+import * as esbuild from "esbuild";
 import { NextRequest } from "next/server";
-import { ensureWorkbenchTempDir, GET } from "./route";
+import { createBundleBuildOptions, ensureWorkbenchTempDir, GET } from "./route";
 
 const originalNodeEnv = process.env.NODE_ENV;
 
@@ -69,5 +72,63 @@ describe("ensureWorkbenchTempDir", () => {
       path.join(projectRoot, ".workbench-temp"),
       path.join(fallbackTmpDir, "mcp-app-studio-workbench-temp"),
     ]);
+  });
+});
+
+describe("createBundleBuildOptions", () => {
+  it("resolves package imports when entry lives outside project root", async () => {
+    const projectRoot = process.cwd();
+    const tempDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "mcp-app-studio-bundle-test-"),
+    );
+    const entryPath = path.join(tempDir, "entry.tsx");
+    await fs.writeFile(
+      entryPath,
+      'import React from "react";\nconsole.log(React);',
+    );
+
+    await assert.doesNotReject(async () => {
+      const result = await esbuild.build(
+        createBundleBuildOptions(projectRoot, entryPath),
+      );
+      assert.ok(result.outputFiles?.[0]?.text);
+    });
+  });
+
+  it("bundles poi-map wrapper from OS temp entry directory", async () => {
+    const projectRoot = process.cwd();
+    const tempDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), "mcp-app-studio-bundle-test-"),
+    );
+    const entryPath = path.join(tempDir, "entry.tsx");
+    const entryContent = `
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { ProductionProvider } from "@/lib/export/production-provider";
+import { POIMapSDK as Widget } from "@/lib/workbench/wrappers/poi-map-sdk.tsx";
+
+function App() {
+  return React.createElement(
+    ProductionProvider,
+    null,
+    React.createElement(Widget, null)
+  );
+}
+
+const container = document.getElementById("root");
+if (container) {
+  const root = createRoot(container);
+  root.render(React.createElement(App));
+}
+`.trim();
+
+    await fs.writeFile(entryPath, entryContent);
+
+    await assert.doesNotReject(async () => {
+      const result = await esbuild.build(
+        createBundleBuildOptions(projectRoot, entryPath),
+      );
+      assert.ok(result.outputFiles?.[0]?.text);
+    });
   });
 });
