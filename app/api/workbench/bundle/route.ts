@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import * as esbuild from "esbuild";
 import { type NextRequest, NextResponse } from "next/server";
@@ -56,6 +57,32 @@ const COMPONENT_MAP: Record<string, ComponentConfig> = {
 const bundleCache = new Map<string, { bundle: string; timestamp: number }>();
 const CACHE_TTL = 5000;
 
+type MkdirFn = (
+  dirPath: string,
+  options: { recursive: true },
+) => Promise<string | undefined>;
+type TmpDirFn = () => string;
+
+export async function ensureWorkbenchTempDir(
+  projectRoot: string,
+  mkdir: MkdirFn = (dirPath, options) => fs.mkdir(dirPath, options),
+  getTmpDir: TmpDirFn = os.tmpdir,
+): Promise<string> {
+  const projectTempDir = path.join(projectRoot, ".workbench-temp");
+
+  try {
+    await mkdir(projectTempDir, { recursive: true });
+    return projectTempDir;
+  } catch {
+    const fallbackTempDir = path.join(
+      getTmpDir(),
+      "mcp-app-studio-workbench-temp",
+    );
+    await mkdir(fallbackTempDir, { recursive: true });
+    return fallbackTempDir;
+  }
+}
+
 export async function GET(request: NextRequest) {
   const isDemoRequest = request.nextUrl.searchParams.get("demo") === "true";
 
@@ -99,8 +126,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const projectRoot = process.cwd();
-    const tempDir = path.join(projectRoot, ".workbench-temp");
-    await fs.mkdir(tempDir, { recursive: true });
+    const tempDir = await ensureWorkbenchTempDir(projectRoot);
 
     const widgetPath = path.resolve(projectRoot, config.entryFile);
     // Use relative imports to avoid Windows "C:/..." path issues in ESM specifiers.
