@@ -82,6 +82,18 @@ describe("generateIframeHtml", () => {
       true,
     );
   });
+
+  it("uses OKLCH token defaults compatible with demo.css", () => {
+    const html = generateIframeHtml({
+      widgetBundle: "console.log('widget')",
+      initialGlobals: TEST_GLOBALS,
+      cssHref: "/workbench-bundles/demo.css",
+      useTailwindCdn: false,
+    });
+
+    assert.equal(html.includes("--background: oklch(1 0 0);"), true);
+    assert.equal(html.includes("--background: 0 0% 100%;"), false);
+  });
 });
 
 describe("generateEmptyIframeHtml", () => {

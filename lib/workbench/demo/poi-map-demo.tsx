@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -11,6 +11,7 @@ import {
 import { POI_MAP_DEMO_INPUT } from "./default-props";
 
 type DisplayMode = "inline" | "pip" | "fullscreen";
+type DemoTheme = "light" | "dark";
 
 type View = {
   mode: "modal" | "inline";
@@ -26,6 +27,8 @@ const DEFAULT_WIDGET_STATE: POIMapViewState = {
 };
 
 type DemoOpenAI = {
+  theme?: DemoTheme;
+  displayMode?: DisplayMode;
   requestDisplayMode?: (args: {
     mode: DisplayMode;
   }) => Promise<{ mode: DisplayMode }>;
@@ -40,8 +43,27 @@ function getDemoOpenAI(): DemoOpenAI | undefined {
   return (window as Window & { openai?: DemoOpenAI }).openai;
 }
 
+function normalizeDisplayMode(value: unknown): DisplayMode | null {
+  if (value === "inline" || value === "pip" || value === "fullscreen") {
+    return value;
+  }
+  return null;
+}
+
+function normalizeTheme(value: unknown): DemoTheme | null {
+  if (value === "light" || value === "dark") {
+    return value;
+  }
+  return null;
+}
+
 export function POIMapDemo() {
-  const [displayMode, setDisplayMode] = useState<DisplayMode>("inline");
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(
+    () => normalizeDisplayMode(getDemoOpenAI()?.displayMode) ?? "inline",
+  );
+  const [theme, setTheme] = useState<DemoTheme>(
+    () => normalizeTheme(getDemoOpenAI()?.theme) ?? "light",
+  );
 
   const [widgetState, setWidgetState] = useState<POIMapViewState>({
     ...DEFAULT_WIDGET_STATE,
@@ -50,6 +72,39 @@ export function POIMapDemo() {
   });
 
   const [view, setView] = useState<View | null>(null);
+
+  useEffect(() => {
+    function syncFromHost(globals?: {
+      displayMode?: unknown;
+      theme?: unknown;
+    }) {
+      const nextDisplayMode = normalizeDisplayMode(globals?.displayMode);
+      if (nextDisplayMode) {
+        setDisplayMode(nextDisplayMode);
+      }
+
+      const nextTheme = normalizeTheme(globals?.theme);
+      if (nextTheme) {
+        setTheme(nextTheme);
+      }
+    }
+
+    syncFromHost(getDemoOpenAI());
+
+    function handleSetGlobals(event: Event) {
+      const detail = (
+        event as CustomEvent<{
+          globals?: { displayMode?: unknown; theme?: unknown };
+        }>
+      ).detail;
+      syncFromHost(detail?.globals);
+    }
+
+    window.addEventListener("openai:set_globals", handleSetGlobals);
+    return () => {
+      window.removeEventListener("openai:set_globals", handleSetGlobals);
+    };
+  }, []);
 
   const handleWidgetStateChange = useCallback(
     (partialState: Partial<POIMapViewState>) => {
@@ -131,7 +186,7 @@ export function POIMapDemo() {
       displayMode={displayMode}
       previousDisplayMode="inline"
       widgetState={widgetState}
-      theme="dark"
+      theme={theme}
       view={view}
       onWidgetStateChange={handleWidgetStateChange}
       onRequestDisplayMode={handleRequestDisplayMode}

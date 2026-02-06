@@ -20,6 +20,18 @@ function getBridgeEffectDeps(source: string): string[] {
     .filter(Boolean);
 }
 
+function getSrcDocMemoDeps(source: string): string[] {
+  const match = source.match(
+    /const srcdoc = useMemo\(\(\) => \{[\s\S]*?\}, \[([^\]]*)\]\);/,
+  );
+
+  assert.ok(match, "expected to find srcdoc useMemo dependencies");
+  return match[1]
+    .split(",")
+    .map((dep) => dep.trim())
+    .filter(Boolean);
+}
+
 describe("WidgetIframeHost bridge lifecycle regression", () => {
   it("keeps bridge attachment stable across globals/state updates", () => {
     const source = fs.readFileSync(TARGET_FILE, "utf8");
@@ -37,5 +49,14 @@ describe("WidgetIframeHost bridge lifecycle regression", () => {
       source,
       /if \(iframe\.contentWindow\) \{\n\s*handleLoad\(\);\n\s*\}/,
     );
+  });
+
+  it("does not rebuild iframe srcDoc when globals change", () => {
+    const source = fs.readFileSync(TARGET_FILE, "utf8");
+    const deps = getSrcDocMemoDeps(source);
+
+    // Changing srcDoc reloads the iframe and resets widget-local state.
+    // Globals are delivered via bridgeRef.sendGlobals and should not rebuild srcDoc.
+    assert.deepEqual(deps, ["widgetBundle", "cssBundle", "demoMode"]);
   });
 });
