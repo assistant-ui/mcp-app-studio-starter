@@ -9,6 +9,7 @@ import {
   generateMCPServer,
   type MCPToolConfig,
 } from "./mcp-server";
+import { scanForUnsafeRequestModalUsage } from "./request-modal-guardrail";
 import type { ExportConfig, ExportedFile, ExportResult } from "./types";
 
 export type { MCPServerConfig, MCPToolConfig } from "./mcp-server";
@@ -78,6 +79,10 @@ export async function exportWidget(
     if (bundleResult.cssFile) {
       files.push(bundleResult.cssFile);
     }
+
+    const modalGuardWarnings =
+      await scanForUnsafeRequestModalUsage(projectRoot);
+    warnings.push(...modalGuardWarnings);
 
     console.log("📄 Generating HTML...");
     const htmlPath = path.join(outputDir, "widget", "index.html");

@@ -156,6 +156,7 @@ These hooks only work on specific platforms. Check availability first:
 | `useUpdateModelContext()` | Host-dependent | Update model-visible context dynamically |
 | `useToolInputPartial()` | Host-dependent | Streaming input during generation |
 | `useLog()` | Host-dependent | Structured logging to host |
+| `openModal()` helper | ChatGPT extensions (fallback-safe) | Use host modal when available, fallback locally |
 
 ## Platform-Specific Features
 
