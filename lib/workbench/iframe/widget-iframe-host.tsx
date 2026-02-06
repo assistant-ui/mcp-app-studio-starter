@@ -37,6 +37,7 @@ export interface WidgetIframeHostProps {
   cssBundle?: string;
   className?: string;
   style?: CSSProperties;
+  demoMode?: boolean;
 }
 
 function mapDeviceTypeToMcpPlatform(
@@ -95,6 +96,7 @@ export function WidgetIframeHost({
   cssBundle,
   className,
   style,
+  demoMode = false,
 }: WidgetIframeHostProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const bridgeRef = useRef<WorkbenchMessageBridge | null>(null);
@@ -475,15 +477,16 @@ export function WidgetIframeHost({
 
   const srcdoc = useMemo(() => {
     if (!widgetBundle) {
-      return generateEmptyIframeHtml(globals);
+      return generateEmptyIframeHtml(globals, true, !demoMode);
     }
     return generateIframeHtml({
       widgetBundle,
       cssBundle,
       initialGlobals: globals,
       useTailwindCdn: true,
+      includeOpenAIShim: !demoMode,
     });
-  }, [widgetBundle, cssBundle, globals]);
+  }, [widgetBundle, cssBundle, globals, demoMode]);
 
   useLayoutEffect(() => {
     const iframe = iframeRef.current;
@@ -598,6 +601,9 @@ export function WidgetIframeHost({
   ]);
 
   useEffect(() => {
+    if (demoMode) {
+      return;
+    }
     const iframe = iframeRef.current;
     if (!iframe) return;
 
@@ -618,7 +624,7 @@ export function WidgetIframeHost({
       bridge.detach();
       bridgeRef.current = null;
     };
-  }, [handlers, globals, iframeKey]);
+  }, [handlers, globals, iframeKey, demoMode]);
 
   useEffect(() => {
     if (bridgeRef.current) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useDemoMode } from "@/hooks/use-demo-mode";
 import { cn } from "@/lib/ui/cn";
 import { useWidgetBundle, WidgetIframeHost } from "@/lib/workbench/iframe";
 import { useSelectedComponent, useToolInput } from "@/lib/workbench/store";
@@ -31,6 +32,7 @@ function ErrorState({ error }: { error: string }) {
 
 function IframeComponentRenderer() {
   const selectedComponent = useSelectedComponent();
+  const isDemoMode = useDemoMode();
   const { loading, error, bundle } = useWidgetBundle(selectedComponent);
 
   if (loading) {
@@ -41,7 +43,13 @@ function IframeComponentRenderer() {
     return <ErrorState error={error} />;
   }
 
-  return <WidgetIframeHost widgetBundle={bundle} className="h-full w-full" />;
+  return (
+    <WidgetIframeHost
+      widgetBundle={bundle}
+      className="h-full w-full"
+      demoMode={isDemoMode}
+    />
+  );
 }
 
 export function IframeComponentContent({ className }: { className?: string }) {
