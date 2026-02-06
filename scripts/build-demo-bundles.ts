@@ -5,7 +5,7 @@ import path from "node:path";
 import tailwindcss from "@tailwindcss/postcss";
 import postcss from "postcss";
 import { buildDemoBundle } from "../lib/workbench/bundles/build-component-bundle";
-import { getWorkbenchDemoComponentEntries } from "../lib/workbench/bundles/demo-component-map";
+import { getWorkbenchDemoComponentEntries } from "../lib/workbench/bundles/component-map";
 
 interface DemoBundleManifest {
   generatedAt: string;

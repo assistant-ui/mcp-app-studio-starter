@@ -5,8 +5,10 @@ import {
   createBundleBuildOptions,
   ensureWorkbenchTempDir,
 } from "@/lib/workbench/bundles/build-component-bundle";
-import { getWorkbenchComponentConfig } from "@/lib/workbench/bundles/component-map";
-import { getWorkbenchDemoComponentConfig } from "@/lib/workbench/bundles/demo-component-map";
+import {
+  getWorkbenchComponentConfig,
+  getWorkbenchDemoComponentConfig,
+} from "@/lib/workbench/bundles/component-map";
 
 export const runtime = "nodejs";
 export { createBundleBuildOptions, ensureWorkbenchTempDir };
