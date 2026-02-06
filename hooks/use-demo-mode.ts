@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 /**
  * Hook to determine if the app is running in demo mode.
@@ -9,12 +9,6 @@ import { useEffect, useState } from "react";
  * and show helpful messages directing users to install locally.
  */
 export function useDemoMode(): boolean {
-  const [isDemoMode, setIsDemoMode] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setIsDemoMode(params.get("demo") === "true");
-  }, []);
-
-  return isDemoMode;
+  const searchParams = useSearchParams();
+  return searchParams.get("demo") === "true";
 }

@@ -478,9 +478,13 @@ export function WidgetIframeHost({
   handlersRef.current = handlers;
 
   const srcdoc = useMemo(() => {
+    // Keep srcDoc stable while globals evolve; the bridge pushes all runtime
+    // updates via OPENAI_SET_GLOBALS without reloading the iframe.
+    const initialGlobals = globalsRef.current;
+
     if (!widgetBundle) {
       return generateEmptyIframeHtml(
-        globals,
+        initialGlobals,
         true,
         true,
         demoMode ? "/workbench-bundles/demo.css" : undefined,
@@ -490,11 +494,11 @@ export function WidgetIframeHost({
       widgetBundle,
       cssBundle,
       cssHref: demoMode ? "/workbench-bundles/demo.css" : undefined,
-      initialGlobals: globals,
+      initialGlobals,
       useTailwindCdn: !demoMode,
       includeOpenAIShim: true,
     });
-  }, [widgetBundle, cssBundle, globals, demoMode]);
+  }, [widgetBundle, cssBundle, demoMode]);
 
   useLayoutEffect(() => {
     if (demoMode) {
