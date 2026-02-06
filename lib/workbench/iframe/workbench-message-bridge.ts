@@ -41,6 +41,10 @@ export class WorkbenchMessageBridge {
     this.boundHandleMessage = this.handleMessage.bind(this);
   }
 
+  setHandlers(handlers: WorkbenchMessageHandlers) {
+    this.handlers = handlers;
+  }
+
   attach(iframe: HTMLIFrameElement) {
     this.iframe = iframe;
     window.addEventListener("message", this.boundHandleMessage, true);

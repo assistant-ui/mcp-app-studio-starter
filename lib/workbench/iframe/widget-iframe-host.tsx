@@ -474,6 +474,8 @@ export function WidgetIframeHost({
       handleGetFileDownloadUrl,
     ],
   );
+  const handlersRef = useRef(handlers);
+  handlersRef.current = handlers;
 
   const srcdoc = useMemo(() => {
     if (!widgetBundle) {
@@ -614,27 +616,38 @@ export function WidgetIframeHost({
   ]);
 
   useEffect(() => {
+    bridgeRef.current?.setHandlers(handlers);
+  }, [handlers]);
+
+  useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    const bridge = new WorkbenchMessageBridge(handlers);
+    const bridge = new WorkbenchMessageBridge(handlersRef.current);
     bridgeRef.current = bridge;
+    let attached = false;
 
     function handleLoad() {
       const currentIframe = iframeRef.current;
       if (!currentIframe) return;
-      bridge.attach(currentIframe);
-      bridge.sendGlobals(globals);
+      if (!attached) {
+        bridge.attach(currentIframe);
+        attached = true;
+      }
+      bridge.sendGlobals(globalsRef.current);
     }
 
     iframe.addEventListener("load", handleLoad);
+    if (iframe.contentWindow) {
+      handleLoad();
+    }
 
     return () => {
       iframe.removeEventListener("load", handleLoad);
       bridge.detach();
       bridgeRef.current = null;
     };
-  }, [handlers, globals, iframeKey]);
+  }, [iframeKey]);
 
   useEffect(() => {
     if (bridgeRef.current) {
