@@ -27,7 +27,6 @@ declare global {
     __widgetLoaded?: boolean;
     __widgetError?: string;
     __openaiCalls?: Array<{ method: string; [key: string]: unknown }>;
-    openai?: Record<string, unknown>;
   }
 }
 
