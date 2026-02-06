@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
+  type POICategory,
   POIMap,
   type POIMapViewState,
 } from "@/components/examples/poi-map";
@@ -24,16 +25,23 @@ const DEFAULT_WIDGET_STATE: POIMapViewState = {
   categoryFilter: null,
 };
 
+type DemoOpenAI = {
+  requestDisplayMode?: (args: {
+    mode: DisplayMode;
+  }) => Promise<{ mode: DisplayMode }>;
+  setWidgetState?: (state: POIMapViewState) => void;
+  callTool?: (name: string, args: Record<string, unknown>) => Promise<unknown>;
+  openExternal?: (payload: { href: string }) => void;
+  sendFollowUpMessage?: (args: { prompt: string }) => Promise<unknown>;
+};
+
+function getDemoOpenAI(): DemoOpenAI | undefined {
+  if (typeof window === "undefined") return undefined;
+  return (window as Window & { openai?: DemoOpenAI }).openai;
+}
+
 export function POIMapDemo() {
   const [displayMode, setDisplayMode] = useState<DisplayMode>("inline");
-  const previousDisplayModeRef = useRef<DisplayMode | null>(null);
-  const lastDisplayModeRef = useRef<DisplayMode>("inline");
-
-  useEffect(() => {
-    if (lastDisplayModeRef.current === displayMode) return;
-    previousDisplayModeRef.current = lastDisplayModeRef.current;
-    lastDisplayModeRef.current = displayMode;
-  }, [displayMode]);
 
   const [widgetState, setWidgetState] = useState<POIMapViewState>({
     ...DEFAULT_WIDGET_STATE,
@@ -45,13 +53,30 @@ export function POIMapDemo() {
 
   const handleWidgetStateChange = useCallback(
     (partialState: Partial<POIMapViewState>) => {
-      setWidgetState((prev) => ({ ...prev, ...partialState }));
+      setWidgetState((prev) => {
+        const nextState = { ...prev, ...partialState };
+        getDemoOpenAI()?.setWidgetState?.(nextState);
+        return nextState;
+      });
     },
     [],
   );
 
   const handleRequestDisplayMode = useCallback((mode: DisplayMode) => {
-    setDisplayMode(mode);
+    const openai = getDemoOpenAI();
+    if (!openai?.requestDisplayMode) {
+      setDisplayMode(mode);
+      return;
+    }
+
+    void openai
+      .requestDisplayMode({ mode })
+      .then((result) => {
+        setDisplayMode(result?.mode ?? mode);
+      })
+      .catch(() => {
+        setDisplayMode(mode);
+      });
   }, []);
 
   const handleViewDetails = useCallback((poiId: string) => {
@@ -63,7 +88,37 @@ export function POIMapDemo() {
   }, []);
 
   const handleOpenExternal = useCallback((url: string) => {
+    const openai = getDemoOpenAI();
+    if (openai?.openExternal) {
+      openai.openExternal({ href: url });
+      return;
+    }
     window.open(url, "_blank", "noopener,noreferrer");
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    void getDemoOpenAI()?.callTool?.("refresh_pois", {
+      center: widgetState.mapCenter,
+      zoom: widgetState.mapZoom,
+    });
+  }, [widgetState.mapCenter, widgetState.mapZoom]);
+
+  const handleToggleFavorite = useCallback(
+    (poiId: string, isFavorite: boolean) => {
+      void getDemoOpenAI()?.callTool?.("toggle_favorite", {
+        poi_id: poiId,
+        is_favorite: isFavorite,
+      });
+    },
+    [],
+  );
+
+  const handleFilterCategory = useCallback((category: POICategory | null) => {
+    void getDemoOpenAI()?.callTool?.("filter_pois", { category });
+  }, []);
+
+  const handleSendFollowUpMessage = useCallback((prompt: string) => {
+    void getDemoOpenAI()?.sendFollowUpMessage?.({ prompt });
   }, []);
 
   return (
@@ -74,15 +129,19 @@ export function POIMapDemo() {
       initialZoom={POI_MAP_DEMO_INPUT.initialZoom}
       title={POI_MAP_DEMO_INPUT.title}
       displayMode={displayMode}
-      previousDisplayMode={previousDisplayModeRef.current ?? undefined}
+      previousDisplayMode="inline"
       widgetState={widgetState}
       theme="dark"
       view={view}
       onWidgetStateChange={handleWidgetStateChange}
       onRequestDisplayMode={handleRequestDisplayMode}
+      onRefresh={handleRefresh}
+      onToggleFavorite={handleToggleFavorite}
+      onFilterCategory={handleFilterCategory}
       onViewDetails={handleViewDetails}
       onDismissModal={handleDismissModal}
       onOpenExternal={handleOpenExternal}
+      onSendFollowUpMessage={handleSendFollowUpMessage}
     />
   );
 }

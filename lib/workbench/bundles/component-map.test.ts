@@ -6,6 +6,8 @@ import { afterEach, describe, it } from "node:test";
 import {
   getWorkbenchComponentConfig,
   getWorkbenchComponentEntries,
+  getWorkbenchDemoComponentConfig,
+  getWorkbenchDemoComponentEntries,
 } from "./component-map";
 
 const originalCwd = process.cwd();
@@ -41,5 +43,20 @@ describe("getWorkbenchComponentConfig", () => {
         },
       ],
     ]);
+  });
+});
+
+describe("getWorkbenchDemoComponentConfig", () => {
+  it("includes the expected demo component ids", () => {
+    const entries = getWorkbenchDemoComponentEntries();
+    const ids = entries.map(([id]) => id).sort();
+    assert.deepEqual(ids, ["poi-map", "welcome"]);
+  });
+
+  it("resolves poi-map demo config", () => {
+    const config = getWorkbenchDemoComponentConfig("poi-map");
+    assert.ok(config);
+    assert.equal(config.entryFile, "lib/workbench/demo/poi-map-demo.tsx");
+    assert.equal(config.exportName, "POIMapDemo");
   });
 });

@@ -41,7 +41,7 @@ export const appComponent: WorkbenchComponentEntry = {
   description: "An interactive places discovery app with map and search",
   category: "data",
   component: POIMapSDK,
-  defaultProps: POI_MAP_DEMO_INPUT as unknown as Record<string, unknown>,
+  defaultProps: POI_MAP_DEMO_INPUT,
   exportConfig: {
     entryPoint: "lib/workbench/wrappers/poi-map-sdk.tsx",
     exportName: "POIMapSDK",
@@ -54,7 +54,7 @@ const welcomeComponent: WorkbenchComponentEntry = {
   description: "A simple starter app - the perfect starting point",
   category: "cards",
   component: WelcomeCardSDK,
-  defaultProps: WELCOME_CARD_DEMO_INPUT as unknown as Record<string, unknown>,
+  defaultProps: WELCOME_CARD_DEMO_INPUT,
   exportConfig: {
     entryPoint: "lib/workbench/wrappers/welcome-card-sdk.tsx",
     exportName: "WelcomeCardSDK",

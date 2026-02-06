@@ -480,7 +480,7 @@ export function WidgetIframeHost({
       return generateEmptyIframeHtml(
         globals,
         true,
-        !demoMode,
+        true,
         demoMode ? "/workbench-bundles/demo.css" : undefined,
       );
     }
@@ -490,7 +490,7 @@ export function WidgetIframeHost({
       cssHref: demoMode ? "/workbench-bundles/demo.css" : undefined,
       initialGlobals: globals,
       useTailwindCdn: !demoMode,
-      includeOpenAIShim: !demoMode,
+      includeOpenAIShim: true,
     });
   }, [widgetBundle, cssBundle, globals, demoMode]);
 
@@ -614,9 +614,6 @@ export function WidgetIframeHost({
   ]);
 
   useEffect(() => {
-    if (demoMode) {
-      return;
-    }
     const iframe = iframeRef.current;
     if (!iframe) return;
 
@@ -637,7 +634,7 @@ export function WidgetIframeHost({
       bridge.detach();
       bridgeRef.current = null;
     };
-  }, [handlers, globals, iframeKey, demoMode]);
+  }, [handlers, globals, iframeKey]);
 
   useEffect(() => {
     if (bridgeRef.current) {

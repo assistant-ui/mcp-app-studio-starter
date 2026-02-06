@@ -2,7 +2,7 @@
 
 import type { MapCenter, POI } from "@/components/examples/poi-map";
 
-export interface POIMapDemoInput {
+export interface POIMapDemoInput extends Record<string, unknown> {
   id: string;
   pois: POI[];
   initialCenter: MapCenter;
@@ -79,7 +79,7 @@ export const POI_MAP_DEMO_INPUT: POIMapDemoInput = {
   title: "San Francisco Highlights",
 };
 
-export interface WelcomeCardDemoInput {
+export interface WelcomeCardDemoInput extends Record<string, unknown> {
   title: string;
   message: string;
 }

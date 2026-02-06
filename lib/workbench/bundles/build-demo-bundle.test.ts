@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { buildDemoBundle } from "./build-component-bundle";
-import { getWorkbenchDemoComponentConfig } from "./demo-component-map";
+import { getWorkbenchDemoComponentConfig } from "./component-map";
 
 describe("buildDemoBundle", () => {
   it("builds a static poi-map demo bundle without ProductionProvider", async () => {
