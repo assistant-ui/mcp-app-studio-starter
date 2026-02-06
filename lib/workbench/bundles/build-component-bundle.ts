@@ -12,7 +12,7 @@ function toAliasImportPath(projectRelativePath: string): string {
     : `@/${normalizedPath}`;
 }
 
-const ENTRY_TEMPLATE = `
+const ENTRY_TEMPLATE_WITH_PROVIDER = `
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { ProductionProvider } from "@/lib/export/production-provider";
@@ -24,6 +24,22 @@ function App() {
     null,
     React.createElement(Widget, null)
   );
+}
+
+const container = document.getElementById("root");
+if (container) {
+  const root = createRoot(container);
+  root.render(React.createElement(App));
+}
+`.trim();
+
+const ENTRY_TEMPLATE_NO_PROVIDER = `
+import React from "react";
+import { createRoot } from "react-dom/client";
+WIDGET_IMPORT_LINE
+
+function App() {
+  return React.createElement(Widget, null);
 }
 
 const container = document.getElementById("root");
@@ -101,6 +117,12 @@ export function createBundleBuildOptions(
   };
 }
 
+function buildEntryTemplate(useProductionProvider: boolean): string {
+  return useProductionProvider
+    ? ENTRY_TEMPLATE_WITH_PROVIDER
+    : ENTRY_TEMPLATE_NO_PROVIDER;
+}
+
 function inlineCssIntoBundle(jsBundle: string, cssBundle?: string): string {
   if (!cssBundle) return jsBundle;
 
@@ -122,6 +144,23 @@ export async function buildComponentBundle(
   config: ComponentConfig,
   options?: { minify?: boolean; nodeEnv?: "development" | "production" },
 ): Promise<string> {
+  return buildBundle(projectRoot, config, options, true);
+}
+
+export async function buildDemoBundle(
+  projectRoot: string,
+  config: ComponentConfig,
+  options?: { minify?: boolean; nodeEnv?: "development" | "production" },
+): Promise<string> {
+  return buildBundle(projectRoot, config, options, false);
+}
+
+async function buildBundle(
+  projectRoot: string,
+  config: ComponentConfig,
+  options: { minify?: boolean; nodeEnv?: "development" | "production" } = {},
+  useProductionProvider: boolean,
+): Promise<string> {
   const tempDir = await ensureWorkbenchTempDir(projectRoot);
   const widgetImportPath = toAliasImportPath(config.entryFile);
   const importLine = config.exportName
@@ -129,7 +168,8 @@ export async function buildComponentBundle(
     : `import Widget from "${widgetImportPath}";`;
 
   const entryPath = path.join(tempDir, `entry-${crypto.randomUUID()}.tsx`);
-  const entryContent = ENTRY_TEMPLATE.replace("WIDGET_IMPORT_LINE", importLine);
+  const entryTemplate = buildEntryTemplate(useProductionProvider);
+  const entryContent = entryTemplate.replace("WIDGET_IMPORT_LINE", importLine);
 
   try {
     await fs.writeFile(entryPath, entryContent, "utf-8");

@@ -52,6 +52,36 @@ describe("generateIframeHtml", () => {
       false,
     );
   });
+
+  it("includes external css link when cssHref is provided", () => {
+    const html = generateIframeHtml({
+      widgetBundle: "console.log('widget')",
+      initialGlobals: TEST_GLOBALS,
+      cssHref: "/workbench-bundles/demo.css",
+      useTailwindCdn: false,
+    });
+
+    assert.equal(
+      html.includes(
+        '<link rel="stylesheet" href="/workbench-bundles/demo.css">',
+      ),
+      true,
+    );
+  });
+
+  it("defines a full-height root sizing chain for h-full layouts", () => {
+    const html = generateIframeHtml({
+      widgetBundle: "console.log('widget')",
+      initialGlobals: TEST_GLOBALS,
+      useTailwindCdn: false,
+    });
+
+    assert.equal(html.includes("html,\nbody {"), true);
+    assert.equal(
+      html.includes("#root {\n  width: 100%;\n  height: 100%;"),
+      true,
+    );
+  });
 });
 
 describe("generateEmptyIframeHtml", () => {
@@ -60,5 +90,21 @@ describe("generateEmptyIframeHtml", () => {
 
     assert.equal(html.includes("OPENAI_METHOD_CALL"), false);
     assert.equal(html.includes("window.__initOpenAIGlobals"), false);
+  });
+
+  it("includes external css link when cssHref is provided", () => {
+    const html = generateEmptyIframeHtml(
+      TEST_GLOBALS,
+      false,
+      false,
+      "/workbench-bundles/demo.css",
+    );
+
+    assert.equal(
+      html.includes(
+        '<link rel="stylesheet" href="/workbench-bundles/demo.css">',
+      ),
+      true,
+    );
   });
 });

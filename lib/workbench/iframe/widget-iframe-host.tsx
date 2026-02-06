@@ -477,11 +477,17 @@ export function WidgetIframeHost({
 
   const srcdoc = useMemo(() => {
     if (!widgetBundle) {
-      return generateEmptyIframeHtml(globals, true, !demoMode);
+      return generateEmptyIframeHtml(
+        globals,
+        true,
+        !demoMode,
+        demoMode ? "/workbench-bundles/demo.css" : undefined,
+      );
     }
     return generateIframeHtml({
       widgetBundle,
       cssBundle,
+      cssHref: demoMode ? "/workbench-bundles/demo.css" : undefined,
       initialGlobals: globals,
       useTailwindCdn: !demoMode,
       includeOpenAIShim: !demoMode,
@@ -489,6 +495,12 @@ export function WidgetIframeHost({
   }, [widgetBundle, cssBundle, globals, demoMode]);
 
   useLayoutEffect(() => {
+    if (demoMode) {
+      mcpInitializedRef.current = false;
+      mcpBridgeRef.current = null;
+      return;
+    }
+
     const iframe = iframeRef.current;
     if (!iframe?.contentWindow) return;
 
@@ -593,6 +605,7 @@ export function WidgetIframeHost({
       void bridge.close();
     };
   }, [
+    demoMode,
     iframeKey,
     handleCallTool,
     handleOpenExternal,
