@@ -5,6 +5,7 @@ export interface IframeHtmlOptions {
   cssBundle?: string;
   initialGlobals: OpenAIGlobals;
   useTailwindCdn?: boolean;
+  includeOpenAIShim?: boolean;
 }
 
 /**
@@ -313,10 +314,16 @@ export function generateIframeHtml(options: IframeHtmlOptions): string {
     cssBundle,
     initialGlobals,
     useTailwindCdn = true,
+    includeOpenAIShim = true,
   } = options;
 
   const themeClass = initialGlobals.theme === "dark" ? "dark" : "";
-  const initScript = `window.__initOpenAIGlobals(${JSON.stringify(initialGlobals)});`;
+  const initScript = includeOpenAIShim
+    ? `<script>window.__initOpenAIGlobals(${JSON.stringify(initialGlobals)});</script>`
+    : "";
+  const bridgeScript = includeOpenAIShim
+    ? `<script>${BRIDGE_SCRIPT}</script>`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="${initialGlobals.locale}" class="${themeClass}">
@@ -330,8 +337,8 @@ export function generateIframeHtml(options: IframeHtmlOptions): string {
 </head>
 <body>
   <div id="root"></div>
-  <script>${BRIDGE_SCRIPT}</script>
-  <script>${initScript}</script>
+  ${bridgeScript}
+  ${initScript}
   <script type="module">${widgetBundle}</script>
 </body>
 </html>`;
@@ -340,9 +347,15 @@ export function generateIframeHtml(options: IframeHtmlOptions): string {
 export function generateEmptyIframeHtml(
   initialGlobals: OpenAIGlobals,
   useTailwindCdn = true,
+  includeOpenAIShim = true,
 ): string {
   const themeClass = initialGlobals.theme === "dark" ? "dark" : "";
-  const initScript = `window.__initOpenAIGlobals(${JSON.stringify(initialGlobals)});`;
+  const initScript = includeOpenAIShim
+    ? `<script>window.__initOpenAIGlobals(${JSON.stringify(initialGlobals)});</script>`
+    : "";
+  const bridgeScript = includeOpenAIShim
+    ? `<script>${BRIDGE_SCRIPT}</script>`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="${initialGlobals.locale}" class="${themeClass}">
@@ -359,8 +372,8 @@ export function generateEmptyIframeHtml(
       Loading widget...
     </div>
   </div>
-  <script>${BRIDGE_SCRIPT}</script>
-  <script>${initScript}</script>
+  ${bridgeScript}
+  ${initScript}
 </body>
 </html>`;
 }

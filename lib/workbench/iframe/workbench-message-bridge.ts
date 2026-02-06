@@ -43,11 +43,11 @@ export class WorkbenchMessageBridge {
 
   attach(iframe: HTMLIFrameElement) {
     this.iframe = iframe;
-    window.addEventListener("message", this.boundHandleMessage);
+    window.addEventListener("message", this.boundHandleMessage, true);
   }
 
   detach() {
-    window.removeEventListener("message", this.boundHandleMessage);
+    window.removeEventListener("message", this.boundHandleMessage, true);
     this.iframe = null;
   }
 
@@ -65,11 +65,17 @@ export class WorkbenchMessageBridge {
     if (!this.iframe?.contentWindow) return;
     if (event.source !== this.iframe.contentWindow) return;
 
-    const message = event.data as IframeToParentMessage;
-    if (!message || typeof message !== "object") return;
-    if (message.type !== "OPENAI_METHOD_CALL") return;
+    if (!event.data || typeof event.data !== "object") return;
+    const maybeMessage = event.data as Partial<IframeToParentMessage>;
+    if (maybeMessage.type !== "OPENAI_METHOD_CALL") return;
 
-    this.processMethodCall(message);
+    // The MCP AppBridge transport also listens to `message` events and expects
+    // JSON-RPC payloads. Stop OPENAI shim messages from reaching it so we don't
+    // spam parse errors in the console.
+    event.stopImmediatePropagation?.();
+    event.stopPropagation?.();
+
+    this.processMethodCall(maybeMessage as IframeToParentMessage);
   }
 
   private async processMethodCall(message: IframeToParentMessage) {
