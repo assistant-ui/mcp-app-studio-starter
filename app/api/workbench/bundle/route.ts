@@ -7,11 +7,11 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-function toImportPath(fromDir: string, absoluteTargetPath: string): string {
-  const relativePath = path
-    .relative(fromDir, absoluteTargetPath)
-    .replace(/\\/g, "/");
-  return relativePath.startsWith(".") ? relativePath : `./${relativePath}`;
+function toAliasImportPath(projectRelativePath: string): string {
+  const normalizedPath = projectRelativePath.replace(/\\/g, "/");
+  return normalizedPath.startsWith("@/")
+    ? normalizedPath
+    : `@/${normalizedPath}`;
 }
 
 const ENTRY_TEMPLATE = `
@@ -83,6 +83,44 @@ export async function ensureWorkbenchTempDir(
   }
 }
 
+export function createBundleBuildOptions(
+  projectRoot: string,
+  entryPath: string,
+): esbuild.BuildOptions {
+  return {
+    absWorkingDir: projectRoot,
+    entryPoints: [entryPath],
+    bundle: true,
+    minify: false,
+    format: "esm",
+    target: ["es2020"],
+    write: false,
+    outdir: path.dirname(entryPath),
+    entryNames: "entry",
+    nodePaths: [path.join(projectRoot, "node_modules")],
+    loader: {
+      ".tsx": "tsx",
+      ".ts": "ts",
+      ".jsx": "jsx",
+      ".js": "js",
+      ".css": "css",
+      ".png": "dataurl",
+      ".jpg": "dataurl",
+      ".svg": "dataurl",
+      ".gif": "dataurl",
+    },
+    alias: {
+      "@": projectRoot,
+    },
+    external: [],
+    define: {
+      "process.env.NODE_ENV": '"development"',
+    },
+    jsx: "automatic",
+    jsxImportSource: "react",
+  };
+}
+
 export async function GET(request: NextRequest) {
   const isDemoRequest = request.nextUrl.searchParams.get("demo") === "true";
 
@@ -128,9 +166,7 @@ export async function GET(request: NextRequest) {
     const projectRoot = process.cwd();
     const tempDir = await ensureWorkbenchTempDir(projectRoot);
 
-    const widgetPath = path.resolve(projectRoot, config.entryFile);
-    // Use relative imports to avoid Windows "C:/..." path issues in ESM specifiers.
-    const widgetImportPath = toImportPath(tempDir, widgetPath);
+    const widgetImportPath = toAliasImportPath(config.entryFile);
 
     const importLine = config.exportName
       ? `import { ${config.exportName} as Widget } from "${widgetImportPath}";`
@@ -143,34 +179,9 @@ export async function GET(request: NextRequest) {
     const entryPath = path.join(tempDir, `entry-${crypto.randomUUID()}.tsx`);
     await fs.writeFile(entryPath, entryContent, "utf-8");
 
-    const result = await esbuild.build({
-      entryPoints: [entryPath],
-      bundle: true,
-      minify: false,
-      format: "esm",
-      target: ["es2020"],
-      write: false,
-      loader: {
-        ".tsx": "tsx",
-        ".ts": "ts",
-        ".jsx": "jsx",
-        ".js": "js",
-        ".css": "css",
-        ".png": "dataurl",
-        ".jpg": "dataurl",
-        ".svg": "dataurl",
-        ".gif": "dataurl",
-      },
-      alias: {
-        "@": projectRoot,
-      },
-      external: [],
-      define: {
-        "process.env.NODE_ENV": '"development"',
-      },
-      jsx: "automatic",
-      jsxImportSource: "react",
-    });
+    const result = await esbuild.build(
+      createBundleBuildOptions(projectRoot, entryPath),
+    );
 
     if (result.errors.length > 0) {
       const errorMessages = result.errors
@@ -182,7 +193,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const bundle = result.outputFiles?.[0]?.text ?? "";
+    const jsBundle = result.outputFiles?.find((file) =>
+      file.path.endsWith(".js"),
+    )?.text;
+    if (!jsBundle) {
+      return NextResponse.json(
+        { error: "Bundle failed: missing JavaScript output" },
+        { status: 500 },
+      );
+    }
+
+    const cssBundle = result.outputFiles?.find((file) =>
+      file.path.endsWith(".css"),
+    )?.text;
+
+    let bundle = jsBundle;
+    if (cssBundle) {
+      const inlinedCssBootstrap = [
+        "(() => {",
+        `  const css = ${JSON.stringify(cssBundle)};`,
+        "  const style = document.createElement('style');",
+        "  style.setAttribute('data-workbench-inline-css', 'true');",
+        "  style.textContent = css;",
+        "  document.head.appendChild(style);",
+        "})();",
+      ].join("\n");
+      bundle = `${inlinedCssBootstrap}\n${jsBundle}`;
+    }
 
     bundleCache.set(cacheKey, { bundle, timestamp: Date.now() });
 
