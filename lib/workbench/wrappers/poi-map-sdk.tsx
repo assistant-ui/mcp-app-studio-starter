@@ -7,7 +7,6 @@ import {
   type POICategory,
   POIMap,
   type POIMapViewState,
-  parseSerializablePOIMap,
 } from "@/components/examples/poi-map";
 import {
   type DisplayMode,
@@ -20,6 +19,10 @@ import {
   useToolInput,
   useWidgetState,
 } from "@/lib/sdk";
+import {
+  readOpenAIToolInputForPOIMap,
+  resolveSerializablePOIMapInput,
+} from "./poi-map-input";
 
 type View = {
   mode: "modal" | "inline";
@@ -45,7 +48,11 @@ const DEFAULT_WIDGET_STATE: POIMapViewState = {
 export function POIMapSDK() {
   const toolInput = useToolInput<Record<string, unknown>>();
   const parsed = useMemo(
-    () => parseSerializablePOIMap(toolInput ?? {}),
+    () =>
+      resolveSerializablePOIMapInput(
+        toolInput ?? {},
+        readOpenAIToolInputForPOIMap(),
+      ),
     [toolInput],
   );
 
