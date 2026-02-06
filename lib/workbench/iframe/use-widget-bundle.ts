@@ -14,17 +14,23 @@ export function buildBundleRequestPath(
   componentId: string,
   currentLocationSearch: string,
 ): string {
-  const requestParams = new URLSearchParams({ id: componentId });
   const currentParams = new URLSearchParams(
     currentLocationSearch.startsWith("?")
       ? currentLocationSearch.slice(1)
       : currentLocationSearch,
   );
+  const isDemoMode = currentParams.get("demo") === "true";
 
-  if (currentParams.get("demo") === "true") {
-    requestParams.set("demo", "true");
+  if (isDemoMode) {
+    return `/workbench-bundles/${encodeURIComponent(componentId)}.js`;
   }
 
+  const requestParams = new URLSearchParams({ id: componentId });
+  return `/api/workbench/bundle?${requestParams.toString()}`;
+}
+
+function buildDevFallbackBundlePath(componentId: string): string {
+  const requestParams = new URLSearchParams({ id: componentId });
   return `/api/workbench/bundle?${requestParams.toString()}`;
 }
 
@@ -58,9 +64,15 @@ export function useWidgetBundle(componentId: string): BundleState {
           componentId,
           typeof window === "undefined" ? "" : window.location.search,
         );
-        const response = await fetch(requestPath, {
+        let response = await fetch(requestPath, {
           signal: controller.signal,
         });
+
+        if (!response.ok && requestPath.startsWith("/workbench-bundles/")) {
+          response = await fetch(buildDevFallbackBundlePath(componentId), {
+            signal: controller.signal,
+          });
+        }
 
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));

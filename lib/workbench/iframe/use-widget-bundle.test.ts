@@ -8,9 +8,9 @@ describe("buildBundleRequestPath", () => {
     assert.equal(path, "/api/workbench/bundle?id=poi-map");
   });
 
-  it("forwards demo=true from current location search", () => {
+  it("uses static demo bundle when demo=true is present", () => {
     const path = buildBundleRequestPath("poi-map", "?demo=true");
-    assert.equal(path, "/api/workbench/bundle?id=poi-map&demo=true");
+    assert.equal(path, "/workbench-bundles/poi-map.js");
   });
 
   it("ignores unrelated query params", () => {
