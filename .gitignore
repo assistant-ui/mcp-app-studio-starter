@@ -25,6 +25,9 @@
 /.export-temp/
 /public/workbench-bundles/
 
+# claude
+.claude/
+
 # misc
 .DS_Store
 *.pem
