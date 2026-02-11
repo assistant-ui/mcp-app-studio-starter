@@ -5,7 +5,7 @@
     "entryPoint": "lib/workbench/wrappers/welcome-card-sdk.tsx",
     "exportName": "WelcomeCardSDK"
   },
-  "deleteGlobs": [
+  "deletePaths": [
     "components/examples/poi-map",
     "lib/workbench/wrappers/poi-map-sdk.tsx",
     "lib/workbench/wrappers/poi-map-sdk.test.ts",
