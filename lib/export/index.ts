@@ -73,11 +73,16 @@ export async function exportWidget(
       };
     }
 
-    if (bundleResult.jsFile) {
-      files.push(bundleResult.jsFile);
-    }
-    if (bundleResult.cssFile) {
-      files.push(bundleResult.cssFile);
+    const isInline = config.output.inline ?? false;
+
+    // In inline mode, JS/CSS are embedded in the HTML — no need for separate files.
+    if (!isInline) {
+      if (bundleResult.jsFile) {
+        files.push(bundleResult.jsFile);
+      }
+      if (bundleResult.cssFile) {
+        files.push(bundleResult.cssFile);
+      }
     }
 
     const modalGuardWarnings =
@@ -95,8 +100,18 @@ export async function exportWidget(
       cssPath: bundleResult.cssFile ? "./widget.css" : undefined,
       jsBundlePath: bundleResult.jsFile?.path,
       cssBundlePath: bundleResult.cssFile?.path,
-      inline: config.output.inline ?? false,
+      inline: isInline,
     });
+
+    // In inline mode, remove the separate JS/CSS files since they're embedded in the HTML.
+    if (isInline) {
+      if (bundleResult.jsFile) {
+        await fs.unlink(bundleResult.jsFile.path).catch(() => {});
+      }
+      if (bundleResult.cssFile) {
+        await fs.unlink(bundleResult.cssFile.path).catch(() => {});
+      }
+    }
 
     const htmlStat = await fs.stat(htmlPath);
     files.push({

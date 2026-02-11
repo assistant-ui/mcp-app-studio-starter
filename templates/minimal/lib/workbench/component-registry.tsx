@@ -1,12 +1,9 @@
 "use client";
 
 import type { ComponentType } from "react";
-import {
-  POI_MAP_DEMO_INPUT,
-  WELCOME_CARD_DEMO_INPUT,
-} from "@/lib/workbench/demo/default-props";
+import { WELCOME_CARD_DEMO_INPUT } from "@/lib/workbench/demo/default-props";
 import { componentConfigs } from "./component-configs";
-import { POIMapSDK, WelcomeCardSDK } from "./wrappers";
+import { WelcomeCardSDK } from "./wrappers";
 
 export type ComponentCategory = "cards" | "lists" | "forms" | "data";
 
@@ -40,18 +37,16 @@ const componentMap: Record<
   string,
   { component: AnyComponent; defaultProps: Record<string, unknown> }
 > = {
-  "poi-map": { component: POIMapSDK, defaultProps: POI_MAP_DEMO_INPUT },
   welcome: { component: WelcomeCardSDK, defaultProps: WELCOME_CARD_DEMO_INPUT },
 };
 
-export const workbenchComponents: WorkbenchComponentEntry[] =
-  componentConfigs
-    .filter((config) => config.id in componentMap)
-    .map((config) => ({
-      ...config,
-      ...componentMap[config.id],
-      exportConfig: config.exportConfig,
-    }));
+export const workbenchComponents: WorkbenchComponentEntry[] = componentConfigs
+  .filter((config) => config.id in componentMap)
+  .map((config) => ({
+    ...config,
+    ...componentMap[config.id],
+    exportConfig: config.exportConfig,
+  }));
 
 export function getComponent(id: string): WorkbenchComponentEntry | undefined {
   return workbenchComponents.find((c) => c.id === id);

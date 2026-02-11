@@ -1,32 +1,38 @@
 import fs from "node:fs";
 import path from "node:path";
+import { componentConfigs } from "../component-configs";
 
 export interface ComponentConfig {
   entryFile: string;
   exportName?: string;
 }
 
-export const WORKBENCH_COMPONENT_MAP: Record<string, ComponentConfig> = {
-  welcome: {
-    entryFile: "lib/workbench/wrappers/welcome-card-sdk.tsx",
-    exportName: "WelcomeCardSDK",
-  },
-  "poi-map": {
-    entryFile: "lib/workbench/wrappers/poi-map-sdk.tsx",
-    exportName: "POIMapSDK",
-  },
-};
+// Derive the bundle maps from the single source of truth in component-configs.ts.
+// No need to manually duplicate entries here when adding new components.
 
-export const WORKBENCH_DEMO_COMPONENT_MAP: Record<string, ComponentConfig> = {
-  welcome: {
-    entryFile: "lib/workbench/demo/welcome-card-demo.tsx",
-    exportName: "WelcomeCardDemo",
-  },
-  "poi-map": {
-    entryFile: "lib/workbench/demo/poi-map-demo.tsx",
-    exportName: "POIMapDemo",
-  },
-};
+export const WORKBENCH_COMPONENT_MAP: Record<string, ComponentConfig> =
+  Object.fromEntries(
+    componentConfigs.map((c) => [
+      c.id,
+      {
+        entryFile: c.exportConfig.entryPoint,
+        exportName: c.exportConfig.exportName,
+      },
+    ]),
+  );
+
+export const WORKBENCH_DEMO_COMPONENT_MAP: Record<string, ComponentConfig> =
+  Object.fromEntries(
+    componentConfigs
+      .filter((c) => c.demoConfig != null)
+      .map((c) => [
+        c.id,
+        {
+          entryFile: c.demoConfig!.entryPoint,
+          exportName: c.demoConfig!.exportName,
+        },
+      ]),
+  );
 
 function hasEntryFile(projectRoot: string, config: ComponentConfig) {
   return fs.existsSync(path.resolve(projectRoot, config.entryFile));

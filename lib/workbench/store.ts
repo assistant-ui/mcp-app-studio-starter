@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { create } from "zustand";
+import { componentConfigs } from "./component-configs";
 import type {
   MockConfigState,
   MockResponse,
@@ -184,10 +185,12 @@ function buildOpenAIGlobals(
   };
 }
 
+const DEFAULT_COMPONENT = componentConfigs[0]?.id ?? "welcome";
+
 function getInitialComponent(): string {
-  if (typeof window === "undefined") return "welcome";
+  if (typeof window === "undefined") return DEFAULT_COMPONENT;
   const params = new URLSearchParams(window.location.search);
-  return params.get("component") ?? "welcome";
+  return params.get("component") ?? DEFAULT_COMPONENT;
 }
 
 export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({

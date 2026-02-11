@@ -100,13 +100,15 @@ process.on("unhandledRejection", (err) => {
   void cleanup(1);
 });
 
-const NEXT_PORT = 3002;
+const DEFAULT_NEXT_PORT = 3002;
 const DEFAULT_MCP_PORT = Number(process.env.PORT ?? "3001") || 3001;
 
 async function main() {
+  const NEXT_PORT = await findAvailablePort(DEFAULT_NEXT_PORT);
+
   const MCP_PORT = hasServer
     ? await findAvailablePort(DEFAULT_MCP_PORT, {
-        // Avoid conflicting with Next's default port.
+        // Avoid conflicting with Next's resolved port.
         exclude: new Set([NEXT_PORT]),
       })
     : null;
@@ -121,9 +123,10 @@ async function main() {
   }
   console.log();
 
-  // Start Next.js
-  const nextCmd = runScriptArgs(pm, "dev:next");
-  const nextProcess = spawn(nextCmd.command, nextCmd.args, {
+  // Start Next.js directly instead of via the dev:next script so the port
+  // can be chosen dynamically.  If you add flags to dev:next (e.g. --turbopack),
+  // mirror them here as well.
+  const nextProcess = spawn("npx", ["next", "dev", "-p", String(NEXT_PORT)], {
     cwd: ROOT,
     stdio: "inherit",
     shell: process.platform === "win32",
