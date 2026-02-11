@@ -53,8 +53,6 @@ export const workbenchComponents: WorkbenchComponentEntry[] =
       exportConfig: config.exportConfig,
     }));
 
-export const appComponent: WorkbenchComponentEntry = workbenchComponents[0];
-
 export function getComponent(id: string): WorkbenchComponentEntry | undefined {
   return workbenchComponents.find((c) => c.id === id);
 }

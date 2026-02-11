@@ -123,7 +123,9 @@ async function main() {
   }
   console.log();
 
-  // Start Next.js directly (bypasses dev:next to allow dynamic port)
+  // Start Next.js directly instead of via the dev:next script so the port
+  // can be chosen dynamically.  If you add flags to dev:next (e.g. --turbopack),
+  // mirror them here as well.
   const nextProcess = spawn("npx", ["next", "dev", "-p", String(NEXT_PORT)], {
     cwd: ROOT,
     stdio: "inherit",

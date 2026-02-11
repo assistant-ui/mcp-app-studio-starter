@@ -1,11 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { appComponent } from "./component-registry";
 import { useWorkbenchStore } from "./store";
 
 describe("Workbench Store", () => {
   beforeEach(() => {
     const store = useWorkbenchStore.getState();
-    store.setToolInput(appComponent.defaultProps);
+    store.setToolInput({});
     store.setToolOutput(null);
     store.setWidgetState(null);
     store.setToolResponseMetadata(null);
