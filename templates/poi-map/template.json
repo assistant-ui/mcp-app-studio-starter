@@ -8,6 +8,8 @@
   "deleteGlobs": [
     "components/examples/welcome-card",
     "lib/workbench/wrappers/welcome-card-sdk.tsx",
-    "lib/workbench/demo/welcome-card-demo.tsx"
+    "lib/workbench/demo/welcome-card-demo.tsx",
+    "lib/workbench/bundles/component-map.test.ts",
+    "lib/workbench/iframe/use-widget-bundle.test.ts"
   ]
 }
