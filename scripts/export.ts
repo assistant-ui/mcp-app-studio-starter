@@ -21,6 +21,7 @@ interface ExportArgs {
   entryPoint: string;
   exportName: string;
   name: string;
+  description?: string;
   outputDir: string;
   inline: boolean;
 }
@@ -89,6 +90,11 @@ function parseArgs(defaults: ExportArgs): ExportArgs {
         if (next) parsed.name = next;
         i++;
         break;
+      case "--description":
+      case "-d":
+        if (next) parsed.description = next;
+        i++;
+        break;
       case "--output":
       case "-o":
         if (next) parsed.outputDir = next;
@@ -115,6 +121,7 @@ Options:
   -e, --entry <path>      Widget entry point (default: ${defaults.entryPoint})
   --export-name <name>    Export name from entry file (default: ${defaults.exportName})
   -n, --name <name>       App name for manifest (default: ${defaults.name})
+  -d, --description <text> App description for manifest (default: from package.json)
   -o, --output <dir>      Output directory (default: export)
   --inline                Inline JS/CSS into HTML
   -h, --help              Show this help message
@@ -151,11 +158,13 @@ async function main() {
     },
   };
 
-  const packageDescription = readPackageDescription(projectRoot);
-  if (packageDescription && !config.manifest?.description) {
+  // CLI --description flag takes priority, then package.json description
+  const description =
+    args.description ?? readPackageDescription(projectRoot);
+  if (description && !config.manifest?.description) {
     config.manifest = {
       ...config.manifest,
-      description: packageDescription,
+      description,
     };
   }
 

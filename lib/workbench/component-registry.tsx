@@ -2,10 +2,12 @@
 
 import type { ComponentType } from "react";
 import {
+  MOVIE_WATCHLIST_DEMO_INPUT,
   POI_MAP_DEMO_INPUT,
   WELCOME_CARD_DEMO_INPUT,
 } from "@/lib/workbench/demo/default-props";
-import { POIMapSDK, WelcomeCardSDK } from "./wrappers";
+import { componentConfigs } from "./component-configs";
+import { MovieWatchlistSDK, POIMapSDK, WelcomeCardSDK } from "./wrappers";
 
 export type ComponentCategory = "cards" | "lists" | "forms" | "data";
 
@@ -27,44 +29,36 @@ export interface WorkbenchComponentEntry {
 // ─────────────────────────────────────────────────────────────────────────────
 // App Configuration
 // ─────────────────────────────────────────────────────────────────────────────
-// Each project has a single app configured here.
+// Metadata (id, label, description, category, exportConfig) comes from the
+// shared component-configs.ts — the single source of truth for both the
+// client-side registry and the Node-side bundle map.
 //
-// Workbench note:
-// - In production, the primary contract is MCP Apps (via `mcp-app-studio`).
-// - In the local workbench, we simulate ChatGPT's optional extensions API
-//   (`window.openai`) so widgets can still be exercised without an MCP host.
+// This file adds the React-specific parts: the component reference and
+// default props for workbench preview.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const appComponent: WorkbenchComponentEntry = {
-  id: "poi-map",
-  label: "Places App Demo",
-  description: "An interactive places discovery app with map and search",
-  category: "data",
-  component: POIMapSDK,
-  defaultProps: POI_MAP_DEMO_INPUT,
-  exportConfig: {
-    entryPoint: "lib/workbench/wrappers/poi-map-sdk.tsx",
-    exportName: "POIMapSDK",
+const componentMap: Record<
+  string,
+  { component: AnyComponent; defaultProps: Record<string, unknown> }
+> = {
+  "poi-map": { component: POIMapSDK, defaultProps: POI_MAP_DEMO_INPUT },
+  "movie-watchlist": {
+    component: MovieWatchlistSDK,
+    defaultProps: MOVIE_WATCHLIST_DEMO_INPUT,
   },
+  welcome: { component: WelcomeCardSDK, defaultProps: WELCOME_CARD_DEMO_INPUT },
 };
 
-const welcomeComponent: WorkbenchComponentEntry = {
-  id: "welcome",
-  label: "Welcome",
-  description: "A simple starter app - the perfect starting point",
-  category: "cards",
-  component: WelcomeCardSDK,
-  defaultProps: WELCOME_CARD_DEMO_INPUT,
-  exportConfig: {
-    entryPoint: "lib/workbench/wrappers/welcome-card-sdk.tsx",
-    exportName: "WelcomeCardSDK",
-  },
-};
+export const workbenchComponents: WorkbenchComponentEntry[] =
+  componentConfigs
+    .filter((config) => config.id in componentMap)
+    .map((config) => ({
+      ...config,
+      ...componentMap[config.id],
+      exportConfig: config.exportConfig,
+    }));
 
-export const workbenchComponents: WorkbenchComponentEntry[] = [
-  appComponent,
-  welcomeComponent,
-];
+export const appComponent: WorkbenchComponentEntry = workbenchComponents[0];
 
 export function getComponent(id: string): WorkbenchComponentEntry | undefined {
   return workbenchComponents.find((c) => c.id === id);

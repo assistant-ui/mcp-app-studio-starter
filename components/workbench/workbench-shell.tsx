@@ -7,13 +7,14 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/ui/logo";
 import { cn } from "@/lib/ui/cn";
-import { appComponent } from "@/lib/workbench/component-registry";
+import { getComponent } from "@/lib/workbench/component-registry";
 import { useWorkbenchPersistence } from "@/lib/workbench/persistence";
 import {
   useDisplayMode,
   useIsLeftPanelOpen,
   useIsRightPanelOpen,
   useIsSDKGuideOpen,
+  useSelectedComponent,
   useWorkbenchStore,
 } from "@/lib/workbench/store";
 import { ExportPopover } from "./export-popover";
@@ -43,6 +44,8 @@ export function WorkbenchShell() {
   const setSDKGuideOpen = useWorkbenchStore((s) => s.setSDKGuideOpen);
   const setWorkbenchTheme = useWorkbenchStore((s) => s.setTheme);
   const { setTheme, resolvedTheme } = useTheme();
+  const selectedComponentId = useSelectedComponent();
+  const activeComponent = getComponent(selectedComponentId);
 
   useWorkbenchPersistence();
 
@@ -109,7 +112,7 @@ export function WorkbenchShell() {
           <span className="select-none font-mono">Workbench</span>
         </div>
 
-        <span className="font-medium text-sm">{appComponent.label}</span>
+        <span className="font-medium text-sm">{activeComponent?.label ?? "MCP App"}</span>
 
         <div className="flex items-center justify-end gap-1">
           <Button
