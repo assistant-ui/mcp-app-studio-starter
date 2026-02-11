@@ -2,12 +2,11 @@
 
 import type { ComponentType } from "react";
 import {
-  MOVIE_WATCHLIST_DEMO_INPUT,
   POI_MAP_DEMO_INPUT,
   WELCOME_CARD_DEMO_INPUT,
 } from "@/lib/workbench/demo/default-props";
 import { componentConfigs } from "./component-configs";
-import { MovieWatchlistSDK, POIMapSDK, WelcomeCardSDK } from "./wrappers";
+import { POIMapSDK, WelcomeCardSDK } from "./wrappers";
 
 export type ComponentCategory = "cards" | "lists" | "forms" | "data";
 
@@ -42,10 +41,6 @@ const componentMap: Record<
   { component: AnyComponent; defaultProps: Record<string, unknown> }
 > = {
   "poi-map": { component: POIMapSDK, defaultProps: POI_MAP_DEMO_INPUT },
-  "movie-watchlist": {
-    component: MovieWatchlistSDK,
-    defaultProps: MOVIE_WATCHLIST_DEMO_INPUT,
-  },
   welcome: { component: WelcomeCardSDK, defaultProps: WELCOME_CARD_DEMO_INPUT },
 };
 

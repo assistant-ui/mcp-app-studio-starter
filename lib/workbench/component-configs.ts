@@ -41,16 +41,6 @@ export const componentConfigs: ComponentMeta[] = [
     },
   },
   {
-    id: "movie-watchlist",
-    label: "Movie Watchlist",
-    description: "A movie watchlist app exercising all SDK hooks",
-    category: "data",
-    exportConfig: {
-      entryPoint: "lib/workbench/wrappers/movie-watchlist-sdk.tsx",
-      exportName: "MovieWatchlistSDK",
-    },
-  },
-  {
     id: "welcome",
     label: "Welcome",
     description: "A simple starter app - the perfect starting point",
