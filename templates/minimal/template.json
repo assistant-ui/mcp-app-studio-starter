@@ -1,0 +1,16 @@
+{
+  "id": "minimal",
+  "defaultComponent": "welcome",
+  "exportConfig": {
+    "entryPoint": "lib/workbench/wrappers/welcome-card-sdk.tsx",
+    "exportName": "WelcomeCardSDK"
+  },
+  "deleteGlobs": [
+    "components/examples/poi-map",
+    "lib/workbench/wrappers/poi-map-sdk.tsx",
+    "lib/workbench/wrappers/poi-map-sdk.test.ts",
+    "lib/workbench/wrappers/poi-map-input.ts",
+    "lib/workbench/demo/poi-map-demo.tsx",
+    "lib/workbench/demo/poi-map-demo.regression.test.ts"
+  ]
+}
