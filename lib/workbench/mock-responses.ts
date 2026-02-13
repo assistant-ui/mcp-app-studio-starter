@@ -245,6 +245,11 @@ export async function handleMockToolCall(
         };
       }
     }
+
+    if (toolConfig?.mockResponse) {
+      await simulateDelay(300);
+      return convertMockResponse(toolConfig.mockResponse);
+    }
   }
 
   const handler = mockHandlers[toolName] || defaultHandler;

@@ -9,13 +9,17 @@ import { createBundleBuildOptions, ensureWorkbenchTempDir, GET } from "./route";
 
 const originalNodeEnv = process.env.NODE_ENV;
 
+function setNodeEnv(value: string | undefined) {
+  (process.env as Record<string, string | undefined>).NODE_ENV = value;
+}
+
 afterEach(() => {
-  process.env.NODE_ENV = originalNodeEnv;
+  setNodeEnv(originalNodeEnv);
 });
 
 describe("GET /api/workbench/bundle", () => {
   it("blocks production requests without demo mode", async () => {
-    process.env.NODE_ENV = "production";
+    setNodeEnv("production");
     const request = new NextRequest("http://localhost/api/workbench/bundle");
     const response = await GET(request);
 
@@ -24,7 +28,7 @@ describe("GET /api/workbench/bundle", () => {
   });
 
   it("blocks production demo requests", async () => {
-    process.env.NODE_ENV = "production";
+    setNodeEnv("production");
     const request = new NextRequest(
       "http://localhost/api/workbench/bundle?demo=true",
     );
@@ -35,7 +39,7 @@ describe("GET /api/workbench/bundle", () => {
   });
 
   it("returns static demo bundle in development when demo=true", async () => {
-    process.env.NODE_ENV = "development";
+    setNodeEnv("development");
     const request = new NextRequest(
       "http://localhost/api/workbench/bundle?id=poi-map&demo=true",
     );

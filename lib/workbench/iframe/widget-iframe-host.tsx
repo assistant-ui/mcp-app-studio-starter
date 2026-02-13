@@ -12,16 +12,18 @@ import {
   useState,
 } from "react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { getFileUrl, storeFile } from "../file-store";
+import { clearFiles, getFileUrl, storeFile } from "../file-store";
 import { handleMockToolCall } from "../mock-responses";
 import { useWorkbenchStore } from "../store";
 import { MORPH_TIMING } from "../transition-config";
-import type {
-  CallToolResponse,
-  DisplayMode,
-  ModalOptions,
-  OpenAIGlobals,
-  WidgetState,
+import {
+  type CallToolResponse,
+  DEFAULT_TOOL_CONFIG,
+  type DisplayMode,
+  type ModalOptions,
+  type OpenAIGlobals,
+  type ToolSimulationConfig,
+  type WidgetState,
 } from "../types";
 import {
   generateEmptyIframeHtml,
@@ -91,6 +93,18 @@ function toMcpToolResultParams(
   return params;
 }
 
+const DEFAULT_SIMULATION_RESPONSE_DATA = JSON.stringify(
+  DEFAULT_TOOL_CONFIG.responseData,
+);
+
+function hasCustomSimulationConfig(config?: ToolSimulationConfig): boolean {
+  if (!config) return false;
+  if (config.responseMode !== DEFAULT_TOOL_CONFIG.responseMode) return true;
+  return (
+    JSON.stringify(config.responseData) !== DEFAULT_SIMULATION_RESPONSE_DATA
+  );
+}
+
 export function WidgetIframeHost({
   widgetBundle,
   cssBundle,
@@ -124,11 +138,77 @@ export function WidgetIframeHost({
         args,
       });
 
-      store.registerSimTool(name);
-      const { simulation } = store;
-      const simConfig = simulation.tools[name];
+      if (!store.mockConfig.tools[name]) {
+        store.registerTool(name);
+      }
 
-      if (simConfig) {
+      const toolConfig = store.mockConfig.tools[name];
+      const activeVariant =
+        store.mockConfig.globalEnabled && toolConfig?.activeVariantId
+          ? toolConfig.variants.find((v) => v.id === toolConfig.activeVariantId)
+          : null;
+
+      const finalizeToolResult = (
+        result: CallToolResponse & { _mockVariant?: string },
+      ): CallToolResponse => {
+        // ChatGPT/workbench compatibility metadata (see comment above).
+        const enrichedMeta = {
+          ...(result._meta ?? {}),
+          "openai/widgetSessionId": store.widgetSessionId,
+        };
+
+        const enrichedResult: CallToolResponse = {
+          ...result,
+          _meta: enrichedMeta,
+        };
+
+        const methodLabel = result._mockVariant
+          ? `callTool("${name}") → [MOCK: ${result._mockVariant}]`
+          : `callTool("${name}") → response`;
+
+        store.addConsoleEntry({
+          type: "callTool",
+          method: methodLabel,
+          result: enrichedResult,
+        });
+
+        store.setToolOutput(enrichedResult.structuredContent ?? null);
+        store.setToolResponseMetadata(enrichedResult._meta ?? null);
+
+        if (enrichedResult._meta?.["openai/closeWidget"] === true) {
+          store.setWidgetClosed(true);
+        }
+
+        return enrichedResult;
+      };
+
+      const runMockCall = async (delay: number): Promise<CallToolResponse> => {
+        store.setActiveToolCall({
+          toolName: name,
+          delay,
+          startTime: Date.now(),
+        });
+
+        let result;
+        try {
+          result = await handleMockToolCall(name, args, store.mockConfig);
+        } finally {
+          store.setActiveToolCall(null);
+        }
+
+        return finalizeToolResult(result);
+      };
+
+      const hasConfiguredMockOverride =
+        store.mockConfig.globalEnabled &&
+        Boolean(toolConfig?.activeVariantId || toolConfig?.mockResponse);
+
+      if (hasConfiguredMockOverride) {
+        return runMockCall(activeVariant?.delay ?? 300);
+      }
+
+      const simConfig = store.simulation.tools[name];
+      if (hasCustomSimulationConfig(simConfig)) {
         store.setActiveToolCall({
           toolName: name,
           delay: 300,
@@ -224,59 +304,7 @@ export function WidgetIframeHost({
         return result;
       }
 
-      if (!store.mockConfig.tools[name]) {
-        store.registerTool(name);
-      }
-
-      const toolConfig = store.mockConfig.tools[name];
-      const activeVariant =
-        store.mockConfig.globalEnabled && toolConfig?.activeVariantId
-          ? toolConfig.variants.find((v) => v.id === toolConfig.activeVariantId)
-          : null;
-      const delay = activeVariant?.delay ?? 300;
-
-      store.setActiveToolCall({
-        toolName: name,
-        delay,
-        startTime: Date.now(),
-      });
-
-      let result;
-      try {
-        result = await handleMockToolCall(name, args, store.mockConfig);
-      } finally {
-        store.setActiveToolCall(null);
-      }
-
-      // ChatGPT/workbench compatibility metadata (see comment above).
-      const enrichedMeta = {
-        ...(result._meta ?? {}),
-        "openai/widgetSessionId": store.widgetSessionId,
-      };
-
-      const enrichedResult: CallToolResponse = {
-        ...result,
-        _meta: enrichedMeta,
-      };
-
-      const methodLabel = result._mockVariant
-        ? `callTool("${name}") → [MOCK: ${result._mockVariant}]`
-        : `callTool("${name}") → response`;
-
-      store.addConsoleEntry({
-        type: "callTool",
-        method: methodLabel,
-        result: enrichedResult,
-      });
-
-      store.setToolOutput(enrichedResult.structuredContent ?? null);
-      store.setToolResponseMetadata(enrichedResult._meta ?? null);
-
-      if (enrichedResult._meta?.["openai/closeWidget"] === true) {
-        store.setWidgetClosed(true);
-      }
-
-      return enrichedResult;
+      return runMockCall(activeVariant?.delay ?? 300);
     },
     [store],
   );
@@ -448,6 +476,21 @@ export function WidgetIframeHost({
     [store],
   );
 
+  const handleCallToolRef = useRef(handleCallTool);
+  useEffect(() => {
+    handleCallToolRef.current = handleCallTool;
+  }, [handleCallTool]);
+
+  const handleOpenExternalRef = useRef(handleOpenExternal);
+  useEffect(() => {
+    handleOpenExternalRef.current = handleOpenExternal;
+  }, [handleOpenExternal]);
+
+  const handleRequestDisplayModeRef = useRef(handleRequestDisplayMode);
+  useEffect(() => {
+    handleRequestDisplayModeRef.current = handleRequestDisplayMode;
+  }, [handleRequestDisplayMode]);
+
   const handlers = useMemo<WorkbenchMessageHandlers>(
     () => ({
       callTool: handleCallTool,
@@ -535,11 +578,11 @@ export function WidgetIframeHost({
         typeof height === "number" && Number.isFinite(height)
           ? Math.max(0, height)
           : null;
-      store.setIntrinsicHeight(nextHeight);
+      useWorkbenchStore.getState().setIntrinsicHeight(nextHeight);
     };
 
     bridge.onloggingmessage = ({ level, logger, data }) => {
-      store.addConsoleEntry({
+      useWorkbenchStore.getState().addConsoleEntry({
         type: "event",
         method: `notifications/message (${logger ?? "widget"})`,
         args: { level, data },
@@ -547,16 +590,16 @@ export function WidgetIframeHost({
     };
 
     bridge.onopenlink = async ({ url }) => {
-      handleOpenExternal({ href: url });
+      handleOpenExternalRef.current({ href: url });
       return {};
     };
 
     bridge.onrequestdisplaymode = async ({ mode }) => {
-      return handleRequestDisplayMode({ mode: mode as DisplayMode });
+      return handleRequestDisplayModeRef.current({ mode: mode as DisplayMode });
     };
 
     bridge.onmessage = async ({ role, content }) => {
-      store.addConsoleEntry({
+      useWorkbenchStore.getState().addConsoleEntry({
         type: "event",
         method: "ui/message",
         args: { role, content },
@@ -565,7 +608,7 @@ export function WidgetIframeHost({
     };
 
     bridge.onupdatemodelcontext = async ({ content, structuredContent }) => {
-      store.addConsoleEntry({
+      useWorkbenchStore.getState().addConsoleEntry({
         type: "event",
         method: "ui/update-model-context",
         args: { content, structuredContent },
@@ -576,7 +619,7 @@ export function WidgetIframeHost({
     bridge.oncalltool = async (params) => {
       const name = params.name as string;
       const args = (params.arguments ?? {}) as Record<string, unknown>;
-      const result = await handleCallTool(name, args);
+      const result = await handleCallToolRef.current(name, args);
       return toMcpToolResultParams(result) as any;
     };
 
@@ -610,18 +653,17 @@ export function WidgetIframeHost({
       mcpBridgeRef.current = null;
       void bridge.close();
     };
-  }, [
-    demoMode,
-    iframeKey,
-    handleCallTool,
-    handleOpenExternal,
-    handleRequestDisplayMode,
-    store,
-  ]);
+  }, [demoMode, iframeKey]);
 
   useEffect(() => {
     bridgeRef.current?.setHandlers(handlers);
   }, [handlers]);
+
+  useEffect(() => {
+    return () => {
+      clearFiles();
+    };
+  }, [iframeKey]);
 
   useEffect(() => {
     const iframe = iframeRef.current;

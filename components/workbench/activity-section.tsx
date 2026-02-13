@@ -29,11 +29,11 @@ interface EntryGroup {
   response: ConsoleEntry | null;
 }
 
-function groupCallToolEntries(
+export function groupCallToolEntries(
   logs: ConsoleEntry[],
 ): (ConsoleEntry | EntryGroup)[] {
   const result: (ConsoleEntry | EntryGroup)[] = [];
-  const pendingRequests = new Map<string, ConsoleEntry>();
+  const pendingRequests = new Map<string, ConsoleEntry[]>();
 
   for (const entry of logs) {
     if (entry.type !== "callTool") {
@@ -46,18 +46,26 @@ function groupCallToolEntries(
 
     if (!isResponse) {
       if (toolName) {
-        pendingRequests.set(toolName, entry);
+        const queue = pendingRequests.get(toolName) ?? [];
+        queue.push(entry);
+        pendingRequests.set(toolName, queue);
       }
       result.push({ id: entry.id, request: entry, response: null });
     } else {
-      const pendingRequest = toolName ? pendingRequests.get(toolName) : null;
+      const queue = toolName ? pendingRequests.get(toolName) : null;
+      const pendingRequest = queue?.[0] ?? null;
       if (pendingRequest) {
         const groupIndex = result.findIndex(
           (item) => "request" in item && item.request.id === pendingRequest.id,
         );
         if (groupIndex !== -1) {
           (result[groupIndex] as EntryGroup).response = entry;
-          pendingRequests.delete(toolName!);
+          queue?.shift();
+          if (!queue || queue.length === 0) {
+            pendingRequests.delete(toolName!);
+          } else {
+            pendingRequests.set(toolName!, queue);
+          }
           continue;
         }
       }

@@ -4,7 +4,12 @@ import type { UrlState } from "./types";
 
 const VALID_MODES: DisplayMode[] = ["inline", "pip", "fullscreen"];
 const VALID_THEMES: Theme[] = ["light", "dark"];
-const VALID_DEVICES: DeviceType[] = ["mobile", "tablet", "desktop"];
+const VALID_DEVICES: DeviceType[] = [
+  "mobile",
+  "tablet",
+  "desktop",
+  "resizable",
+];
 
 export function parseUrlParams(
   searchParams: URLSearchParams,

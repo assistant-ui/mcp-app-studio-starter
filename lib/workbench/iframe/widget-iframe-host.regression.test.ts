@@ -32,6 +32,18 @@ function getSrcDocMemoDeps(source: string): string[] {
     .filter(Boolean);
 }
 
+function getAppBridgeLayoutEffectDeps(source: string): string[] {
+  const match = source.match(
+    /useLayoutEffect\(\(\) => \{[\s\S]*?const bridge = new AppBridge[\s\S]*?\}, \[([^\]]*)\]\);/,
+  );
+
+  assert.ok(match, "expected to find AppBridge useLayoutEffect dependencies");
+  return match[1]
+    .split(",")
+    .map((dep) => dep.trim())
+    .filter(Boolean);
+}
+
 describe("WidgetIframeHost bridge lifecycle regression", () => {
   it("keeps bridge attachment stable across globals/state updates", () => {
     const source = fs.readFileSync(TARGET_FILE, "utf8");
@@ -58,5 +70,38 @@ describe("WidgetIframeHost bridge lifecycle regression", () => {
     // Changing srcDoc reloads the iframe and resets widget-local state.
     // Globals are delivered via bridgeRef.sendGlobals and should not rebuild srcDoc.
     assert.deepEqual(deps, ["widgetBundle", "cssBundle", "demoMode"]);
+  });
+
+  it("keeps AppBridge connection effect independent from store/callback churn", () => {
+    const source = fs.readFileSync(TARGET_FILE, "utf8");
+    const deps = getAppBridgeLayoutEffectDeps(source);
+
+    assert.deepEqual(deps, ["demoMode", "iframeKey"]);
+  });
+
+  it("does not auto-register simulation config for every tool call", () => {
+    const source = fs.readFileSync(TARGET_FILE, "utf8");
+
+    assert.doesNotMatch(source, /registerSimTool\(name\)/);
+  });
+
+  it("evaluates mock handlers before simulation overrides", () => {
+    const source = fs.readFileSync(TARGET_FILE, "utf8");
+    const firstSimulationRead = source.indexOf("const simConfig =");
+    const firstMockCall = source.indexOf("handleMockToolCall(");
+
+    assert.notEqual(firstSimulationRead, -1);
+    assert.notEqual(firstMockCall, -1);
+    assert.ok(firstMockCall < firstSimulationRead);
+  });
+
+  it("cleans up uploaded file object URLs when iframe lifecycle resets", () => {
+    const source = fs.readFileSync(TARGET_FILE, "utf8");
+
+    assert.match(source, /clearFiles/);
+    assert.match(
+      source,
+      /useEffect\(\(\) => \{\n\s*return \(\) => \{\n\s*clearFiles\(\);\n\s*\};\n\s*\}, \[iframeKey\]\);/,
+    );
   });
 });

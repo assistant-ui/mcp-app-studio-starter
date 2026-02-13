@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import * as assert from "node:assert/strict";
+import { beforeEach, describe, it } from "node:test";
 import { useWorkbenchStore } from "./store";
 
 describe("Workbench Store", () => {
@@ -17,7 +18,7 @@ describe("Workbench Store", () => {
       store.setTheme("dark");
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.theme).toBe("dark");
+      assert.strictEqual(globals.theme, "dark");
     });
 
     it("should return correct locale", () => {
@@ -26,7 +27,7 @@ describe("Workbench Store", () => {
       store.setLocale("es-ES");
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.locale).toBe("es-ES");
+      assert.strictEqual(globals.locale, "es-ES");
     });
 
     it("should return correct displayMode", () => {
@@ -35,7 +36,7 @@ describe("Workbench Store", () => {
       store.setDisplayMode("fullscreen");
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.displayMode).toBe("fullscreen");
+      assert.strictEqual(globals.displayMode, "fullscreen");
     });
 
     it("should return correct maxHeight", () => {
@@ -44,7 +45,7 @@ describe("Workbench Store", () => {
       store.setMaxHeight(1200);
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.maxHeight).toBe(1200);
+      assert.strictEqual(globals.maxHeight, 1200);
     });
 
     it("should include toolInput", () => {
@@ -54,7 +55,7 @@ describe("Workbench Store", () => {
       store.setToolInput(testInput);
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.toolInput).toEqual(testInput);
+      assert.deepStrictEqual(globals.toolInput, testInput);
     });
 
     it("should include toolOutput (null when unset)", () => {
@@ -63,7 +64,7 @@ describe("Workbench Store", () => {
       store.setToolOutput(null);
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.toolOutput).toBeNull();
+      assert.strictEqual(globals.toolOutput, null);
     });
 
     it("should include toolOutput (object when set)", () => {
@@ -73,7 +74,7 @@ describe("Workbench Store", () => {
       store.setToolOutput(testOutput);
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.toolOutput).toEqual(testOutput);
+      assert.deepStrictEqual(globals.toolOutput, testOutput);
     });
 
     it("should include widgetState", () => {
@@ -83,7 +84,7 @@ describe("Workbench Store", () => {
       store.setWidgetState(testState);
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.widgetState).toEqual(testState);
+      assert.deepStrictEqual(globals.widgetState, testState);
     });
 
     it("should include toolResponseMetadata", () => {
@@ -93,7 +94,7 @@ describe("Workbench Store", () => {
       store.setToolResponseMetadata(testMetadata);
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.toolResponseMetadata).toEqual(testMetadata);
+      assert.deepStrictEqual(globals.toolResponseMetadata, testMetadata);
     });
 
     it("should include safeAreaInsets", () => {
@@ -103,7 +104,7 @@ describe("Workbench Store", () => {
       store.setSafeAreaInsets(testInsets);
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.safeArea.insets).toEqual(testInsets);
+      assert.deepStrictEqual(globals.safeArea.insets, testInsets);
     });
 
     it("should include userAgent with device type", () => {
@@ -112,7 +113,7 @@ describe("Workbench Store", () => {
       store.setDeviceType("mobile");
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.userAgent.device.type).toBe("mobile");
+      assert.strictEqual(globals.userAgent.device.type, "mobile");
     });
 
     it("should include userAgent capabilities for mobile (no hover, touch)", () => {
@@ -121,8 +122,8 @@ describe("Workbench Store", () => {
       store.setDeviceType("mobile");
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.userAgent.capabilities.hover).toBe(false);
-      expect(globals.userAgent.capabilities.touch).toBe(true);
+      assert.strictEqual(globals.userAgent.capabilities.hover, false);
+      assert.strictEqual(globals.userAgent.capabilities.touch, true);
     });
 
     it("should include userAgent capabilities for desktop (hover, no touch)", () => {
@@ -131,8 +132,8 @@ describe("Workbench Store", () => {
       store.setDeviceType("desktop");
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.userAgent.capabilities.hover).toBe(true);
-      expect(globals.userAgent.capabilities.touch).toBe(false);
+      assert.strictEqual(globals.userAgent.capabilities.hover, true);
+      assert.strictEqual(globals.userAgent.capabilities.touch, false);
     });
   });
 
@@ -144,8 +145,8 @@ describe("Workbench Store", () => {
       store.setDeviceType("mobile");
       const state = useWorkbenchStore.getState();
 
-      expect(state.deviceType).toBe("mobile");
-      expect(state.maxHeight).toBe(initialMaxHeight);
+      assert.strictEqual(state.deviceType, "mobile");
+      assert.strictEqual(state.maxHeight, initialMaxHeight);
     });
 
     it("should update deviceType to tablet without changing maxHeight", () => {
@@ -155,8 +156,8 @@ describe("Workbench Store", () => {
       store.setDeviceType("tablet");
       const state = useWorkbenchStore.getState();
 
-      expect(state.deviceType).toBe("tablet");
-      expect(state.maxHeight).toBe(500);
+      assert.strictEqual(state.deviceType, "tablet");
+      assert.strictEqual(state.maxHeight, 500);
     });
 
     it("should update deviceType to desktop without changing maxHeight", () => {
@@ -166,8 +167,8 @@ describe("Workbench Store", () => {
       store.setDeviceType("desktop");
       const state = useWorkbenchStore.getState();
 
-      expect(state.deviceType).toBe("desktop");
-      expect(state.maxHeight).toBe(600);
+      assert.strictEqual(state.deviceType, "desktop");
+      assert.strictEqual(state.maxHeight, 600);
     });
   });
 
@@ -190,21 +191,23 @@ describe("Workbench Store", () => {
       const globals = store.getOpenAIGlobals();
 
       // Verify all values are correctly reflected
-      expect(globals.theme).toBe("dark");
-      expect(globals.locale).toBe("fr-FR");
-      expect(globals.displayMode).toBe("pip");
-      expect(globals.maxHeight).toBe(1500);
-      expect(globals.toolInput).toEqual({ input1: "value1" });
-      expect(globals.toolOutput).toEqual({ output1: "result1" });
-      expect(globals.widgetState).toEqual({ state1: "stateValue1" });
-      expect(globals.toolResponseMetadata).toEqual({ meta1: "metaValue1" });
-      expect(globals.safeArea.insets).toEqual({
+      assert.strictEqual(globals.theme, "dark");
+      assert.strictEqual(globals.locale, "fr-FR");
+      assert.strictEqual(globals.displayMode, "pip");
+      assert.strictEqual(globals.maxHeight, 1500);
+      assert.deepStrictEqual(globals.toolInput, { input1: "value1" });
+      assert.deepStrictEqual(globals.toolOutput, { output1: "result1" });
+      assert.deepStrictEqual(globals.widgetState, { state1: "stateValue1" });
+      assert.deepStrictEqual(globals.toolResponseMetadata, {
+        meta1: "metaValue1",
+      });
+      assert.deepStrictEqual(globals.safeArea.insets, {
         top: 15,
         bottom: 25,
         left: 10,
         right: 10,
       });
-      expect(globals.userAgent.device.type).toBe("tablet");
+      assert.strictEqual(globals.userAgent.device.type, "tablet");
     });
 
     it("should maintain consistent structure across multiple calls", () => {
@@ -214,8 +217,9 @@ describe("Workbench Store", () => {
       const globals2 = store.getOpenAIGlobals();
 
       // Should have identical structure
-      expect(globals1).toEqual(globals2);
-      expect(Object.keys(globals1).sort()).toEqual(
+      assert.deepStrictEqual(globals1, globals2);
+      assert.deepStrictEqual(
+        Object.keys(globals1).sort(),
         Object.keys(globals2).sort(),
       );
     });
@@ -230,9 +234,9 @@ describe("Workbench Store", () => {
 
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.toolOutput).toBeNull();
-      expect(globals.widgetState).toBeNull();
-      expect(globals.toolResponseMetadata).toBeNull();
+      assert.strictEqual(globals.toolOutput, null);
+      assert.strictEqual(globals.widgetState, null);
+      assert.strictEqual(globals.toolResponseMetadata, null);
     });
 
     it("should update globals when safeAreaInsets are partially updated", () => {
@@ -246,10 +250,10 @@ describe("Workbench Store", () => {
 
       const globals = store.getOpenAIGlobals();
 
-      expect(globals.safeArea.insets.top).toBe(20);
-      expect(globals.safeArea.insets.bottom).toBe(10);
-      expect(globals.safeArea.insets.left).toBe(10);
-      expect(globals.safeArea.insets.right).toBe(10);
+      assert.strictEqual(globals.safeArea.insets.top, 20);
+      assert.strictEqual(globals.safeArea.insets.bottom, 10);
+      assert.strictEqual(globals.safeArea.insets.left, 10);
+      assert.strictEqual(globals.safeArea.insets.right, 10);
     });
   });
 });
