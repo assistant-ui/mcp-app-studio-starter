@@ -32,6 +32,14 @@ The workbench simulates an MCP Apps host in an iframe. It also installs a
 `window.openai` shim so you can exercise **ChatGPT-only extensions** during
 development (optional, non-standard).
 
+## Agent Workflow
+
+Use `.agent/skills/mcp-app-development/SKILL.md` as the default coding-agent workflow for this repo. It defines the 80/20 capability-slice loop:
+
+- Build UI and real MCP tool(s) in one chunk
+- Use TDD (`red -> green`) for parity checks
+- Never treat mock-only behavior as done
+
 ## Commands
 
 | Command          | Description                              |
