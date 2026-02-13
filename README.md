@@ -34,7 +34,7 @@ development (optional, non-standard).
 
 ## Agent Workflow
 
-Use `/Users/petepetrash/Code/aui/mcp-app-studio-starter/.agent/skills/mcp-app-development/SKILL.md` as the default coding-agent workflow for this repo. It defines the 80/20 capability-slice loop:
+Use `.agent/skills/mcp-app-development/SKILL.md` as the default coding-agent workflow for this repo. It defines the 80/20 capability-slice loop:
 
 - Build UI and real MCP tool(s) in one chunk
 - Use TDD (`red -> green`) for parity checks
