@@ -109,13 +109,11 @@ function ChatWithComposer({
   );
 }
 
-export function shouldShowPreviewResizeHandles(
-  deviceType: DeviceType,
-): boolean {
+function shouldShowPreviewResizeHandles(deviceType: DeviceType): boolean {
   return deviceType === "resizable";
 }
 
-export function shouldUsePreviewStage(
+function shouldUsePreviewStage(
   deviceType: DeviceType,
   containerWidth: number,
 ): boolean {
@@ -137,7 +135,7 @@ export function shouldUsePreviewStage(
   );
 }
 
-export function resolvePreviewDeviceWidth(
+function resolvePreviewDeviceWidth(
   deviceType: DeviceType,
   resizableWidth: number,
 ): number {
@@ -149,7 +147,7 @@ export function resolvePreviewDeviceWidth(
   return typeof preset.width === "number" ? preset.width : 0;
 }
 
-export function clampResizablePreviewWidth(width: number): number {
+function clampResizablePreviewWidth(width: number): number {
   return Math.max(RESIZABLE_MIN_WIDTH, Math.min(RESIZABLE_MAX_WIDTH, width));
 }
 
