@@ -7,12 +7,15 @@ import { workbenchComponents } from "@/lib/workbench/component-registry";
 import type { ConversationContext } from "@/lib/workbench/mock-config";
 import {
   useConversationMode,
-  useDeviceType,
   useDisplayMode,
   useSelectedComponent,
   useWorkbenchStore,
 } from "@/lib/workbench/store";
-import { getLayoutConfig, getLayoutVariant } from "./chat-thread-layout";
+import {
+  getLayoutConfig,
+  getLayoutVariant,
+  resolveWidgetHeight,
+} from "./chat-thread-layout";
 import { MorphContainer } from "./component-renderer";
 
 interface MockMessage {
@@ -169,7 +172,6 @@ interface ChatThreadProps {
 export function ChatThread({ children, className }: ChatThreadProps) {
   const displayMode = useDisplayMode();
   const theme = useWorkbenchStore((s) => s.previewTheme);
-  const deviceType = useDeviceType();
   const conversationMode = useConversationMode();
   const maxHeight = useWorkbenchStore((s) => s.maxHeight);
   const intrinsicHeight = useWorkbenchStore((s) => s.intrinsicHeight);
@@ -178,11 +180,7 @@ export function ChatThread({ children, className }: ChatThreadProps) {
   const effectiveIsDark = theme === "dark";
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const widgetHeight =
-    intrinsicHeight !== null
-      ? Math.min(Math.max(intrinsicHeight, 0), maxHeight)
-      : maxHeight;
-  const isDesktopDevice = deviceType === "desktop";
+  const widgetHeight = resolveWidgetHeight(maxHeight, intrinsicHeight);
 
   useEffect(() => {
     if (scrollRef.current && displayMode === "pip") {
@@ -239,8 +237,6 @@ export function ChatThread({ children, className }: ChatThreadProps) {
   const layoutVariant = getLayoutVariant({ displayMode, conversationMode });
   const layout = getLayoutConfig({
     variant: layoutVariant,
-    isDesktopDevice,
-    isDark: effectiveIsDark,
     widgetHeight,
   });
 
