@@ -14,7 +14,6 @@ export {
   useToolInputPartial,
   useToolResult,
   useUpdateModelContext,
-  useWidgetState,
 } from "mcp-app-studio";
 
 export type {
@@ -41,3 +40,9 @@ export {
   type OpenModalResult,
   openModal,
 } from "./open-modal";
+export { useOpenAIChannel } from "./openai-channel";
+export {
+  readToolResponseMetadata,
+  useToolResponseMetadata,
+} from "./tool-response-metadata";
+export { useWidgetState } from "./widget-state";

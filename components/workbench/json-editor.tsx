@@ -6,6 +6,7 @@ import { type Diagnostic, linter, lintGutter } from "@codemirror/lint";
 import { oneDarkHighlightStyle } from "@codemirror/theme-one-dark";
 import { EditorView, placeholder, tooltips } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
+import { AlertTriangle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/ui/cn";
@@ -20,8 +21,9 @@ const jsonLinterWithNullSupport = linter((view): Diagnostic[] => {
 
 interface JsonEditorProps {
   label?: string;
-  value: Record<string, unknown>;
-  onChange: (value: Record<string, unknown>) => void;
+  text: string;
+  invalidMessage?: string | null;
+  onChange: (text: string) => void;
 }
 
 // Style specs are kept as plain objects so the EditorView.theme() calls
@@ -133,30 +135,19 @@ const customEditorStyleLight = EditorView.theme(lightStyleSpec, {
 });
 const customEditorStyleDark = EditorView.theme(darkStyleSpec, { dark: true });
 
-function computeText(value: Record<string, unknown>): string {
-  if (Object.keys(value).length === 0) {
-    return "";
-  }
-  return JSON.stringify(value, null, 2);
-}
-
-export function JsonEditor({ value, onChange }: JsonEditorProps) {
+export function JsonEditor({
+  text,
+  invalidMessage = null,
+  onChange,
+}: JsonEditorProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const valueStr = JSON.stringify(value);
-  const [prevValueStr, setPrevValueStr] = useState(valueStr);
-  const [text, setText] = useState(() => computeText(value));
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const isDark = mounted && resolvedTheme === "dark";
-
-  if (valueStr !== prevValueStr) {
-    setPrevValueStr(valueStr);
-    setText(computeText(value));
-  }
 
   const extensions = useMemo(
     () => [
@@ -173,25 +164,7 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
   );
 
   const handleChange = (newText: string) => {
-    setText(newText);
-
-    const trimmed = newText.trim();
-    if (trimmed === "" || trimmed === "null") {
-      const emptyObj = {};
-      const emptyStr = JSON.stringify(emptyObj);
-      setPrevValueStr(emptyStr);
-      onChange(emptyObj);
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(newText);
-      const parsedStr = JSON.stringify(parsed);
-      setPrevValueStr(parsedStr);
-      onChange(parsed);
-    } catch {
-      // Linter will show the error inline
-    }
+    onChange(newText);
   };
 
   return (
@@ -233,6 +206,14 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
           "dark:[&_.cm-matchingBracket]:bg-[rgba(255,255,255,0.15)]!",
         )}
       />
+      {invalidMessage ? (
+        <div className="px-3 pb-3">
+          <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800 text-xs dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+            <span>{invalidMessage}</span>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

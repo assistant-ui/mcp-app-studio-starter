@@ -20,31 +20,54 @@ function isDemoBundleRequest(currentLocationSearch: string): boolean {
   return currentParams.get("demo") === "true";
 }
 
-function shouldUseStaticBundle(currentLocationSearch: string): boolean {
-  return (
-    isDemoBundleRequest(currentLocationSearch) ||
-    process.env.NODE_ENV === "production"
-  );
+type BundleBuildMode = "demo" | "runtime" | "static";
+
+function resolveBundleBuildMode(
+  currentLocationSearch: string,
+  nodeEnv: string = process.env.NODE_ENV ?? "development",
+): BundleBuildMode {
+  if (isDemoBundleRequest(currentLocationSearch)) {
+    return nodeEnv === "production" ? "demo" : "demo";
+  }
+
+  return nodeEnv === "production" ? "static" : "runtime";
+}
+
+function shouldUseStaticBundle(
+  currentLocationSearch: string,
+  nodeEnv: string = process.env.NODE_ENV ?? "development",
+): boolean {
+  if (nodeEnv !== "production") {
+    return false;
+  }
+
+  return isDemoBundleRequest(currentLocationSearch) || nodeEnv === "production";
 }
 
 export function buildBundleCacheKey(
   componentId: string,
   currentLocationSearch: string,
+  nodeEnv: string = process.env.NODE_ENV ?? "development",
 ): string {
-  return `${encodeURIComponent(componentId)}::${
-    shouldUseStaticBundle(currentLocationSearch) ? "demo" : "runtime"
-  }`;
+  return `${encodeURIComponent(componentId)}::${resolveBundleBuildMode(
+    currentLocationSearch,
+    nodeEnv,
+  )}`;
 }
 
 export function buildBundleRequestPath(
   componentId: string,
   currentLocationSearch: string,
+  nodeEnv: string = process.env.NODE_ENV ?? "development",
 ): string {
-  if (shouldUseStaticBundle(currentLocationSearch)) {
+  if (shouldUseStaticBundle(currentLocationSearch, nodeEnv)) {
     return `/workbench-bundles/${encodeURIComponent(componentId)}.js`;
   }
 
   const requestParams = new URLSearchParams({ id: componentId });
+  if (isDemoBundleRequest(currentLocationSearch)) {
+    requestParams.set("demo", "true");
+  }
   return `/api/workbench/bundle?${requestParams.toString()}`;
 }
 

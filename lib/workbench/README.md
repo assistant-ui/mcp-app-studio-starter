@@ -10,6 +10,11 @@ The workbench is a **local MCP Apps host simulator** for developing embedded UIs
   open-in-app links, and checkout beta)
   during development.
 
+## Demo Bundles
+
+- In development, `?demo=true` uses a fresh bundle from `/api/workbench/bundle?...&demo=true` so demo previews reflect source edits immediately.
+- In production, demo previews use the prebuilt files in `public/workbench-bundles/`.
+
 ## Theming Contract
 
 Use the shared framework-agnostic contract:

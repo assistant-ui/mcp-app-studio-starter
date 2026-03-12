@@ -165,6 +165,7 @@ These hooks only work on specific platforms. Check availability first:
 | Hook | Platform | Description |
 | ---- | -------- | ----------- |
 | `useWidgetState()` | ChatGPT extensions | Persistent state across sessions |
+| `useToolResponseMetadata()` | ChatGPT extensions | Read private tool metadata from the host |
 | `useUpdateModelContext()` | Host-dependent | Update model-visible context dynamically |
 | `useToolInputPartial()` | Host-dependent | Streaming input during generation |
 | `useLog()` | Host-dependent | Structured logging to host |
@@ -179,6 +180,7 @@ optional ChatGPT extensions (`window.openai`) when needed.
 | ------- | ----------------- | ---------------------------- |
 | Tool input | Yes | (alias: `window.openai.toolInput`) |
 | Tool result | Yes | (alias: `window.openai.toolOutput`) |
+| Private metadata | No | Yes (alias: `window.openai.toolResponseMetadata`) |
 | Call tool | Yes | (alias: `window.openai.callTool`) |
 | Send message | Host-dependent | (alias: `window.openai.sendFollowUpMessage`) |
 | Update model context | Host-dependent | (extension: `window.openai.setWidgetState`) |

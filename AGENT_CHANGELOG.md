@@ -187,6 +187,7 @@ to match the real runtime model across hosts.
 
 ### Level 3: Platform-Specific (Advanced)
 - `useWidgetState()` - ChatGPT extensions only, persistent state (optional `window.openai`)
+- `useToolResponseMetadata()` - ChatGPT extensions only, private host metadata (optional `window.openai`)
 - `useUpdateModelContext()` - Host-dependent, model context updates (standard MCP Apps)
 - `useToolInputPartial()` - Host-dependent, streaming input
 - `useLog()` - Host-dependent, structured logging

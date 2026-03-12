@@ -69,6 +69,11 @@ const HOOK_REGISTRY: Record<string, HookInfo> = {
     category: "chatgpt-extensions",
     description: "Persistent widget state",
   },
+  useToolResponseMetadata: {
+    name: "useToolResponseMetadata",
+    category: "chatgpt-extensions",
+    description: "Read private tool metadata",
+  },
   useToolInputPartial: {
     name: "useToolInputPartial",
     category: "portable",
@@ -87,7 +92,7 @@ const HOOK_REGISTRY: Record<string, HookInfo> = {
   useToolResult: {
     name: "useToolResult",
     category: "portable",
-    description: "Get/set tool result",
+    description: "Read tool result",
   },
 };
 

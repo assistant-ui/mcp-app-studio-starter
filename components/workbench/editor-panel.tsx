@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, RotateCcw } from "lucide-react";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,14 +13,11 @@ import { cn } from "@/lib/ui/cn";
 import { getComponent } from "@/lib/workbench/component-registry";
 import { useSelectedComponent, useWorkbenchStore } from "@/lib/workbench/store";
 import { JsonEditor } from "./json-editor";
+import { useJsonEditorChannel } from "./json-editor-state";
 
-type JsonEditorTab =
-  | "toolInput"
-  | "toolOutput"
-  | "widgetState"
-  | "toolResponseMetadata";
+type JsonEditorTab = "toolInput" | "toolOutput" | "widgetState";
 
-type EditorSectionKey = "toolInput" | "widgetState" | "toolResponseMetadata";
+type EditorSectionKey = "toolInput" | "widgetState";
 
 interface EditorSectionConfig {
   key: EditorSectionKey;
@@ -44,109 +41,57 @@ const EDITOR_SECTIONS: EditorSectionConfig[] = [
       "State your app persists between interactions. Restored when the app reopens.",
     tab: "widgetState",
   },
-  {
-    key: "toolResponseMetadata",
-    title: "Private Metadata",
-    tooltip:
-      "Data only your app sees. Hidden from the model and not included in responses.",
-    tab: "toolResponseMetadata",
-  },
 ];
 
 function useJsonEditorState() {
   const selectedComponent = useSelectedComponent();
 
-  const {
-    toolInput,
-    toolOutput,
-    widgetState,
-    toolResponseMetadata,
-    setToolInput,
-    setToolOutput,
-    setWidgetState,
-    setToolResponseMetadata,
-  } = useWorkbenchStore(
-    useShallow((s) => ({
-      toolInput: s.toolInput,
-      toolOutput: s.toolOutput,
-      widgetState: s.widgetState,
-      toolResponseMetadata: s.toolResponseMetadata,
-      setToolInput: s.setToolInput,
-      setToolOutput: s.setToolOutput,
-      setWidgetState: s.setWidgetState,
-      setToolResponseMetadata: s.setToolResponseMetadata,
-    })),
-  );
+  const { toolInput, widgetState, setToolInput, setWidgetState } =
+    useWorkbenchStore(
+      useShallow((s) => ({
+        toolInput: s.toolInput,
+        widgetState: s.widgetState,
+        setToolInput: s.setToolInput,
+        setWidgetState: s.setWidgetState,
+      })),
+    );
 
-  const getActiveData = useCallback(
-    (tab: JsonEditorTab): Record<string, unknown> => {
-      switch (tab) {
-        case "toolInput":
-          return toolInput;
-        case "toolOutput":
-          return toolOutput ?? {};
-        case "widgetState":
-          return (widgetState as Record<string, unknown>) ?? {};
-        case "toolResponseMetadata":
-          return toolResponseMetadata ?? {};
-        default:
-          return {};
+  const toolInputController = useJsonEditorChannel({
+    label: "App Props",
+    value: toolInput,
+    onApply: setToolInput,
+  });
+  const widgetStateController = useJsonEditorChannel({
+    label: "App State",
+    value: (widgetState as Record<string, unknown>) ?? {},
+    onApply: (value) =>
+      setWidgetState(Object.keys(value).length === 0 ? null : value),
+  });
+
+  const controllers = {
+    toolInput: toolInputController,
+    widgetState: widgetStateController,
+  } as const;
+
+  const handleReset = (tab: JsonEditorTab) => {
+    switch (tab) {
+      case "toolInput": {
+        const nextValue = getComponent(selectedComponent)?.defaultProps ?? {};
+        setToolInput(nextValue);
+        controllers.toolInput.resetToValue(nextValue);
+        break;
       }
-    },
-    [toolInput, toolOutput, widgetState, toolResponseMetadata],
-  );
-
-  const handleChange = useCallback(
-    (tab: JsonEditorTab, value: Record<string, unknown>) => {
-      const isEmpty = Object.keys(value).length === 0;
-
-      switch (tab) {
-        case "toolInput":
-          setToolInput(value);
-          break;
-        case "toolOutput":
-          setToolOutput(isEmpty ? null : value);
-          break;
-        case "widgetState":
-          setWidgetState(isEmpty ? null : value);
-          break;
-        case "toolResponseMetadata":
-          setToolResponseMetadata(isEmpty ? null : value);
-          break;
+      case "widgetState": {
+        setWidgetState(null);
+        controllers.widgetState.resetToValue({});
+        break;
       }
-    },
-    [setToolInput, setToolOutput, setWidgetState, setToolResponseMetadata],
-  );
+      case "toolOutput":
+        break;
+    }
+  };
 
-  const handleReset = useCallback(
-    (tab: JsonEditorTab) => {
-      switch (tab) {
-        case "toolInput": {
-          const component = getComponent(selectedComponent);
-          setToolInput(component?.defaultProps ?? {});
-          break;
-        }
-        case "toolOutput":
-          setToolOutput(null);
-          break;
-        case "widgetState":
-          setWidgetState(null);
-          break;
-        case "toolResponseMetadata":
-          setToolResponseMetadata(null);
-          break;
-      }
-    },
-    [
-      selectedComponent,
-      setToolInput,
-      setToolOutput,
-      setWidgetState,
-      setToolResponseMetadata,
-    ],
-  );
-
-  return { getActiveData, handleChange, handleReset };
+  return { controllers, handleReset };
 }
 
 interface EditorSectionTriggerProps {
@@ -207,22 +152,33 @@ function EditorSectionContent({ isOpen, children }: EditorSectionContentProps) {
 }
 
 interface WidgetStateSectionProps {
-  value: Record<string, unknown>;
-  onChange: (value: Record<string, unknown>) => void;
+  text: string;
+  invalidMessage: string | null;
+  onChange: (text: string) => void;
 }
 
-function WidgetStateSection({ value, onChange }: WidgetStateSectionProps) {
-  return <JsonEditor label="App State" value={value} onChange={onChange} />;
+function WidgetStateSection({
+  text,
+  invalidMessage,
+  onChange,
+}: WidgetStateSectionProps) {
+  return (
+    <JsonEditor
+      label="App State"
+      text={text}
+      invalidMessage={invalidMessage}
+      onChange={onChange}
+    />
+  );
 }
 
 export function EditorPanel() {
-  const { getActiveData, handleChange, handleReset } = useJsonEditorState();
+  const { controllers, handleReset } = useJsonEditorState();
   const [openSections, setOpenSections] = useState<
     Record<EditorSectionKey, boolean>
   >({
     toolInput: true,
     widgetState: false,
-    toolResponseMetadata: false,
   });
 
   const toggleSection = (key: EditorSectionKey) => {
@@ -230,19 +186,22 @@ export function EditorPanel() {
   };
 
   const renderSectionContent = (section: EditorSectionConfig) => {
+    const controller = controllers[section.key];
     if (section.key === "widgetState") {
       return (
         <WidgetStateSection
-          value={getActiveData(section.tab)}
-          onChange={(value) => handleChange(section.tab, value)}
+          text={controller.text}
+          invalidMessage={controller.invalidMessage}
+          onChange={controller.handleTextChange}
         />
       );
     }
     return (
       <JsonEditor
         label={section.title}
-        value={getActiveData(section.tab)}
-        onChange={(value) => handleChange(section.tab, value)}
+        text={controller.text}
+        invalidMessage={controller.invalidMessage}
+        onChange={controller.handleTextChange}
       />
     );
   };
