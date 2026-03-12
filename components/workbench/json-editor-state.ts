@@ -1,16 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer } from "react";
 
 export interface JsonEditorChannelState {
   text: string;
   appliedValueStr: string;
   invalidMessage: string | null;
+  pendingAppliedValue: Record<string, unknown> | null;
+  pendingApplyVersion: number;
 }
 
 interface JsonEditorTextChangeResult {
   nextState: JsonEditorChannelState;
-  appliedValue: Record<string, unknown> | null;
 }
 
 interface UseJsonEditorChannelOptions {
@@ -18,6 +19,24 @@ interface UseJsonEditorChannelOptions {
   value: Record<string, unknown>;
   onApply: (value: Record<string, unknown>) => void;
 }
+
+type JsonEditorChannelAction =
+  | {
+      type: "userEdit";
+      text: string;
+      label: string;
+    }
+  | {
+      type: "externalValueChanged";
+      value: Record<string, unknown>;
+    }
+  | {
+      type: "resetToValue";
+      value: Record<string, unknown>;
+    }
+  | {
+      type: "flushPendingApply";
+    };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -51,6 +70,8 @@ export function createJsonEditorChannelState(
     text: serializeJsonEditorValue(value),
     appliedValueStr: JSON.stringify(value),
     invalidMessage: null,
+    pendingAppliedValue: null,
+    pendingApplyVersion: 0,
   };
 }
 
@@ -67,8 +88,8 @@ export function applyJsonEditorTextChange(
         ...state,
         text,
         invalidMessage: formatEmptyDraftMessage(label),
+        pendingAppliedValue: null,
       },
-      appliedValue: null,
     };
   }
 
@@ -78,8 +99,9 @@ export function applyJsonEditorTextChange(
         text,
         appliedValueStr: JSON.stringify({}),
         invalidMessage: null,
+        pendingAppliedValue: {},
+        pendingApplyVersion: state.pendingApplyVersion + 1,
       },
-      appliedValue: {},
     };
   }
 
@@ -91,8 +113,8 @@ export function applyJsonEditorTextChange(
           ...state,
           text,
           invalidMessage: formatInvalidShapeMessage(label),
+          pendingAppliedValue: null,
         },
-        appliedValue: null,
       };
     }
 
@@ -101,8 +123,9 @@ export function applyJsonEditorTextChange(
         text,
         appliedValueStr: JSON.stringify(parsed),
         invalidMessage: null,
+        pendingAppliedValue: parsed,
+        pendingApplyVersion: state.pendingApplyVersion + 1,
       },
-      appliedValue: parsed,
     };
   } catch {
     return {
@@ -110,8 +133,8 @@ export function applyJsonEditorTextChange(
         ...state,
         text,
         invalidMessage: formatInvalidJsonMessage(label),
+        pendingAppliedValue: null,
       },
-      appliedValue: null,
     };
   }
 }
@@ -129,10 +152,36 @@ export function reconcileJsonEditorChannelState(
     return {
       ...state,
       appliedValueStr,
+      pendingAppliedValue: null,
     };
   }
 
   return createJsonEditorChannelState(value);
+}
+
+export function jsonEditorChannelReducer(
+  state: JsonEditorChannelState,
+  action: JsonEditorChannelAction,
+): JsonEditorChannelState {
+  switch (action.type) {
+    case "userEdit":
+      return applyJsonEditorTextChange(state, action.text, action.label)
+        .nextState;
+    case "externalValueChanged":
+      return reconcileJsonEditorChannelState(state, action.value);
+    case "resetToValue":
+      return createJsonEditorChannelState(action.value);
+    case "flushPendingApply":
+      if (state.pendingAppliedValue === null) {
+        return state;
+      }
+      return {
+        ...state,
+        pendingAppliedValue: null,
+      };
+    default:
+      return state;
+  }
 }
 
 export function useJsonEditorChannel({
@@ -141,32 +190,34 @@ export function useJsonEditorChannel({
   onApply,
 }: UseJsonEditorChannelOptions) {
   const appliedValueStr = useMemo(() => JSON.stringify(value), [value]);
-  const [state, setState] = useState(() => createJsonEditorChannelState(value));
+  const [state, dispatch] = useReducer(
+    jsonEditorChannelReducer,
+    value,
+    createJsonEditorChannelState,
+  );
 
   useEffect(() => {
-    setState((prev) => {
-      if (prev.appliedValueStr === appliedValueStr) {
-        return prev;
-      }
-      return reconcileJsonEditorChannelState(prev, value);
-    });
+    dispatch({ type: "externalValueChanged", value });
   }, [appliedValueStr, value]);
+
+  useEffect(() => {
+    if (state.pendingAppliedValue === null) {
+      return;
+    }
+
+    onApply(state.pendingAppliedValue);
+    dispatch({ type: "flushPendingApply" });
+  }, [onApply, state.pendingAppliedValue, state.pendingApplyVersion]);
 
   const handleTextChange = useCallback(
     (text: string) => {
-      setState((prev) => {
-        const result = applyJsonEditorTextChange(prev, text, label);
-        if (result.appliedValue) {
-          onApply(result.appliedValue);
-        }
-        return result.nextState;
-      });
+      dispatch({ type: "userEdit", text, label });
     },
-    [label, onApply],
+    [label],
   );
 
   const resetToValue = useCallback((nextValue: Record<string, unknown>) => {
-    setState(createJsonEditorChannelState(nextValue));
+    dispatch({ type: "resetToValue", value: nextValue });
   }, []);
 
   return {

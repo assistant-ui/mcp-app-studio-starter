@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/ui/cn";
 import { getComponent } from "@/lib/workbench/component-registry";
 import { useSelectedComponent, useWorkbenchStore } from "@/lib/workbench/store";
+import { resolveInitialWidgetState } from "@/lib/workbench/widget-state-defaults";
 import { JsonEditor } from "./json-editor";
 import { useJsonEditorChannel } from "./json-editor-state";
 
@@ -56,6 +57,11 @@ function useJsonEditorState() {
       })),
     );
 
+  const initialWidgetState = resolveInitialWidgetState(
+    selectedComponent,
+    toolInput,
+  );
+
   const toolInputController = useJsonEditorChannel({
     label: "App Props",
     value: toolInput,
@@ -63,7 +69,7 @@ function useJsonEditorState() {
   });
   const widgetStateController = useJsonEditorChannel({
     label: "App State",
-    value: (widgetState as Record<string, unknown>) ?? {},
+    value: (widgetState as Record<string, unknown>) ?? initialWidgetState,
     onApply: (value) =>
       setWidgetState(Object.keys(value).length === 0 ? null : value),
   });
@@ -82,8 +88,12 @@ function useJsonEditorState() {
         break;
       }
       case "widgetState": {
-        setWidgetState(null);
-        controllers.widgetState.resetToValue({});
+        setWidgetState(
+          Object.keys(initialWidgetState).length === 0
+            ? null
+            : initialWidgetState,
+        );
+        controllers.widgetState.resetToValue(initialWidgetState);
         break;
       }
       case "toolOutput":

@@ -20,7 +20,9 @@ describe("json editor channel state", () => {
       "App State",
     );
 
-    assert.deepEqual(result.appliedValue, { categoryFilter: "cafe" });
+    assert.deepEqual(result.nextState.pendingAppliedValue, {
+      categoryFilter: "cafe",
+    });
     assert.equal(result.nextState.text, '{\n  "categoryFilter": "cafe"\n}');
     assert.equal(result.nextState.invalidMessage, null);
   });
@@ -29,7 +31,7 @@ describe("json editor channel state", () => {
     const state = createJsonEditorChannelState({ selectedPoiId: "1" });
     const result = applyJsonEditorTextChange(state, "null", "App State");
 
-    assert.deepEqual(result.appliedValue, {});
+    assert.deepEqual(result.nextState.pendingAppliedValue, {});
     assert.equal(result.nextState.text, "null");
     assert.equal(result.nextState.invalidMessage, null);
   });
@@ -41,7 +43,7 @@ describe("json editor channel state", () => {
     });
     const result = applyJsonEditorTextChange(state, "", "App Props");
 
-    assert.equal(result.appliedValue, null);
+    assert.equal(result.nextState.pendingAppliedValue, null);
     assert.equal(
       result.nextState.invalidMessage,
       "Empty App Props draft. Type null to clear it. Preview is using the last valid value.",
@@ -59,7 +61,7 @@ describe("json editor channel state", () => {
     const state = createJsonEditorChannelState({});
     const result = applyJsonEditorTextChange(state, '["museum"]', "App State");
 
-    assert.equal(result.appliedValue, null);
+    assert.equal(result.nextState.pendingAppliedValue, null);
     assert.equal(
       result.nextState.invalidMessage,
       "App State must be a JSON object or null. Preview is using the last valid value.",
