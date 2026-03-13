@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, CircleHelp, RotateCcw } from "lucide-react";
+import { ChevronDown, RotateCcw } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ const EDITOR_SECTIONS: EditorSectionConfig[] = [
     key: "widgetState",
     title: "Host State",
     tooltip:
-      "Optional host-managed state exposed by the host. In ChatGPT/OpenAI this maps to widgetState. This is not part of standard MCP Apps.",
+      "Optional host-managed state exposed by the host. In ChatGPT this maps to widgetState. This is not part of standard MCP Apps.",
     tab: "widgetState",
   },
 ];
@@ -106,7 +106,6 @@ function useJsonEditorState() {
 
 interface EditorSectionTriggerProps {
   title: string;
-  tooltip?: string;
   badge?: React.ReactNode;
   isOpen: boolean;
   onToggle: () => void;
@@ -115,7 +114,6 @@ interface EditorSectionTriggerProps {
 
 function EditorSectionTrigger({
   title,
-  tooltip,
   badge,
   isOpen,
   onToggle,
@@ -137,19 +135,6 @@ function EditorSectionTrigger({
         <span className="mr-1 font-normal text-muted-foreground text-sm">
           {title}
         </span>
-
-        {tooltip ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex size-4 shrink-0 items-center justify-center text-muted-foreground/70">
-                <CircleHelp className="size-3.5" />
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-56 text-xs">
-              {tooltip}
-            </TooltipContent>
-          </Tooltip>
-        ) : null}
 
         {badge}
       </button>
@@ -245,12 +230,18 @@ export function EditorPanel() {
         <div key={section.key} className="contents">
           <EditorSectionTrigger
             title={section.title}
-            tooltip={section.tooltip}
             badge={
               section.key === "widgetState" ? (
-                <span className="rounded-full border border-amber-300/80 bg-amber-100 px-1.5 py-0.5 font-medium text-[10px] text-amber-900 uppercase tracking-wide dark:border-amber-700/80 dark:bg-amber-950 dark:text-amber-200">
-                  OpenAI extension
-                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="rounded-full border border-border bg-muted px-1.5 py-0.5 font-medium text-[10px] text-muted-foreground">
+                      ChatGPT
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-56 text-xs">
+                    {section.tooltip}
+                  </TooltipContent>
+                </Tooltip>
               ) : undefined
             }
             isOpen={openSections[section.key]}
