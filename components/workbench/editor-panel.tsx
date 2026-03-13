@@ -70,6 +70,7 @@ function useJsonEditorState() {
     value: resolveEditableWidgetState(
       (widgetState as Record<string, unknown> | null) ?? null,
     ),
+    emptyDraftBehavior: "clear",
     onApply: (value) =>
       setWidgetState(Object.keys(value).length === 0 ? null : value),
   });

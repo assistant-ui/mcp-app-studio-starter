@@ -10,11 +10,15 @@ export interface JsonEditorChannelState {
   pendingApplyVersion: number;
 }
 
+interface JsonEditorChannelOptions {
+  emptyDraftBehavior?: "reject" | "clear";
+}
+
 interface JsonEditorTextChangeResult {
   nextState: JsonEditorChannelState;
 }
 
-interface UseJsonEditorChannelOptions {
+interface UseJsonEditorChannelOptions extends JsonEditorChannelOptions {
   label: string;
   value: Record<string, unknown>;
   onApply: (value: Record<string, unknown>) => void;
@@ -25,6 +29,7 @@ type JsonEditorChannelAction =
       type: "userEdit";
       text: string;
       label: string;
+      options?: JsonEditorChannelOptions;
     }
   | {
       type: "externalValueChanged";
@@ -79,10 +84,23 @@ export function applyJsonEditorTextChange(
   state: JsonEditorChannelState,
   text: string,
   label: string,
+  options?: JsonEditorChannelOptions,
 ): JsonEditorTextChangeResult {
   const trimmed = text.trim();
 
   if (trimmed === "") {
+    if (options?.emptyDraftBehavior === "clear") {
+      return {
+        nextState: {
+          text,
+          appliedValueStr: JSON.stringify({}),
+          invalidMessage: null,
+          pendingAppliedValue: {},
+          pendingApplyVersion: state.pendingApplyVersion + 1,
+        },
+      };
+    }
+
     return {
       nextState: {
         ...state,
@@ -165,8 +183,12 @@ export function jsonEditorChannelReducer(
 ): JsonEditorChannelState {
   switch (action.type) {
     case "userEdit":
-      return applyJsonEditorTextChange(state, action.text, action.label)
-        .nextState;
+      return applyJsonEditorTextChange(
+        state,
+        action.text,
+        action.label,
+        action.options,
+      ).nextState;
     case "externalValueChanged":
       return reconcileJsonEditorChannelState(state, action.value);
     case "resetToValue":
@@ -188,6 +210,7 @@ export function useJsonEditorChannel({
   label,
   value,
   onApply,
+  emptyDraftBehavior,
 }: UseJsonEditorChannelOptions) {
   const appliedValueStr = useMemo(() => JSON.stringify(value), [value]);
   const [state, dispatch] = useReducer(
@@ -211,9 +234,14 @@ export function useJsonEditorChannel({
 
   const handleTextChange = useCallback(
     (text: string) => {
-      dispatch({ type: "userEdit", text, label });
+      dispatch({
+        type: "userEdit",
+        text,
+        label,
+        options: { emptyDraftBehavior },
+      });
     },
-    [label],
+    [emptyDraftBehavior, label],
   );
 
   const resetToValue = useCallback((nextValue: Record<string, unknown>) => {
