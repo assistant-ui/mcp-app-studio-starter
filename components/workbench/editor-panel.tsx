@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, RotateCcw } from "lucide-react";
+import { ChevronDown, RotateCcw, Trash2 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
@@ -174,11 +174,7 @@ function WidgetStateSection({
   return (
     <div>
       <div className="px-3 pt-3 text-[11px] text-muted-foreground leading-relaxed">
-        {/* Host state is an OpenAI-specific override layer, not the app's full
-            runtime state. Keep this panel raw so it doesn't drift from real host semantics. */}
-        Edits host-managed widget state only. Empty means no persisted host
-        override. Your app may still derive runtime state from App Props,
-        built-in defaults, local storage, or server data.
+        ChatGPT-only host state. Empty means no host override.
       </div>
       <JsonEditor
         label="Host State"
@@ -259,10 +255,18 @@ export function EditorPanel() {
                         handleReset(section.tab);
                       }}
                     >
-                      <RotateCcw className="size-3" />
+                      {section.key === "widgetState" ? (
+                        <Trash2 className="size-3" />
+                      ) : (
+                        <RotateCcw className="size-3" />
+                      )}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="left">Reset</TooltipContent>
+                  <TooltipContent side="left">
+                    {section.key === "widgetState"
+                      ? "Clear Host State"
+                      : "Reset"}
+                  </TooltipContent>
                 </Tooltip>
               ) : null
             }
