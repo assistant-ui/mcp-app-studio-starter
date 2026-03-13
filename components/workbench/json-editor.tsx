@@ -163,17 +163,13 @@ export function JsonEditor({
     [isDark],
   );
 
-  const handleChange = (newText: string) => {
-    onChange(newText);
-  };
-
   return (
     <div className="relative">
       <CodeMirror
         value={text}
         height="100%"
         extensions={extensions}
-        onChange={handleChange}
+        onChange={onChange}
         theme="none"
         basicSetup={{
           lineNumbers: true,

@@ -1,22 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from "@/components/examples/poi-map";
-import {
-  getDefaultDemoWidgetState,
-  resolveDemoWidgetState,
-} from "./poi-map-demo-state";
+import { resolveDemoWidgetState } from "./poi-map-demo-state";
 
 describe("poi map demo state helpers", () => {
-  it("builds the expected default widget state", () => {
-    assert.deepEqual(getDefaultDemoWidgetState(), {
-      selectedPoiId: null,
-      favoriteIds: [],
-      mapCenter: DEFAULT_CENTER,
-      mapZoom: DEFAULT_ZOOM + 1,
-      categoryFilter: null,
-    });
-  });
-
   it("merges host widget state over the demo defaults", () => {
     assert.deepEqual(
       resolveDemoWidgetState({

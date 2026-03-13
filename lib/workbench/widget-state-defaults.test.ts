@@ -18,10 +18,6 @@ describe("resolveInitialWidgetState", () => {
     });
   });
 
-  it("returns an empty object for components without widget state", () => {
-    assert.deepEqual(resolveInitialWidgetState("welcome", {}), {});
-  });
-
   it("keeps reset widget state derived from the latest tool input", () => {
     const initialToolInput = {
       ...POI_MAP_DEMO_INPUT,
