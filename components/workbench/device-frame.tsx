@@ -7,7 +7,6 @@ import type { DeviceType } from "@/lib/workbench/types";
 interface DeviceFrameProps {
   children: React.ReactNode;
   className?: string;
-  framed?: boolean;
   style?: React.CSSProperties;
 }
 
@@ -45,35 +44,34 @@ function DynamicIsland({ isDark }: { isDark: boolean }) {
   );
 }
 
-export function DeviceFrame({
-  children,
-  className,
-  framed = true,
-  style,
-}: DeviceFrameProps) {
+export function DeviceFrame({ children, className, style }: DeviceFrameProps) {
   const theme = useWorkbenchTheme();
   const deviceType = useDeviceType();
   const effectiveIsDark = theme === "dark";
-  const shouldShowFrame = deviceType !== "desktop" && framed;
-  const config = deviceType === "desktop" ? null : FRAME_CONFIG[deviceType];
+
+  if (deviceType === "desktop") {
+    return (
+      <div className={className} style={style}>
+        {children}
+      </div>
+    );
+  }
+
+  const config = FRAME_CONFIG[deviceType];
 
   return (
     <div
       className={cn(
-        "relative flex flex-col overflow-hidden transition-colors",
-        shouldShowFrame && "border shadow-xl",
-        shouldShowFrame && config?.borderRadius,
-        shouldShowFrame &&
-          (effectiveIsDark
-            ? "border-neutral-700/50 bg-neutral-900 shadow-black/30"
-            : "border-neutral-300/50 bg-white shadow-black/10"),
+        "relative flex flex-col overflow-hidden border shadow-xl transition-colors",
+        config.borderRadius,
+        effectiveIsDark
+          ? "border-neutral-700/50 bg-neutral-900 shadow-black/30"
+          : "border-neutral-300/50 bg-white shadow-black/10",
         className,
       )}
       style={style}
     >
-      {shouldShowFrame && config?.showNotch && (
-        <DynamicIsland isDark={effectiveIsDark} />
-      )}
+      {config.showNotch && <DynamicIsland isDark={effectiveIsDark} />}
       {children}
     </div>
   );

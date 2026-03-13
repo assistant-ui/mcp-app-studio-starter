@@ -17,21 +17,6 @@ export interface LayoutConfig {
   contentViewportClassName: string;
 }
 
-export function resolveWidgetHeight(
-  maxHeight: number,
-  intrinsicHeight: number | null,
-): number {
-  if (
-    intrinsicHeight === null ||
-    !Number.isFinite(intrinsicHeight) ||
-    intrinsicHeight <= 0
-  ) {
-    return maxHeight;
-  }
-
-  return Math.min(intrinsicHeight, maxHeight);
-}
-
 export function getLayoutVariant({
   displayMode,
   conversationMode,
@@ -47,9 +32,13 @@ export function getLayoutVariant({
 
 export function getLayoutConfig({
   variant,
+  isDesktopDevice: _isDesktopDevice,
+  isDark: _isDark,
   widgetHeight,
 }: {
   variant: LayoutVariant;
+  isDesktopDevice: boolean;
+  isDark: boolean;
   widgetHeight: number;
 }): LayoutConfig {
   const cardTone = "border-border bg-background";
