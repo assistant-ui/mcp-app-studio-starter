@@ -30,10 +30,41 @@ function getOpenAIWindow(): OpenAIExtensionWindow | null {
   return window as OpenAIExtensionWindow;
 }
 
-export function readOpenAIChannel<T>(field: OpenAIChannelField): T | null {
+export interface OpenAIChannelSnapshot<T> {
+  available: boolean;
+  value: T | null;
+}
+
+export function readOpenAIChannelSnapshot<T>(
+  field: OpenAIChannelField,
+): OpenAIChannelSnapshot<T> {
   const openai = getOpenAIWindow()?.openai;
-  const value = openai?.[field];
-  return value === undefined ? null : (value as T | null);
+  if (!openai || !(field in openai)) {
+    return {
+      available: false,
+      value: null,
+    };
+  }
+
+  const value = openai[field];
+  return {
+    available: true,
+    value: value === undefined ? null : (value as T | null),
+  };
+}
+
+export function readOpenAIChannel<T>(field: OpenAIChannelField): T | null {
+  return readOpenAIChannelSnapshot<T>(field).value;
+}
+
+export function useOpenAIChannelAvailability(
+  field: OpenAIChannelField,
+): boolean {
+  return useSyncExternalStore(
+    (callback) => subscribeToOpenAIChannel(field, callback),
+    () => readOpenAIChannelSnapshot(field).available,
+    () => false,
+  );
 }
 
 export function subscribeToOpenAIChannel(

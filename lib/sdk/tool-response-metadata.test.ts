@@ -1,9 +1,6 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
-import {
-  readToolResponseMetadata,
-  useToolResponseMetadata,
-} from "./tool-response-metadata";
+import { readToolResponseMetadata } from "./tool-response-metadata";
 
 type MockWindow = {
   openai?: Record<string, unknown>;
@@ -14,10 +11,6 @@ afterEach(() => {
 });
 
 describe("tool response metadata helpers", () => {
-  it("exports a hook function", () => {
-    assert.equal(typeof useToolResponseMetadata, "function");
-  });
-
   it("reads tool response metadata from window.openai", () => {
     (globalThis as { window?: MockWindow }).window = {
       openai: {

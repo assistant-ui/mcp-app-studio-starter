@@ -2,7 +2,18 @@
 
 import { useWidgetState as useBaseWidgetState } from "mcp-app-studio";
 import { useCallback } from "react";
-import { useOpenAIChannel } from "./openai-channel";
+import {
+  type OpenAIChannelSnapshot,
+  useOpenAIChannel,
+  useOpenAIChannelAvailability,
+} from "./openai-channel";
+
+function resolveWidgetStateValue<T>(
+  channel: OpenAIChannelSnapshot<T>,
+  localState: T | null,
+): T | null {
+  return channel.available ? channel.value : localState;
+}
 
 export function useWidgetState<T = Record<string, unknown>>(): [
   T | null,
@@ -10,6 +21,8 @@ export function useWidgetState<T = Record<string, unknown>>(): [
 ] {
   const [localState, setLocalState] = useBaseWidgetState<T>();
   const liveState = useOpenAIChannel<T>("widgetState");
+  const isLiveStateChannelAvailable =
+    useOpenAIChannelAvailability("widgetState");
 
   const setWidgetState = useCallback(
     (state: T | null) => {
@@ -18,5 +31,14 @@ export function useWidgetState<T = Record<string, unknown>>(): [
     [setLocalState],
   );
 
-  return [liveState ?? localState, setWidgetState];
+  return [
+    resolveWidgetStateValue(
+      {
+        available: isLiveStateChannelAvailable,
+        value: liveState,
+      },
+      localState,
+    ),
+    setWidgetState,
+  ];
 }

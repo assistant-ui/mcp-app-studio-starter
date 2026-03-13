@@ -3,6 +3,7 @@ import { afterEach, describe, it } from "node:test";
 import {
   OPENAI_SET_GLOBALS_EVENT,
   readOpenAIChannel,
+  readOpenAIChannelSnapshot,
   subscribeToOpenAIChannel,
 } from "./openai-channel";
 
@@ -41,6 +42,26 @@ describe("openai channel helpers", () => {
     setMockWindow(createMockWindow());
 
     assert.equal(readOpenAIChannel("toolResponseMetadata"), null);
+  });
+
+  it("distinguishes an explicit null channel value from a missing channel", () => {
+    setMockWindow(
+      createMockWindow({
+        widgetState: null,
+      }),
+    );
+
+    assert.deepEqual(readOpenAIChannelSnapshot("widgetState"), {
+      available: true,
+      value: null,
+    });
+
+    setMockWindow(createMockWindow());
+
+    assert.deepEqual(readOpenAIChannelSnapshot("widgetState"), {
+      available: false,
+      value: null,
+    });
   });
 
   it("subscribes only to updates for the requested channel", () => {

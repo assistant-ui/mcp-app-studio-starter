@@ -30,3 +30,30 @@ export function resolveInitialWidgetState(
       return {};
   }
 }
+
+export function resolveVisibleWidgetState(
+  componentId: string,
+  toolInput: Record<string, unknown>,
+  widgetState: Record<string, unknown> | null,
+): Record<string, unknown> {
+  const initialWidgetState = resolveInitialWidgetState(componentId, toolInput);
+
+  switch (componentId) {
+    case "poi-map":
+      return mergePOIMapWidgetState(
+        initialWidgetState as POIMapViewState,
+        widgetState as Partial<POIMapViewState> | null,
+      );
+    default:
+      return widgetState ?? initialWidgetState;
+  }
+}
+
+export function resolveResetWidgetState(
+  _componentId: string,
+  _toolInput: Record<string, unknown>,
+): Record<string, unknown> | null {
+  // Reset should clear persisted widget state so visible defaults stay derived
+  // from the latest App Props rather than freezing a snapshot.
+  return null;
+}

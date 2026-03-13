@@ -12,7 +12,10 @@ import {
 import { cn } from "@/lib/ui/cn";
 import { getComponent } from "@/lib/workbench/component-registry";
 import { useSelectedComponent, useWorkbenchStore } from "@/lib/workbench/store";
-import { resolveInitialWidgetState } from "@/lib/workbench/widget-state-defaults";
+import {
+  resolveResetWidgetState,
+  resolveVisibleWidgetState,
+} from "@/lib/workbench/widget-state-defaults";
 import { JsonEditor } from "./json-editor";
 import { useJsonEditorChannel } from "./json-editor-state";
 
@@ -57,9 +60,10 @@ function useJsonEditorState() {
       })),
     );
 
-  const initialWidgetState = resolveInitialWidgetState(
+  const visibleWidgetState = resolveVisibleWidgetState(
     selectedComponent,
     toolInput,
+    (widgetState as Record<string, unknown> | null) ?? null,
   );
 
   const toolInputController = useJsonEditorChannel({
@@ -69,7 +73,7 @@ function useJsonEditorState() {
   });
   const widgetStateController = useJsonEditorChannel({
     label: "App State",
-    value: (widgetState as Record<string, unknown>) ?? initialWidgetState,
+    value: visibleWidgetState,
     onApply: (value) =>
       setWidgetState(Object.keys(value).length === 0 ? null : value),
   });
@@ -88,12 +92,18 @@ function useJsonEditorState() {
         break;
       }
       case "widgetState": {
-        setWidgetState(
-          Object.keys(initialWidgetState).length === 0
-            ? null
-            : initialWidgetState,
+        const resetWidgetState = resolveResetWidgetState(
+          selectedComponent,
+          toolInput,
         );
-        controllers.widgetState.resetToValue(initialWidgetState);
+        const nextVisibleWidgetState = resolveVisibleWidgetState(
+          selectedComponent,
+          toolInput,
+          resetWidgetState,
+        );
+
+        setWidgetState(resetWidgetState);
+        controllers.widgetState.resetToValue(nextVisibleWidgetState);
         break;
       }
       case "toolOutput":
