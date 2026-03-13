@@ -6,7 +6,6 @@ import { type Diagnostic, linter, lintGutter } from "@codemirror/lint";
 import { oneDarkHighlightStyle } from "@codemirror/theme-one-dark";
 import { EditorView, placeholder, tooltips } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
-import { AlertTriangle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/ui/cn";
@@ -22,7 +21,6 @@ const jsonLinterWithNullSupport = linter((view): Diagnostic[] => {
 interface JsonEditorProps {
   label?: string;
   text: string;
-  invalidMessage?: string | null;
   onChange: (text: string) => void;
 }
 
@@ -135,11 +133,7 @@ const customEditorStyleLight = EditorView.theme(lightStyleSpec, {
 });
 const customEditorStyleDark = EditorView.theme(darkStyleSpec, { dark: true });
 
-export function JsonEditor({
-  text,
-  invalidMessage = null,
-  onChange,
-}: JsonEditorProps) {
+export function JsonEditor({ text, onChange }: JsonEditorProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -202,14 +196,6 @@ export function JsonEditor({
           "dark:[&_.cm-matchingBracket]:bg-[rgba(255,255,255,0.15)]!",
         )}
       />
-      {invalidMessage ? (
-        <div className="px-3 pb-3">
-          <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800 text-xs dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
-            <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-            <span>{invalidMessage}</span>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }

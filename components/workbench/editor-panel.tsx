@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, RotateCcw, Trash2 } from "lucide-react";
+import { AlertTriangle, ChevronDown, RotateCcw, Trash2 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
@@ -162,26 +162,16 @@ function EditorSectionContent({ isOpen, children }: EditorSectionContentProps) {
 
 interface WidgetStateSectionProps {
   text: string;
-  invalidMessage: string | null;
   onChange: (text: string) => void;
 }
 
-function WidgetStateSection({
-  text,
-  invalidMessage,
-  onChange,
-}: WidgetStateSectionProps) {
+function WidgetStateSection({ text, onChange }: WidgetStateSectionProps) {
   return (
     <div>
       <div className="px-3 pt-3 text-[11px] text-muted-foreground leading-relaxed">
         ChatGPT-only host state. Empty means no host override.
       </div>
-      <JsonEditor
-        label="Host State"
-        text={text}
-        invalidMessage={invalidMessage}
-        onChange={onChange}
-      />
+      <JsonEditor label="Host State" text={text} onChange={onChange} />
     </div>
   );
 }
@@ -205,7 +195,6 @@ export function EditorPanel() {
       return (
         <WidgetStateSection
           text={controller.text}
-          invalidMessage={controller.invalidMessage}
           onChange={controller.handleTextChange}
         />
       );
@@ -214,9 +203,55 @@ export function EditorPanel() {
       <JsonEditor
         label={section.title}
         text={controller.text}
-        invalidMessage={controller.invalidMessage}
         onChange={controller.handleTextChange}
       />
+    );
+  };
+
+  const renderSectionAction = (section: EditorSectionConfig) => {
+    if (!openSections[section.key]) {
+      return null;
+    }
+
+    const controller = controllers[section.key];
+
+    return (
+      <div className="flex items-center gap-1">
+        {controller.invalidMessage ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex size-6 items-center justify-center text-amber-600 dark:text-amber-400">
+                <AlertTriangle className="size-3.5" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="max-w-72 text-xs">
+              {controller.invalidMessage}
+            </TooltipContent>
+          </Tooltip>
+        ) : null}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="size-6"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleReset(section.tab);
+              }}
+            >
+              {section.key === "widgetState" ? (
+                <Trash2 className="size-3" />
+              ) : (
+                <RotateCcw className="size-3" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left">
+            {section.key === "widgetState" ? "Clear Host State" : "Reset"}
+          </TooltipContent>
+        </Tooltip>
+      </div>
     );
   };
 
@@ -242,34 +277,7 @@ export function EditorPanel() {
             }
             isOpen={openSections[section.key]}
             onToggle={() => toggleSection(section.key)}
-            action={
-              openSections[section.key] ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="size-6"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleReset(section.tab);
-                      }}
-                    >
-                      {section.key === "widgetState" ? (
-                        <Trash2 className="size-3" />
-                      ) : (
-                        <RotateCcw className="size-3" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="left">
-                    {section.key === "widgetState"
-                      ? "Clear Host State"
-                      : "Reset"}
-                  </TooltipContent>
-                </Tooltip>
-              ) : null
-            }
+            action={renderSectionAction(section)}
           />
           <EditorSectionContent isOpen={openSections[section.key]}>
             {renderSectionContent(section)}
