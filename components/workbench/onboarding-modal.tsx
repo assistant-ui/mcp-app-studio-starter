@@ -36,9 +36,9 @@ const STEPS: OnboardingStep[] = [
   },
   {
     icon: <Database className="size-5 text-green-500" />,
-    title: "App State",
+    title: "Host State",
     description:
-      "Persistent state your app maintains across interactions. Visible to the model in follow-up turns.",
+      "Optional OpenAI/ChatGPT host-managed state. Useful when the host exposes widgetState, but not part of standard MCP Apps.",
   },
 ];
 

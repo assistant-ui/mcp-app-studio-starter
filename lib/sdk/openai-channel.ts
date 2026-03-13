@@ -1,8 +1,12 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import {
+  OPENAI_SET_GLOBALS_EVENT,
+  WORKBENCH_OPENAI_SHIM_MARKER,
+} from "./openai-channel-contract";
 
-export const OPENAI_SET_GLOBALS_EVENT = "openai:set_globals" as const;
+export { OPENAI_SET_GLOBALS_EVENT, WORKBENCH_OPENAI_SHIM_MARKER };
 
 export type OpenAIChannelField =
   | "toolInput"
@@ -23,6 +27,7 @@ interface OpenAISetGlobalsEventDetail {
 
 interface OpenAIExtensionWindow extends Window {
   openai?: OpenAIReadableGlobals;
+  __MCP_APP_STUDIO_WORKBENCH_OPENAI_SHIM__?: boolean;
 }
 
 function getOpenAIWindow(): OpenAIExtensionWindow | null {
@@ -30,9 +35,41 @@ function getOpenAIWindow(): OpenAIExtensionWindow | null {
   return window as OpenAIExtensionWindow;
 }
 
+export function isWorkbenchOpenAIShimWindow(
+  currentWindow:
+    | Pick<OpenAIExtensionWindow, typeof WORKBENCH_OPENAI_SHIM_MARKER>
+    | null
+    | undefined,
+): boolean {
+  return currentWindow?.[WORKBENCH_OPENAI_SHIM_MARKER] === true;
+}
+
 export interface OpenAIChannelSnapshot<T> {
   available: boolean;
   value: T | null;
+}
+
+const channelSnapshotCache = new Map<
+  OpenAIChannelField,
+  OpenAIChannelSnapshot<unknown>
+>();
+
+function getCachedChannelSnapshot<T>(
+  field: OpenAIChannelField,
+  available: boolean,
+  value: T | null,
+): OpenAIChannelSnapshot<T> {
+  const cached = channelSnapshotCache.get(field);
+  if (cached && cached.available === available && cached.value === value) {
+    return cached as OpenAIChannelSnapshot<T>;
+  }
+
+  const snapshot: OpenAIChannelSnapshot<T> = {
+    available,
+    value,
+  };
+  channelSnapshotCache.set(field, snapshot);
+  return snapshot;
 }
 
 export function readOpenAIChannelSnapshot<T>(
@@ -40,39 +77,38 @@ export function readOpenAIChannelSnapshot<T>(
 ): OpenAIChannelSnapshot<T> {
   const openai = getOpenAIWindow()?.openai;
   if (!openai || !(field in openai)) {
-    return {
-      available: false,
-      value: null,
-    };
+    return getCachedChannelSnapshot<T>(field, false, null);
   }
 
   const value = openai[field];
-  return {
-    available: true,
-    value: value === undefined ? null : (value as T | null),
-  };
+  return getCachedChannelSnapshot(
+    field,
+    true,
+    value === undefined ? null : (value as T | null),
+  );
 }
 
 export function readOpenAIChannel<T>(field: OpenAIChannelField): T | null {
   return readOpenAIChannelSnapshot<T>(field).value;
 }
 
-export function useOpenAIChannelAvailability(
+export function readWorkbenchOpenAIChannelSnapshot<T>(
   field: OpenAIChannelField,
-): boolean {
-  return useSyncExternalStore(
-    (callback) => subscribeToOpenAIChannel(field, callback),
-    () => readOpenAIChannelSnapshot(field).available,
-    () => false,
-  );
+): OpenAIChannelSnapshot<T> {
+  const currentWindow = getOpenAIWindow();
+  if (!currentWindow || !isWorkbenchOpenAIShimWindow(currentWindow)) {
+    return getCachedChannelSnapshot<T>(field, false, null);
+  }
+
+  return readOpenAIChannelSnapshot<T>(field);
 }
 
-export function subscribeToOpenAIChannel(
+export function subscribeToWorkbenchOpenAIChannel(
   field: OpenAIChannelField,
   callback: () => void,
 ): () => void {
   const currentWindow = getOpenAIWindow();
-  if (!currentWindow) {
+  if (!currentWindow || !isWorkbenchOpenAIShimWindow(currentWindow)) {
     return () => {};
   }
 
@@ -97,10 +133,15 @@ export function subscribeToOpenAIChannel(
   };
 }
 
-export function useOpenAIChannel<T>(field: OpenAIChannelField): T | null {
+export function useWorkbenchOpenAIChannelSnapshot<T>(
+  field: OpenAIChannelField,
+): OpenAIChannelSnapshot<T> {
   return useSyncExternalStore(
-    (callback) => subscribeToOpenAIChannel(field, callback),
-    () => readOpenAIChannel<T>(field),
-    () => null,
+    (callback) => subscribeToWorkbenchOpenAIChannel(field, callback),
+    () => readWorkbenchOpenAIChannelSnapshot<T>(field),
+    () => ({
+      available: false,
+      value: null,
+    }),
   );
 }

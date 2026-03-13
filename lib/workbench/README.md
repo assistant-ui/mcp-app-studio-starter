@@ -53,6 +53,10 @@ There are two kinds of "OpenAI/ChatGPT" references you may see in workbench code
    tool calls with the current preview session and to simulate host-driven close
    behavior. Non-ChatGPT hosts should ignore them.
 
+`widgetState` is an OpenAI/ChatGPT host-managed state channel, not a standard
+MCP Apps persistence primitive. For portable MCP Apps, use app-managed
+persistence such as localStorage or server-backed tools.
+
 ## Where To Look
 
 - Host simulation (MCP + ChatGPT extensions): `lib/workbench/iframe/widget-iframe-host.tsx`

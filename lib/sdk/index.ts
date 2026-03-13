@@ -40,9 +40,5 @@ export {
   type OpenModalResult,
   openModal,
 } from "./open-modal";
-export { useOpenAIChannel } from "./openai-channel";
-export {
-  readToolResponseMetadata,
-  useToolResponseMetadata,
-} from "./tool-response-metadata";
+export { readToolResponseMetadata } from "./tool-response-metadata";
 export { useWidgetState } from "./widget-state";

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, RotateCcw } from "lucide-react";
+import { ChevronDown, CircleHelp, RotateCcw } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,9 @@ import { cn } from "@/lib/ui/cn";
 import { getComponent } from "@/lib/workbench/component-registry";
 import { useSelectedComponent, useWorkbenchStore } from "@/lib/workbench/store";
 import {
+  resolveEditableWidgetState,
   resolveResetWidgetState,
-  resolveVisibleWidgetState,
-} from "@/lib/workbench/widget-state-defaults";
+} from "@/lib/workbench/widget-state-editor";
 import { JsonEditor } from "./json-editor";
 import { useJsonEditorChannel } from "./json-editor-state";
 
@@ -40,9 +40,9 @@ const EDITOR_SECTIONS: EditorSectionConfig[] = [
   },
   {
     key: "widgetState",
-    title: "App State",
+    title: "Host State",
     tooltip:
-      "State your app persists between interactions. Restored when the app reopens.",
+      "Optional host-managed state exposed by the host. In ChatGPT/OpenAI this maps to widgetState. This is not part of standard MCP Apps.",
     tab: "widgetState",
   },
 ];
@@ -60,20 +60,16 @@ function useJsonEditorState() {
       })),
     );
 
-  const visibleWidgetState = resolveVisibleWidgetState(
-    selectedComponent,
-    toolInput,
-    (widgetState as Record<string, unknown> | null) ?? null,
-  );
-
   const toolInputController = useJsonEditorChannel({
     label: "App Props",
     value: toolInput,
     onApply: setToolInput,
   });
   const widgetStateController = useJsonEditorChannel({
-    label: "App State",
-    value: visibleWidgetState,
+    label: "Host State",
+    value: resolveEditableWidgetState(
+      (widgetState as Record<string, unknown> | null) ?? null,
+    ),
     onApply: (value) =>
       setWidgetState(Object.keys(value).length === 0 ? null : value),
   });
@@ -92,18 +88,12 @@ function useJsonEditorState() {
         break;
       }
       case "widgetState": {
-        const resetWidgetState = resolveResetWidgetState(
-          selectedComponent,
-          toolInput,
-        );
-        const nextVisibleWidgetState = resolveVisibleWidgetState(
-          selectedComponent,
-          toolInput,
-          resetWidgetState,
-        );
+        const resetWidgetState = resolveResetWidgetState();
+        const nextEditableWidgetState =
+          resolveEditableWidgetState(resetWidgetState);
 
         setWidgetState(resetWidgetState);
-        controllers.widgetState.resetToValue(nextVisibleWidgetState);
+        controllers.widgetState.resetToValue(nextEditableWidgetState);
         break;
       }
       case "toolOutput":
@@ -125,6 +115,7 @@ interface EditorSectionTriggerProps {
 
 function EditorSectionTrigger({
   title,
+  tooltip,
   badge,
   isOpen,
   onToggle,
@@ -146,6 +137,19 @@ function EditorSectionTrigger({
         <span className="mr-1 font-normal text-muted-foreground text-sm">
           {title}
         </span>
+
+        {tooltip ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex size-4 shrink-0 items-center justify-center text-muted-foreground/70">
+                <CircleHelp className="size-3.5" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-56 text-xs">
+              {tooltip}
+            </TooltipContent>
+          </Tooltip>
+        ) : null}
 
         {badge}
       </button>
@@ -183,12 +187,21 @@ function WidgetStateSection({
   onChange,
 }: WidgetStateSectionProps) {
   return (
-    <JsonEditor
-      label="App State"
-      text={text}
-      invalidMessage={invalidMessage}
-      onChange={onChange}
-    />
+    <div>
+      <div className="px-3 pt-3 text-[11px] text-muted-foreground leading-relaxed">
+        {/* Host state is an OpenAI-specific override layer, not the app's full
+            runtime state. Keep this panel raw so it doesn't drift from real host semantics. */}
+        Edits host-managed widget state only. Empty means no persisted host
+        override. Your app may still derive runtime state from App Props,
+        built-in defaults, local storage, or server data.
+      </div>
+      <JsonEditor
+        label="Host State"
+        text={text}
+        invalidMessage={invalidMessage}
+        onChange={onChange}
+      />
+    </div>
   );
 }
 
@@ -233,6 +246,13 @@ export function EditorPanel() {
           <EditorSectionTrigger
             title={section.title}
             tooltip={section.tooltip}
+            badge={
+              section.key === "widgetState" ? (
+                <span className="rounded-full border border-amber-300/80 bg-amber-100 px-1.5 py-0.5 font-medium text-[10px] text-amber-900 uppercase tracking-wide dark:border-amber-700/80 dark:bg-amber-950 dark:text-amber-200">
+                  OpenAI extension
+                </span>
+              ) : undefined
+            }
             isOpen={openSections[section.key]}
             onToggle={() => toggleSection(section.key)}
             action={
