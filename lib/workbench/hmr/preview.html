@@ -23,8 +23,6 @@
           const message = event.data;
           if (!message || typeof message !== "object") return;
           if (message.type !== "OPENAI_SET_GLOBALS") return;
-          event.stopImmediatePropagation?.();
-          event.stopPropagation?.();
           // Cache for the OpenAI shim which installs after this inline script.
           window.__OPENAI_INITIAL_GLOBALS = message.globals;
           const next =
