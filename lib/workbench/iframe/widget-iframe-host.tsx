@@ -739,11 +739,8 @@ export function WidgetIframeHost({
     mcpBridgeRef.current = bridge;
 
     bridge.onsizechange = () => {
-      // ext-apps size notifications reflect the current iframe viewport, which
-      // is host-controlled in the workbench. For h-full widgets that makes the
-      // value circular, especially across fullscreen transitions. Treat
-      // `notifyIntrinsicHeight(...)` as the explicit intrinsic-size contract
-      // instead of mirroring viewport size back into the inline layout.
+      // In the workbench, viewport size is host-controlled; only explicit
+      // `notifyIntrinsicHeight(...)` calls should drive inline preview height.
     };
 
     bridge.onloggingmessage = ({ level, logger, data }) => {
