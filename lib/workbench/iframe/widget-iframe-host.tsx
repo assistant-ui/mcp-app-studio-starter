@@ -738,15 +738,6 @@ export function WidgetIframeHost({
 
     mcpBridgeRef.current = bridge;
 
-    bridge.onsizechange = ({ height }) => {
-      // Mirrors the legacy `window.openai.notifyIntrinsicHeight(height)` behavior.
-      const nextHeight =
-        typeof height === "number" && Number.isFinite(height)
-          ? Math.max(0, height)
-          : null;
-      useWorkbenchStore.getState().setIntrinsicHeight(nextHeight);
-    };
-
     bridge.onloggingmessage = ({ level, logger, data }) => {
       useWorkbenchStore.getState().addConsoleEntry({
         type: "event",
@@ -879,8 +870,9 @@ export function WidgetIframeHost({
   }, [toolOutputStr, toolResponseMetadataStr]);
 
   useEffect(() => {
+    setIntrinsicHeight(null);
     setIframeKey((k) => k + 1);
-  }, [widgetBundle, cssBundle, hmrSrc]);
+  }, [cssBundle, hmrSrc, setIntrinsicHeight, widgetBundle]);
 
   const effectiveTheme = globals.previewTheme || globals.theme;
   const iframeShellBackground =

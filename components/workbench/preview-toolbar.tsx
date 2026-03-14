@@ -184,8 +184,35 @@ function SettingRow({ label, htmlFor, children }: SettingRowProps) {
   );
 }
 
+function DisabledSettingControl({
+  tooltip,
+  children,
+}: {
+  tooltip: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <TooltipPrimitive.Root delayDuration={200}>
+      <TooltipPrimitive.Trigger asChild>
+        <span className="cursor-not-allowed opacity-50">{children}</span>
+      </TooltipPrimitive.Trigger>
+      <TooltipContent side="left">{tooltip}</TooltipContent>
+    </TooltipPrimitive.Root>
+  );
+}
+
+function parseInlineHeightDraft(inputValue: string): number | null {
+  if (inputValue.trim() === "") return null;
+
+  const parsed = Number(inputValue);
+  if (!Number.isFinite(parsed)) return null;
+  return clamp(parsed, 100, 2000);
+}
+
 function AdvancedSettingsPopover() {
   const displayMode = useDisplayMode();
+  const [isEditingInlineHeight, setIsEditingInlineHeight] = useState(false);
+  const [inlineHeightDraft, setInlineHeightDraft] = useState("");
 
   const {
     locale,
@@ -212,6 +239,26 @@ function AdvancedSettingsPopover() {
       setUserLocation: s.setUserLocation,
     })),
   );
+
+  const safeAreaSummary = [
+    safeAreaInsets.left,
+    safeAreaInsets.top,
+    safeAreaInsets.right,
+    safeAreaInsets.bottom,
+  ].join(" / ");
+  const isSafeAreaEnabled = displayMode === "fullscreen";
+  const inlineHeightValue = isEditingInlineHeight
+    ? inlineHeightDraft
+    : String(maxHeight);
+
+  const commitInlineHeightDraft = () => {
+    const nextHeight = parseInlineHeightDraft(inlineHeightDraft);
+    setIsEditingInlineHeight(false);
+    setInlineHeightDraft("");
+    if (nextHeight !== null) {
+      setMaxHeight(nextHeight);
+    }
+  };
 
   return (
     <Popover>
@@ -254,36 +301,61 @@ function AdvancedSettingsPopover() {
           </SettingRow>
         )}
 
-        {displayMode === "inline" && (
-          <SettingRow label="Max height" htmlFor="max-height">
-            <InputGroup className={INPUT_GROUP_CLASSES}>
-              <InputGroupInput
-                id="max-height"
-                type="number"
-                value={maxHeight}
-                onChange={(e) => {
-                  const clamped = clamp(Number(e.target.value), 100, 2000);
-                  setMaxHeight(clamped);
-                }}
-                min={100}
-                max={2000}
-                className={INPUT_CLASSES}
-              />
-              <InputGroupAddon align="inline-end" className={ADDON_CLASSES}>
-                px
-              </InputGroupAddon>
-            </InputGroup>
-          </SettingRow>
-        )}
+        <SettingRow label="Min Height" htmlFor="inline-height">
+          <InputGroup className={INPUT_GROUP_CLASSES}>
+            <InputGroupInput
+              id="inline-height"
+              type="number"
+              value={inlineHeightValue}
+              onFocus={() => {
+                setIsEditingInlineHeight(true);
+                setInlineHeightDraft(String(maxHeight));
+              }}
+              onChange={(e) => {
+                setInlineHeightDraft(e.target.value);
+              }}
+              onBlur={commitInlineHeightDraft}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.currentTarget.blur();
+                  return;
+                }
 
-        {displayMode === "fullscreen" && (
-          <SettingRow label="Safe area">
+                if (e.key === "Escape") {
+                  setIsEditingInlineHeight(false);
+                  setInlineHeightDraft("");
+                  e.currentTarget.blur();
+                }
+              }}
+              min={100}
+              max={2000}
+              className={INPUT_CLASSES}
+            />
+            <InputGroupAddon align="inline-end" className={ADDON_CLASSES}>
+              px
+            </InputGroupAddon>
+          </InputGroup>
+        </SettingRow>
+
+        <SettingRow label="Safe area">
+          {isSafeAreaEnabled ? (
             <SafeAreaInsetsControl
               value={safeAreaInsets}
               onChange={setSafeAreaInsets}
             />
-          </SettingRow>
-        )}
+          ) : (
+            <DisabledSettingControl tooltip="Safe area only applies in Fullscreen mode.">
+              <button
+                type="button"
+                disabled
+                aria-label="Safe area unavailable"
+                className="flex h-7 select-none items-center gap-2 rounded-md border border-input bg-transparent px-2 text-xs tabular-nums"
+              >
+                {safeAreaSummary}
+              </button>
+            </DisabledSettingControl>
+          )}
+        </SettingRow>
 
         <SettingRow label="Locale">
           <Select value={locale} onValueChange={setLocale}>

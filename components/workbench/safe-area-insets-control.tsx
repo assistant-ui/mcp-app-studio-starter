@@ -33,6 +33,12 @@ function clamp(value: number, min: number, max: number): number {
   return value;
 }
 
+export function getInitialAllInputValue(value: SafeAreaInsets): string {
+  const { top, bottom, left, right } = value;
+  const isUniform = top === bottom && top === left && top === right;
+  return isUniform ? String(top) : "";
+}
+
 function InsetInput({
   side,
   value,
@@ -77,30 +83,18 @@ export function SafeAreaInsetsControl({
 }: SafeAreaInsetsControlProps) {
   const [open, setOpen] = useState(false);
   const [customizeSides, setCustomizeSides] = useState(false);
-  const [allInputValue, setAllInputValue] = useState("");
+  const [isEditingAllInput, setIsEditingAllInput] = useState(false);
+  const [allInputDraft, setAllInputDraft] = useState("");
 
   const { top, bottom, left, right } = value;
   const isUniform = top === bottom && top === left && top === right;
-
-  const [prevIsUniform, setPrevIsUniform] = useState(isUniform);
-  const [prevTop, setPrevTop] = useState(top);
-
-  if (isUniform !== prevIsUniform || top !== prevTop) {
-    setPrevIsUniform(isUniform);
-    setPrevTop(top);
-    if (isUniform) {
-      setAllInputValue(String(top));
-    } else {
-      setAllInputValue("");
-    }
-  }
-
-  if (!isUniform && !customizeSides) {
-    setCustomizeSides(true);
-  }
+  const showCustomizedSides = customizeSides || !isUniform;
+  const allInputValue = isEditingAllInput
+    ? allInputDraft
+    : getInitialAllInputValue(value);
 
   const handleAllChange = (inputValue: string) => {
-    setAllInputValue(inputValue);
+    setAllInputDraft(inputValue);
     const parsed = Number(inputValue);
     if (Number.isFinite(parsed)) {
       const clamped = clamp(parsed, 0, 100);
@@ -121,8 +115,9 @@ export function SafeAreaInsetsControl({
 
   const handleReset = () => {
     onChange({ top: 0, bottom: 0, left: 0, right: 0 });
-    setAllInputValue("0");
     setCustomizeSides(false);
+    setIsEditingAllInput(false);
+    setAllInputDraft("");
   };
 
   const summaryItems = [
@@ -175,7 +170,22 @@ export function SafeAreaInsetsControl({
               type="number"
               value={allInputValue}
               placeholder={isUniform ? undefined : "mixed"}
+              onFocus={() => {
+                setIsEditingAllInput(true);
+                setAllInputDraft(getInitialAllInputValue(value));
+              }}
               onChange={(e) => handleAllChange(e.target.value)}
+              onBlur={() => {
+                setIsEditingAllInput(false);
+                setAllInputDraft("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === "Escape") {
+                  setIsEditingAllInput(false);
+                  setAllInputDraft("");
+                  e.currentTarget.blur();
+                }
+              }}
               min={0}
               max={100}
               className={INPUT_CLASSES}
@@ -198,12 +208,13 @@ export function SafeAreaInsetsControl({
           </Label>
           <Switch
             id="customize-sides"
-            checked={customizeSides}
+            checked={showCustomizedSides}
+            disabled={!isUniform}
             onCheckedChange={setCustomizeSides}
           />
         </div>
 
-        {customizeSides && (
+        {showCustomizedSides && (
           <div className="relative grid grid-cols-[auto_0px_auto] grid-rows-[auto_0px_auto] items-center justify-items-center gap-1">
             <div />
             <InsetInput
