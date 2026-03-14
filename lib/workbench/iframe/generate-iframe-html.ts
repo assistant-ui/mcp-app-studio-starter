@@ -95,6 +95,8 @@ const BRIDGE_SCRIPT = `
 
     switch (message.type) {
       case "OPENAI_SET_GLOBALS":
+        event.stopImmediatePropagation?.();
+        event.stopPropagation?.();
         previousGlobals = globals;
         globals = { ...DEFAULT_GLOBALS, ...message.globals };
         const changed = buildChangedGlobals(previousGlobals, globals);
