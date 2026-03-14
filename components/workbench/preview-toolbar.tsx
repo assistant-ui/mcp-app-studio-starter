@@ -201,8 +201,18 @@ function DisabledSettingControl({
   );
 }
 
+function parseInlineHeightDraft(inputValue: string): number | null {
+  if (inputValue.trim() === "") return null;
+
+  const parsed = Number(inputValue);
+  if (!Number.isFinite(parsed)) return null;
+  return clamp(parsed, 100, 2000);
+}
+
 function AdvancedSettingsPopover() {
   const displayMode = useDisplayMode();
+  const [isEditingInlineHeight, setIsEditingInlineHeight] = useState(false);
+  const [inlineHeightDraft, setInlineHeightDraft] = useState("");
 
   const {
     locale,
@@ -238,6 +248,18 @@ function AdvancedSettingsPopover() {
   ].join(" / ");
   const isInlineHeightEnabled = displayMode === "inline";
   const isSafeAreaEnabled = displayMode === "fullscreen";
+  const inlineHeightValue = isEditingInlineHeight
+    ? inlineHeightDraft
+    : String(maxHeight);
+
+  const commitInlineHeightDraft = () => {
+    const nextHeight = parseInlineHeightDraft(inlineHeightDraft);
+    setIsEditingInlineHeight(false);
+    setInlineHeightDraft("");
+    if (nextHeight !== null) {
+      setMaxHeight(nextHeight);
+    }
+  };
 
   return (
     <Popover>
@@ -286,10 +308,26 @@ function AdvancedSettingsPopover() {
               <InputGroupInput
                 id="inline-height"
                 type="number"
-                value={maxHeight}
+                value={inlineHeightValue}
+                onFocus={() => {
+                  setIsEditingInlineHeight(true);
+                  setInlineHeightDraft(String(maxHeight));
+                }}
                 onChange={(e) => {
-                  const clamped = clamp(Number(e.target.value), 100, 2000);
-                  setMaxHeight(clamped);
+                  setInlineHeightDraft(e.target.value);
+                }}
+                onBlur={commitInlineHeightDraft}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.currentTarget.blur();
+                    return;
+                  }
+
+                  if (e.key === "Escape") {
+                    setIsEditingInlineHeight(false);
+                    setInlineHeightDraft("");
+                    e.currentTarget.blur();
+                  }
                 }}
                 min={100}
                 max={2000}

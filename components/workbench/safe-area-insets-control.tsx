@@ -83,14 +83,18 @@ export function SafeAreaInsetsControl({
 }: SafeAreaInsetsControlProps) {
   const [open, setOpen] = useState(false);
   const [customizeSides, setCustomizeSides] = useState(false);
+  const [isEditingAllInput, setIsEditingAllInput] = useState(false);
+  const [allInputDraft, setAllInputDraft] = useState("");
 
   const { top, bottom, left, right } = value;
   const isUniform = top === bottom && top === left && top === right;
-  const allInputDefaultValue = getInitialAllInputValue(value);
-  const allInputKey = `all-${top}-${right}-${bottom}-${left}`;
   const showCustomizedSides = customizeSides || !isUniform;
+  const allInputValue = isEditingAllInput
+    ? allInputDraft
+    : getInitialAllInputValue(value);
 
   const handleAllChange = (inputValue: string) => {
+    setAllInputDraft(inputValue);
     const parsed = Number(inputValue);
     if (Number.isFinite(parsed)) {
       const clamped = clamp(parsed, 0, 100);
@@ -112,6 +116,8 @@ export function SafeAreaInsetsControl({
   const handleReset = () => {
     onChange({ top: 0, bottom: 0, left: 0, right: 0 });
     setCustomizeSides(false);
+    setIsEditingAllInput(false);
+    setAllInputDraft("");
   };
 
   const summaryItems = [
@@ -161,11 +167,25 @@ export function SafeAreaInsetsControl({
           </Label>
           <InputGroup className={`${INPUT_GROUP_CLASSES} w-20`}>
             <InputGroupInput
-              key={allInputKey}
               type="number"
-              defaultValue={allInputDefaultValue}
+              value={allInputValue}
               placeholder={isUniform ? undefined : "mixed"}
+              onFocus={() => {
+                setIsEditingAllInput(true);
+                setAllInputDraft(getInitialAllInputValue(value));
+              }}
               onChange={(e) => handleAllChange(e.target.value)}
+              onBlur={() => {
+                setIsEditingAllInput(false);
+                setAllInputDraft("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === "Escape") {
+                  setIsEditingAllInput(false);
+                  setAllInputDraft("");
+                  e.currentTarget.blur();
+                }
+              }}
               min={0}
               max={100}
               className={INPUT_CLASSES}
