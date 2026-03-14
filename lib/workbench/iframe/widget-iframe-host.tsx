@@ -123,6 +123,27 @@ function hasCustomSimulationConfig(config?: ToolSimulationConfig): boolean {
   );
 }
 
+function measureIframeIntrinsicHeight(
+  iframe: HTMLIFrameElement | null,
+): number | null {
+  const doc = iframe?.contentWindow?.document;
+  if (!doc) return null;
+
+  const { documentElement, body } = doc;
+  if (!documentElement || !body) return null;
+
+  const measuredHeight = Math.max(
+    Math.ceil(documentElement.getBoundingClientRect().height),
+    Math.ceil(body.getBoundingClientRect().height),
+    documentElement.scrollHeight,
+    body.scrollHeight,
+    documentElement.offsetHeight,
+    body.offsetHeight,
+  );
+
+  return Number.isFinite(measuredHeight) ? measuredHeight : null;
+}
+
 export function WidgetIframeHost({
   widgetBundle,
   hmrSrc,
@@ -153,7 +174,79 @@ export function WidgetIframeHost({
   const setView = useWorkbenchStore((s) => s.setView);
   const globalsRef = useRef(globals);
   const openInAppUrlRef = useRef<string | null>(null);
+  const intrinsicHeightRepairFrameRef = useRef<number | null>(null);
   globalsRef.current = globals;
+
+  const cancelIntrinsicHeightRepair = useCallback(() => {
+    if (intrinsicHeightRepairFrameRef.current !== null) {
+      window.cancelAnimationFrame(intrinsicHeightRepairFrameRef.current);
+      intrinsicHeightRepairFrameRef.current = null;
+    }
+  }, []);
+
+  const repairIntrinsicHeightAfterTransition = useCallback(
+    (fallbackHeight: number) => {
+      cancelIntrinsicHeightRepair();
+
+      const waitForTransitionToSettle = () => {
+        const currentState = useWorkbenchStore.getState();
+        if (currentState.isTransitioning) {
+          intrinsicHeightRepairFrameRef.current = window.requestAnimationFrame(
+            waitForTransitionToSettle,
+          );
+          return;
+        }
+
+        intrinsicHeightRepairFrameRef.current = window.requestAnimationFrame(
+          () => {
+            intrinsicHeightRepairFrameRef.current =
+              window.requestAnimationFrame(() => {
+                intrinsicHeightRepairFrameRef.current = null;
+                const measuredHeight = measureIframeIntrinsicHeight(
+                  iframeRef.current,
+                );
+                setIntrinsicHeight(
+                  measuredHeight !== null
+                    ? Math.max(0, measuredHeight)
+                    : fallbackHeight,
+                );
+              });
+          },
+        );
+      };
+
+      intrinsicHeightRepairFrameRef.current = window.requestAnimationFrame(
+        waitForTransitionToSettle,
+      );
+    },
+    [cancelIntrinsicHeightRepair, setIntrinsicHeight],
+  );
+
+  const commitIntrinsicHeight = useCallback(
+    (height: number | null) => {
+      const currentState = useWorkbenchStore.getState();
+      const leavingFullscreen =
+        currentState.isTransitioning &&
+        currentState.transitionFrom === "fullscreen" &&
+        currentState.displayMode !== "fullscreen";
+
+      // View transitions can briefly report 0px while the inline layout is
+      // reattaching after fullscreen. Re-measure after the transition settles
+      // so real collapsed widgets can still report an intentional 0px height.
+      if (height === 0 && leavingFullscreen) {
+        repairIntrinsicHeightAfterTransition(height);
+        return;
+      }
+
+      cancelIntrinsicHeightRepair();
+      setIntrinsicHeight(height);
+    },
+    [
+      cancelIntrinsicHeightRepair,
+      repairIntrinsicHeightAfterTransition,
+      setIntrinsicHeight,
+    ],
+  );
 
   const handleCallTool = useCallback(
     async (
@@ -510,9 +603,9 @@ export function WidgetIframeHost({
         args: { height },
       });
       const nextHeight = Number.isFinite(height) ? Math.max(0, height) : null;
-      setIntrinsicHeight(nextHeight);
+      commitIntrinsicHeight(nextHeight);
     },
-    [addConsoleEntry, setIntrinsicHeight],
+    [addConsoleEntry, commitIntrinsicHeight],
   );
 
   const handleRequestModal = useCallback(
@@ -620,6 +713,12 @@ export function WidgetIframeHost({
   useEffect(() => {
     handleRequestDisplayModeRef.current = handleRequestDisplayMode;
   }, [handleRequestDisplayMode]);
+
+  useEffect(() => cancelIntrinsicHeightRepair, [cancelIntrinsicHeightRepair]);
+
+  useEffect(() => {
+    cancelIntrinsicHeightRepair();
+  }, [cancelIntrinsicHeightRepair, iframeKey]);
 
   const handlers = useMemo<WorkbenchMessageHandlers>(
     () => ({
@@ -744,7 +843,7 @@ export function WidgetIframeHost({
         typeof height === "number" && Number.isFinite(height)
           ? Math.max(0, height)
           : null;
-      useWorkbenchStore.getState().setIntrinsicHeight(nextHeight);
+      commitIntrinsicHeight(nextHeight);
     };
 
     bridge.onloggingmessage = ({ level, logger, data }) => {
@@ -831,7 +930,7 @@ export function WidgetIframeHost({
     return () => {
       clearFiles();
     };
-  }, [iframeKey]);
+  }, [commitIntrinsicHeight, iframeKey]);
 
   useEffect(() => {
     if (bridgeRef.current) {

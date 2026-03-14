@@ -178,13 +178,10 @@ export function ChatThread({ children, className }: ChatThreadProps) {
   const effectiveIsDark = theme === "dark";
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const hasMeasuredIntrinsicHeight =
-    typeof intrinsicHeight === "number" &&
-    Number.isFinite(intrinsicHeight) &&
-    intrinsicHeight > 0;
-  const widgetHeight = hasMeasuredIntrinsicHeight
-    ? Math.min(intrinsicHeight, maxHeight)
-    : maxHeight;
+  const widgetHeight =
+    intrinsicHeight !== null
+      ? Math.min(Math.max(intrinsicHeight, 0), maxHeight)
+      : maxHeight;
   const isDesktopDevice = deviceType === "desktop";
 
   useEffect(() => {
