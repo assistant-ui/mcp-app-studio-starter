@@ -17,20 +17,20 @@ import {
   useResizableWidth,
   useWorkbenchStore,
 } from "@/lib/workbench/store";
-import { DEVICE_PRESETS, type DeviceType } from "@/lib/workbench/types";
 import { ChatThread } from "./chat-thread";
 import { DeviceFrame } from "./device-frame";
 import { IframeComponentContent } from "./iframe-component-content";
 import { MockComposer } from "./mock-composer";
+import {
+  clampResizablePreviewWidth,
+  FRAME_VISIBILITY_THRESHOLD,
+  resolvePreviewDeviceWidth,
+  shouldShowPreviewResizeHandles,
+  shouldUsePreviewStage,
+} from "./preview-layout";
 
 const PREVIEW_MIN_SIZE = 30;
 const PREVIEW_MAX_SIZE = 100;
-const RESIZABLE_MIN_WIDTH =
-  typeof DEVICE_PRESETS.mobile.width === "number"
-    ? DEVICE_PRESETS.mobile.width
-    : 375;
-const RESIZABLE_MAX_WIDTH = 1200;
-const FRAME_VISIBILITY_THRESHOLD = 80;
 const PREVIEW_PANEL_IDS = {
   leftSpacer: "preview-left-spacer",
   center: "preview-center",
@@ -109,48 +109,6 @@ function ChatWithComposer({
   );
 }
 
-function shouldShowPreviewResizeHandles(deviceType: DeviceType): boolean {
-  return deviceType === "resizable";
-}
-
-function shouldUsePreviewStage(
-  deviceType: DeviceType,
-  containerWidth: number,
-): boolean {
-  if (containerWidth <= 0) return false;
-  if (deviceType === "resizable") return true;
-
-  if (deviceType === "desktop") {
-    const tabletWidth = DEVICE_PRESETS.tablet.width;
-    return (
-      typeof tabletWidth === "number" &&
-      containerWidth > tabletWidth + FRAME_VISIBILITY_THRESHOLD
-    );
-  }
-
-  const preset = DEVICE_PRESETS[deviceType];
-  return (
-    typeof preset.width === "number" &&
-    containerWidth > preset.width + FRAME_VISIBILITY_THRESHOLD
-  );
-}
-
-function resolvePreviewDeviceWidth(
-  deviceType: DeviceType,
-  resizableWidth: number,
-): number {
-  if (deviceType === "resizable") {
-    return resizableWidth;
-  }
-
-  const preset = DEVICE_PRESETS[deviceType];
-  return typeof preset.width === "number" ? preset.width : 0;
-}
-
-function clampResizablePreviewWidth(width: number): number {
-  return Math.max(RESIZABLE_MIN_WIDTH, Math.min(RESIZABLE_MAX_WIDTH, width));
-}
-
 function PanelPreview() {
   const deviceType = useDeviceType();
   const displayMode = useDisplayMode();
@@ -172,7 +130,11 @@ function PanelPreview() {
     (!isDesktop &&
       containerWidth > 0 &&
       containerWidth > deviceWidth + FRAME_VISIBILITY_THRESHOLD);
-  const showPreviewStage = shouldUsePreviewStage(deviceType, containerWidth);
+  const showPreviewStage = shouldUsePreviewStage(
+    displayMode,
+    deviceType,
+    containerWidth,
+  );
   const rootTone = !hydrated
     ? "bg-background"
     : isDark
