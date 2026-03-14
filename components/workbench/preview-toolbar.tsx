@@ -246,7 +246,6 @@ function AdvancedSettingsPopover() {
     safeAreaInsets.right,
     safeAreaInsets.bottom,
   ].join(" / ");
-  const isInlineHeightEnabled = displayMode === "inline";
   const isSafeAreaEnabled = displayMode === "fullscreen";
   const inlineHeightValue = isEditingInlineHeight
     ? inlineHeightDraft
@@ -302,59 +301,40 @@ function AdvancedSettingsPopover() {
           </SettingRow>
         )}
 
-        <SettingRow label="Inline height" htmlFor="inline-height">
-          {isInlineHeightEnabled ? (
-            <InputGroup className={INPUT_GROUP_CLASSES}>
-              <InputGroupInput
-                id="inline-height"
-                type="number"
-                value={inlineHeightValue}
-                onFocus={() => {
-                  setIsEditingInlineHeight(true);
-                  setInlineHeightDraft(String(maxHeight));
-                }}
-                onChange={(e) => {
-                  setInlineHeightDraft(e.target.value);
-                }}
-                onBlur={commitInlineHeightDraft}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.currentTarget.blur();
-                    return;
-                  }
+        <SettingRow label="Min Height" htmlFor="inline-height">
+          <InputGroup className={INPUT_GROUP_CLASSES}>
+            <InputGroupInput
+              id="inline-height"
+              type="number"
+              value={inlineHeightValue}
+              onFocus={() => {
+                setIsEditingInlineHeight(true);
+                setInlineHeightDraft(String(maxHeight));
+              }}
+              onChange={(e) => {
+                setInlineHeightDraft(e.target.value);
+              }}
+              onBlur={commitInlineHeightDraft}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.currentTarget.blur();
+                  return;
+                }
 
-                  if (e.key === "Escape") {
-                    setIsEditingInlineHeight(false);
-                    setInlineHeightDraft("");
-                    e.currentTarget.blur();
-                  }
-                }}
-                min={100}
-                max={2000}
-                className={INPUT_CLASSES}
-              />
-              <InputGroupAddon align="inline-end" className={ADDON_CLASSES}>
-                px
-              </InputGroupAddon>
-            </InputGroup>
-          ) : (
-            <DisabledSettingControl tooltip="Inline height only applies in Inline mode.">
-              <InputGroup className={INPUT_GROUP_CLASSES}>
-                <InputGroupInput
-                  id="inline-height"
-                  type="number"
-                  value={maxHeight}
-                  disabled
-                  min={100}
-                  max={2000}
-                  className={INPUT_CLASSES}
-                />
-                <InputGroupAddon align="inline-end" className={ADDON_CLASSES}>
-                  px
-                </InputGroupAddon>
-              </InputGroup>
-            </DisabledSettingControl>
-          )}
+                if (e.key === "Escape") {
+                  setIsEditingInlineHeight(false);
+                  setInlineHeightDraft("");
+                  e.currentTarget.blur();
+                }
+              }}
+              min={100}
+              max={2000}
+              className={INPUT_CLASSES}
+            />
+            <InputGroupAddon align="inline-end" className={ADDON_CLASSES}>
+              px
+            </InputGroupAddon>
+          </InputGroup>
         </SettingRow>
 
         <SettingRow label="Safe area">
