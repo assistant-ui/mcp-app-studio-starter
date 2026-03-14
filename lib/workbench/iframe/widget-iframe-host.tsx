@@ -155,11 +155,6 @@ export function WidgetIframeHost({
   const openInAppUrlRef = useRef<string | null>(null);
   globalsRef.current = globals;
 
-  const resetIframeAfterFullscreenExit = useCallback(() => {
-    setIntrinsicHeight(null);
-    setIframeKey((key) => key + 1);
-  }, [setIntrinsicHeight]);
-
   const handleCallTool = useCallback(
     async (
       name: string,
@@ -442,18 +437,12 @@ export function WidgetIframeHost({
         return { mode: args.mode };
       }
 
-      const shouldResetIframeAfterTransition =
-        currentMode === "fullscreen" && args.mode !== "fullscreen";
-
       if (
         reducedMotion ||
         typeof document === "undefined" ||
         !("startViewTransition" in document)
       ) {
         setDisplayMode(args.mode);
-        if (shouldResetIframeAfterTransition) {
-          resetIframeAfterFullscreenExit();
-        }
         return { mode: args.mode };
       }
 
@@ -475,20 +464,11 @@ export function WidgetIframeHost({
 
       transition.finished.finally(() => {
         setTransitioning(false);
-        if (shouldResetIframeAfterTransition) {
-          resetIframeAfterFullscreenExit();
-        }
       });
 
       return { mode: args.mode };
     },
-    [
-      addConsoleEntry,
-      reducedMotion,
-      resetIframeAfterFullscreenExit,
-      setDisplayMode,
-      setTransitioning,
-    ],
+    [addConsoleEntry, reducedMotion, setDisplayMode, setTransitioning],
   );
 
   const handleSendFollowUpMessage = useCallback(
@@ -758,13 +738,12 @@ export function WidgetIframeHost({
 
     mcpBridgeRef.current = bridge;
 
-    bridge.onsizechange = ({ height }) => {
-      // Mirrors the legacy `window.openai.notifyIntrinsicHeight(height)` behavior.
-      const nextHeight =
-        typeof height === "number" && Number.isFinite(height)
-          ? Math.max(0, height)
-          : null;
-      useWorkbenchStore.getState().setIntrinsicHeight(nextHeight);
+    bridge.onsizechange = () => {
+      // ext-apps size notifications reflect the current iframe viewport, which
+      // is host-controlled in the workbench. For h-full widgets that makes the
+      // value circular, especially across fullscreen transitions. Treat
+      // `notifyIntrinsicHeight(...)` as the explicit intrinsic-size contract
+      // instead of mirroring viewport size back into the inline layout.
     };
 
     bridge.onloggingmessage = ({ level, logger, data }) => {
