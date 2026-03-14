@@ -219,6 +219,11 @@ export function EditorPanel() {
               variant="ghost"
               size="icon-sm"
               className="size-6"
+              aria-label={
+                section.key === "widgetState"
+                  ? "Clear Host State"
+                  : "Reset App Props"
+              }
               onClick={(e) => {
                 e.stopPropagation();
                 handleReset(section.key);

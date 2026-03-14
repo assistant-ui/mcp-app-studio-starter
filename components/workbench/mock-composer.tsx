@@ -90,6 +90,7 @@ export function MockComposer({ variant = "bottom" }: MockComposerProps) {
         />
         <button
           type="button"
+          aria-label="Send message"
           className={cn(
             "flex shrink-0 items-center justify-center rounded-full transition-colors",
             !hydrated

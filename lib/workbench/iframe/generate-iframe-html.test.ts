@@ -48,6 +48,16 @@ describe("generateIframeHtml", () => {
     assert.equal(html.includes('callMethod("requestCheckout"'), true);
   });
 
+  it("stops OPENAI globals messages from reaching the MCP transport", () => {
+    const html = generateIframeHtml({
+      widgetBundle: "console.log('widget')",
+      initialGlobals: TEST_GLOBALS,
+    });
+
+    assert.equal(html.includes("event.stopImmediatePropagation?.();"), true);
+    assert.equal(html.includes("event.stopPropagation?.();"), true);
+  });
+
   it("omits the OpenAI shim when includeOpenAIShim=false", () => {
     const html = generateIframeHtml({
       widgetBundle: "console.log('widget')",
