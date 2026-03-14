@@ -20,8 +20,8 @@ const jsonLinterWithNullSupport = linter((view): Diagnostic[] => {
 
 interface JsonEditorProps {
   label?: string;
-  value: Record<string, unknown>;
-  onChange: (value: Record<string, unknown>) => void;
+  text: string;
+  onChange: (text: string) => void;
 }
 
 // Style specs are kept as plain objects so the EditorView.theme() calls
@@ -133,30 +133,15 @@ const customEditorStyleLight = EditorView.theme(lightStyleSpec, {
 });
 const customEditorStyleDark = EditorView.theme(darkStyleSpec, { dark: true });
 
-function computeText(value: Record<string, unknown>): string {
-  if (Object.keys(value).length === 0) {
-    return "";
-  }
-  return JSON.stringify(value, null, 2);
-}
-
-export function JsonEditor({ value, onChange }: JsonEditorProps) {
+export function JsonEditor({ text, onChange }: JsonEditorProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const valueStr = JSON.stringify(value);
-  const [prevValueStr, setPrevValueStr] = useState(valueStr);
-  const [text, setText] = useState(() => computeText(value));
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const isDark = mounted && resolvedTheme === "dark";
-
-  if (valueStr !== prevValueStr) {
-    setPrevValueStr(valueStr);
-    setText(computeText(value));
-  }
 
   const extensions = useMemo(
     () => [
@@ -172,35 +157,13 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
     [isDark],
   );
 
-  const handleChange = (newText: string) => {
-    setText(newText);
-
-    const trimmed = newText.trim();
-    if (trimmed === "" || trimmed === "null") {
-      const emptyObj = {};
-      const emptyStr = JSON.stringify(emptyObj);
-      setPrevValueStr(emptyStr);
-      onChange(emptyObj);
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(newText);
-      const parsedStr = JSON.stringify(parsed);
-      setPrevValueStr(parsedStr);
-      onChange(parsed);
-    } catch {
-      // Linter will show the error inline
-    }
-  };
-
   return (
     <div className="relative">
       <CodeMirror
         value={text}
         height="100%"
         extensions={extensions}
-        onChange={handleChange}
+        onChange={onChange}
         theme="none"
         basicSetup={{
           lineNumbers: true,

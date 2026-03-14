@@ -25,6 +25,10 @@ import type {
   MockVariant,
   MockVariantType,
 } from "@/lib/workbench/mock-config";
+import {
+  getMockResponseSemanticKey,
+  shouldSyncInlineMockVariantDraft,
+} from "./mock-variant-editor-state";
 import { COMPACT_LABEL_CLASSES } from "./styles";
 
 interface MockVariantEditorProps {
@@ -202,7 +206,7 @@ function MockVariantEditorInner({
 
         <div>
           <Label className={cn(COMPACT_LABEL_CLASSES, "mb-1 block")}>
-            Response
+            Tool Result
           </Label>
           <div className="overflow-hidden rounded-md border bg-input/50">
             <CodeMirror
@@ -249,6 +253,10 @@ export function InlineMockVariantEditor({
   const [hasError, setHasError] = useState(false);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [lastSubmittedResponseKey, setLastSubmittedResponseKey] = useState(() =>
+    getMockResponseSemanticKey(variant.response),
+  );
+  const [previousVariantId, setPreviousVariantId] = useState(variant.id);
 
   useEffect(() => {
     setMounted(true);
@@ -257,9 +265,28 @@ export function InlineMockVariantEditor({
   const isDark = mounted && resolvedTheme === "dark";
 
   useEffect(() => {
+    const nextResponseKey = getMockResponseSemanticKey(variant.response);
+    const shouldSync = shouldSyncInlineMockVariantDraft({
+      previousVariantId,
+      nextVariantId: variant.id,
+      nextResponseKey,
+      lastSubmittedResponseKey,
+    });
+
+    setPreviousVariantId(variant.id);
+    if (!shouldSync) {
+      return;
+    }
+
     setResponseText(JSON.stringify(variant.response, null, 2));
     setHasError(false);
-  }, [variant.id, variant.response]);
+    setLastSubmittedResponseKey(nextResponseKey);
+  }, [
+    lastSubmittedResponseKey,
+    previousVariantId,
+    variant.id,
+    variant.response,
+  ]);
 
   const extensions = useMemo(
     () => [
@@ -284,6 +311,7 @@ export function InlineMockVariantEditor({
     try {
       const parsed = JSON.parse(text);
       setHasError(false);
+      setLastSubmittedResponseKey(getMockResponseSemanticKey(parsed));
       onChange({
         ...variant,
         response: parsed,

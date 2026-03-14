@@ -2,13 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  DEFAULT_CENTER,
-  DEFAULT_ZOOM,
   type POICategory,
   POIMap,
   type POIMapViewState,
 } from "@/components/examples/poi-map";
 import { POI_MAP_DEMO_INPUT } from "./default-props";
+import { resolveDemoWidgetState } from "./poi-map-demo-state";
 
 type DisplayMode = "inline" | "pip" | "fullscreen";
 type DemoTheme = "light" | "dark";
@@ -18,18 +17,11 @@ type View = {
   params: Record<string, unknown> | null;
 };
 
-const DEFAULT_WIDGET_STATE: POIMapViewState = {
-  selectedPoiId: null,
-  favoriteIds: [],
-  mapCenter: DEFAULT_CENTER,
-  mapZoom: DEFAULT_ZOOM,
-  categoryFilter: null,
-};
-
 type DemoOpenAI = {
   theme?: DemoTheme;
   previewTheme?: DemoTheme;
   displayMode?: DisplayMode;
+  widgetState?: unknown;
   requestDisplayMode?: (args: {
     mode: DisplayMode;
   }) => Promise<{ mode: DisplayMode }>;
@@ -68,11 +60,9 @@ export function POIMapDemo() {
       "light",
   );
 
-  const [widgetState, setWidgetState] = useState<POIMapViewState>({
-    ...DEFAULT_WIDGET_STATE,
-    mapCenter: POI_MAP_DEMO_INPUT.initialCenter ?? DEFAULT_CENTER,
-    mapZoom: POI_MAP_DEMO_INPUT.initialZoom ?? DEFAULT_ZOOM,
-  });
+  const [widgetState, setWidgetState] = useState<POIMapViewState>(() =>
+    resolveDemoWidgetState(getDemoOpenAI()?.widgetState),
+  );
 
   const [view, setView] = useState<View | null>(null);
 
@@ -81,6 +71,7 @@ export function POIMapDemo() {
       displayMode?: unknown;
       theme?: unknown;
       previewTheme?: unknown;
+      widgetState?: unknown;
     }) {
       const nextDisplayMode = normalizeDisplayMode(globals?.displayMode);
       if (nextDisplayMode) {
@@ -90,6 +81,10 @@ export function POIMapDemo() {
       const nextTheme = normalizeTheme(globals?.previewTheme || globals?.theme);
       if (nextTheme) {
         setTheme(nextTheme);
+      }
+
+      if (globals && "widgetState" in globals) {
+        setWidgetState(resolveDemoWidgetState(globals.widgetState));
       }
     }
 
@@ -102,6 +97,7 @@ export function POIMapDemo() {
             displayMode?: unknown;
             theme?: unknown;
             previewTheme?: unknown;
+            widgetState?: unknown;
           };
         }>
       ).detail;

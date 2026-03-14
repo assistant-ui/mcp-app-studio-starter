@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronDown, RotateCcw } from "lucide-react";
-import { type ReactNode, useCallback, useState } from "react";
+import { AlertTriangle, ChevronDown, RotateCcw, Trash2 } from "lucide-react";
+import { type ReactNode, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,20 +13,14 @@ import { cn } from "@/lib/ui/cn";
 import { getComponent } from "@/lib/workbench/component-registry";
 import { useSelectedComponent, useWorkbenchStore } from "@/lib/workbench/store";
 import { JsonEditor } from "./json-editor";
+import { useJsonEditorChannel } from "./json-editor-state";
 
-type JsonEditorTab =
-  | "toolInput"
-  | "toolOutput"
-  | "widgetState"
-  | "toolResponseMetadata";
-
-type EditorSectionKey = "toolInput" | "widgetState" | "toolResponseMetadata";
+type EditorSectionKey = "toolInput" | "widgetState";
 
 interface EditorSectionConfig {
   key: EditorSectionKey;
   title: string;
   tooltip: string;
-  tab: JsonEditorTab;
 }
 
 const EDITOR_SECTIONS: EditorSectionConfig[] = [
@@ -35,123 +29,67 @@ const EDITOR_SECTIONS: EditorSectionConfig[] = [
     title: "App Props",
     tooltip:
       "Data passed to your app when a tool is called. Edit to test different inputs.",
-    tab: "toolInput",
   },
   {
     key: "widgetState",
-    title: "App State",
+    title: "Host State",
     tooltip:
-      "State your app persists between interactions. Restored when the app reopens.",
-    tab: "widgetState",
-  },
-  {
-    key: "toolResponseMetadata",
-    title: "Private Metadata",
-    tooltip:
-      "Data only your app sees. Hidden from the model and not included in responses.",
-    tab: "toolResponseMetadata",
+      "Optional host-managed state exposed by the host. In ChatGPT this maps to widgetState. This is not part of standard MCP Apps.",
   },
 ];
 
 function useJsonEditorState() {
   const selectedComponent = useSelectedComponent();
 
-  const {
-    toolInput,
-    toolOutput,
-    widgetState,
-    toolResponseMetadata,
-    setToolInput,
-    setToolOutput,
-    setWidgetState,
-    setToolResponseMetadata,
-  } = useWorkbenchStore(
-    useShallow((s) => ({
-      toolInput: s.toolInput,
-      toolOutput: s.toolOutput,
-      widgetState: s.widgetState,
-      toolResponseMetadata: s.toolResponseMetadata,
-      setToolInput: s.setToolInput,
-      setToolOutput: s.setToolOutput,
-      setWidgetState: s.setWidgetState,
-      setToolResponseMetadata: s.setToolResponseMetadata,
-    })),
-  );
+  const { toolInput, widgetState, setToolInput, setWidgetState } =
+    useWorkbenchStore(
+      useShallow((s) => ({
+        toolInput: s.toolInput,
+        widgetState: s.widgetState,
+        setToolInput: s.setToolInput,
+        setWidgetState: s.setWidgetState,
+      })),
+    );
 
-  const getActiveData = useCallback(
-    (tab: JsonEditorTab): Record<string, unknown> => {
-      switch (tab) {
-        case "toolInput":
-          return toolInput;
-        case "toolOutput":
-          return toolOutput ?? {};
-        case "widgetState":
-          return (widgetState as Record<string, unknown>) ?? {};
-        case "toolResponseMetadata":
-          return toolResponseMetadata ?? {};
-        default:
-          return {};
+  const toolInputController = useJsonEditorChannel({
+    label: "App Props",
+    value: toolInput,
+    onApply: setToolInput,
+  });
+  const widgetStateController = useJsonEditorChannel({
+    label: "Host State",
+    value: (widgetState as Record<string, unknown> | null) ?? {},
+    emptyDraftBehavior: "clear",
+    onApply: (value) =>
+      setWidgetState(Object.keys(value).length === 0 ? null : value),
+  });
+
+  const controllers = {
+    toolInput: toolInputController,
+    widgetState: widgetStateController,
+  } as const;
+
+  const handleReset = (key: EditorSectionKey) => {
+    switch (key) {
+      case "toolInput": {
+        const nextValue = getComponent(selectedComponent)?.defaultProps ?? {};
+        setToolInput(nextValue);
+        controllers.toolInput.resetToValue(nextValue);
+        break;
       }
-    },
-    [toolInput, toolOutput, widgetState, toolResponseMetadata],
-  );
-
-  const handleChange = useCallback(
-    (tab: JsonEditorTab, value: Record<string, unknown>) => {
-      const isEmpty = Object.keys(value).length === 0;
-
-      switch (tab) {
-        case "toolInput":
-          setToolInput(value);
-          break;
-        case "toolOutput":
-          setToolOutput(isEmpty ? null : value);
-          break;
-        case "widgetState":
-          setWidgetState(isEmpty ? null : value);
-          break;
-        case "toolResponseMetadata":
-          setToolResponseMetadata(isEmpty ? null : value);
-          break;
+      case "widgetState": {
+        setWidgetState(null);
+        controllers.widgetState.resetToValue({});
+        break;
       }
-    },
-    [setToolInput, setToolOutput, setWidgetState, setToolResponseMetadata],
-  );
+    }
+  };
 
-  const handleReset = useCallback(
-    (tab: JsonEditorTab) => {
-      switch (tab) {
-        case "toolInput": {
-          const component = getComponent(selectedComponent);
-          setToolInput(component?.defaultProps ?? {});
-          break;
-        }
-        case "toolOutput":
-          setToolOutput(null);
-          break;
-        case "widgetState":
-          setWidgetState(null);
-          break;
-        case "toolResponseMetadata":
-          setToolResponseMetadata(null);
-          break;
-      }
-    },
-    [
-      selectedComponent,
-      setToolInput,
-      setToolOutput,
-      setWidgetState,
-      setToolResponseMetadata,
-    ],
-  );
-
-  return { getActiveData, handleChange, handleReset };
+  return { controllers, handleReset };
 }
 
 interface EditorSectionTriggerProps {
   title: string;
-  tooltip?: string;
   badge?: React.ReactNode;
   isOpen: boolean;
   onToggle: () => void;
@@ -207,22 +145,28 @@ function EditorSectionContent({ isOpen, children }: EditorSectionContentProps) {
 }
 
 interface WidgetStateSectionProps {
-  value: Record<string, unknown>;
-  onChange: (value: Record<string, unknown>) => void;
+  text: string;
+  onChange: (text: string) => void;
 }
 
-function WidgetStateSection({ value, onChange }: WidgetStateSectionProps) {
-  return <JsonEditor label="App State" value={value} onChange={onChange} />;
+function WidgetStateSection({ text, onChange }: WidgetStateSectionProps) {
+  return (
+    <div>
+      <div className="px-3 pt-3 text-[11px] text-muted-foreground leading-relaxed">
+        ChatGPT-only host state. Empty means no host override.
+      </div>
+      <JsonEditor label="Host State" text={text} onChange={onChange} />
+    </div>
+  );
 }
 
 export function EditorPanel() {
-  const { getActiveData, handleChange, handleReset } = useJsonEditorState();
+  const { controllers, handleReset } = useJsonEditorState();
   const [openSections, setOpenSections] = useState<
     Record<EditorSectionKey, boolean>
   >({
     toolInput: true,
     widgetState: false,
-    toolResponseMetadata: false,
   });
 
   const toggleSection = (key: EditorSectionKey) => {
@@ -230,20 +174,68 @@ export function EditorPanel() {
   };
 
   const renderSectionContent = (section: EditorSectionConfig) => {
+    const controller = controllers[section.key];
     if (section.key === "widgetState") {
       return (
         <WidgetStateSection
-          value={getActiveData(section.tab)}
-          onChange={(value) => handleChange(section.tab, value)}
+          text={controller.text}
+          onChange={controller.handleTextChange}
         />
       );
     }
     return (
       <JsonEditor
         label={section.title}
-        value={getActiveData(section.tab)}
-        onChange={(value) => handleChange(section.tab, value)}
+        text={controller.text}
+        onChange={controller.handleTextChange}
       />
+    );
+  };
+
+  const renderSectionAction = (section: EditorSectionConfig) => {
+    if (!openSections[section.key]) {
+      return null;
+    }
+
+    const controller = controllers[section.key];
+
+    return (
+      <div className="flex items-center gap-1">
+        {controller.invalidMessage ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex size-6 items-center justify-center text-amber-600 dark:text-amber-400">
+                <AlertTriangle className="size-3.5" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="max-w-72 text-xs">
+              {controller.invalidMessage}
+            </TooltipContent>
+          </Tooltip>
+        ) : null}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="size-6"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleReset(section.key);
+              }}
+            >
+              {section.key === "widgetState" ? (
+                <Trash2 className="size-3" />
+              ) : (
+                <RotateCcw className="size-3" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left">
+            {section.key === "widgetState" ? "Clear Host State" : "Reset"}
+          </TooltipContent>
+        </Tooltip>
+      </div>
     );
   };
 
@@ -253,29 +245,23 @@ export function EditorPanel() {
         <div key={section.key} className="contents">
           <EditorSectionTrigger
             title={section.title}
-            tooltip={section.tooltip}
-            isOpen={openSections[section.key]}
-            onToggle={() => toggleSection(section.key)}
-            action={
-              openSections[section.key] ? (
+            badge={
+              section.key === "widgetState" ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="size-6"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleReset(section.tab);
-                      }}
-                    >
-                      <RotateCcw className="size-3" />
-                    </Button>
+                    <span className="rounded-full border border-border bg-muted px-1.5 py-0.5 font-medium text-[10px] text-muted-foreground">
+                      ChatGPT
+                    </span>
                   </TooltipTrigger>
-                  <TooltipContent side="left">Reset</TooltipContent>
+                  <TooltipContent side="top" className="max-w-56 text-xs">
+                    {section.tooltip}
+                  </TooltipContent>
                 </Tooltip>
-              ) : null
+              ) : undefined
             }
+            isOpen={openSections[section.key]}
+            onToggle={() => toggleSection(section.key)}
+            action={renderSectionAction(section)}
           />
           <EditorSectionContent isOpen={openSections[section.key]}>
             {renderSectionContent(section)}

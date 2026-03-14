@@ -39,7 +39,7 @@ function buildSystemPrompt(context: WorkbenchContext): string {
 Focus on helping with MCP Apps development. This includes:
 - The MCP Apps SDK (ext-apps) for building interactive UI components
 - ChatGPT as an MCP host (with optional ChatGPT-specific extensions)
-- Tool definitions, widget state, display modes
+- Tool definitions, host-managed widgetState, display modes
 - Cross-platform compatibility between MCP hosts
 
 ## Terminology Guardrails
@@ -52,14 +52,14 @@ The user is working in an MCP App workbench with the following state:
 - Display mode: ${context.displayMode}
 - Has tool input: ${!!context.toolInput && Object.keys(context.toolInput).length > 0}
 - Has tool output: ${!!context.toolOutput}
-- Has widget state: ${!!context.widgetState}
+- Has OpenAI/ChatGPT host-managed state: ${!!context.widgetState}
 
 ## Available Tools
 You have tools to:
 1. \`fetch_mcp_apps_docs\` - Fetch the MCP Apps SDK documentation
 2. \`search_openai_docs\` - Search the OpenAI/ChatGPT Apps documentation
 3. \`fetch_openai_doc\` - Fetch a specific OpenAI documentation page
-4. \`inspect_workbench\` - Get the user's current configuration (tool input, output, widget state)
+4. \`inspect_workbench\` - Get the user's current configuration (tool input, output, host-managed widget state)
 5. \`get_console_logs\` - See recent SDK method calls
 6. \`validate_config\` - Check for common configuration issues
 
@@ -72,7 +72,8 @@ Use the documentation tools proactively to find accurate, up-to-date information
 4. For configuration issues, explain both what's wrong AND how to fix it
 5. Keep responses concise but complete
 6. Prefer searching docs over relying on general knowledge
-7. When discussing platform differences, clarify which platform(s) support each feature`;
+7. When discussing platform differences, clarify which platform(s) support each feature
+8. Treat widgetState as an optional OpenAI/ChatGPT host extension, not a standard MCP Apps persistence primitive`;
 }
 
 let mcpClientPromise: Promise<
@@ -137,9 +138,10 @@ export function createValidateConfigTool(context: WorkbenchContext) {
           issues.push({
             severity: "warning",
             field: "widgetState",
-            message: "Widget state is very large. This may impact performance.",
+            message:
+              "Host-managed widgetState is very large. This may impact performance.",
             suggestion:
-              "Keep widget state under 4k tokens for optimal performance.",
+              "Keep host-managed widgetState under 4k tokens for optimal performance.",
           });
         }
       }
@@ -268,7 +270,7 @@ export async function POST(req: Request) {
 
       inspect_workbench: {
         description:
-          "Get the current workbench configuration including the selected component, tool input/output, and widget state. Use this to understand what the user is working on.",
+          "Get the current workbench configuration including the selected component, tool input/output, and host-managed widgetState. Use this to understand what the user is working on.",
         inputSchema: z.object({
           include: z
             .array(

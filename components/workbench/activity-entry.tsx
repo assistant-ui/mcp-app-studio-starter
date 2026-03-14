@@ -158,6 +158,14 @@ function getMetadataPreview(entry: ConsoleEntry): string | null {
   }
 }
 
+function ToolResultDetails({ result }: { result: unknown }) {
+  if (result === undefined) {
+    return null;
+  }
+
+  return <ResultPreview value={result} />;
+}
+
 type SimulatedMode = "SUCCESS" | "ERROR" | "hang";
 
 function parseSimulatedResponse(response: ConsoleEntry | null): {
@@ -214,7 +222,6 @@ function ResponseEntry({
   simulatedMode = null,
 }: ResponseEntryProps) {
   const hasDetails = response.result !== undefined;
-
   return (
     <Entry.Root>
       <Entry.Row variant="response" onClick={onToggle} disabled={!hasDetails}>
@@ -229,7 +236,7 @@ function ResponseEntry({
 
       {isExpanded && hasDetails && (
         <Entry.Details>
-          <ResultPreview value={response.result} />
+          <ToolResultDetails result={response.result} />
         </Entry.Details>
       )}
     </Entry.Root>
@@ -278,11 +285,7 @@ export function ActivityEntry({
       {isExpanded && hasDetails && (
         <Entry.Details>
           <ArgsPreview value={entry.args} />
-          {entry.result !== undefined && (
-            <pre className="mt-1 overflow-x-auto text-[10px] text-emerald-600/80 leading-relaxed dark:text-emerald-300">
-              → {JSON.stringify(entry.result, null, 2)}
-            </pre>
-          )}
+          <ToolResultDetails result={entry.result} />
         </Entry.Details>
       )}
     </Entry.Root>

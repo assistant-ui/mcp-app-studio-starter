@@ -1,9 +1,14 @@
+import {
+  OPENAI_SET_GLOBALS_EVENT,
+  WORKBENCH_OPENAI_SHIM_MARKER,
+} from "@/lib/sdk/openai-channel-contract";
 import type { OpenAIAPI, OpenAIGlobals, ParentToIframeMessage } from "../types";
 
 type OpenAIShimWindow = Window & {
   openai?: OpenAIGlobals & OpenAIAPI;
   /** Cached by the preview.html inline script before modules load. */
   __OPENAI_INITIAL_GLOBALS?: Partial<OpenAIGlobals>;
+  __MCP_APP_STUDIO_WORKBENCH_OPENAI_SHIM__?: boolean;
 };
 
 const DEFAULT_GLOBALS: OpenAIGlobals = {
@@ -32,7 +37,7 @@ function generateCallId() {
 }
 
 function dispatchGlobalsChange(changedGlobals: Partial<OpenAIGlobals>) {
-  const event = new CustomEvent("openai:set_globals", {
+  const event = new CustomEvent(OPENAI_SET_GLOBALS_EVENT, {
     detail: { globals: changedGlobals },
   });
   window.dispatchEvent(event);
@@ -187,6 +192,7 @@ export function installOpenAIShim(targetWindow: Window = window) {
     configurable: false,
     writable: false,
   });
+  shimWindow[WORKBENCH_OPENAI_SHIM_MARKER] = true;
 
   // The host sends OPENAI_SET_GLOBALS on the iframe `load` event, which fires
   // before ES modules execute. The preview.html inline script caches those

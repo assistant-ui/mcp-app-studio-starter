@@ -10,6 +10,11 @@ The workbench is a **local MCP Apps host simulator** for developing embedded UIs
   open-in-app links, and checkout beta)
   during development.
 
+## Demo Bundles
+
+- In development, `?demo=true` uses a fresh bundle from `/api/workbench/bundle?...&demo=true` so demo previews reflect source edits immediately.
+- In production, demo previews use the prebuilt files in `public/workbench-bundles/`.
+
 ## Theming Contract
 
 Use the shared framework-agnostic contract:
@@ -47,6 +52,15 @@ There are two kinds of "OpenAI/ChatGPT" references you may see in workbench code
    These are **workbench-only compatibility metadata keys** used to correlate
    tool calls with the current preview session and to simulate host-driven close
    behavior. Non-ChatGPT hosts should ignore them.
+
+`widgetState` is an OpenAI/ChatGPT host-managed state channel, not a standard
+MCP Apps persistence primitive. For portable MCP Apps, use app-managed
+persistence such as localStorage or server-backed tools.
+
+Tool result metadata lives on the tool result itself as `_meta`. In ChatGPT
+that metadata is also exposed to widgets as `toolResponseMetadata`. In the
+workbench UI, author tool result metadata in Simulation and inspect it in
+Activity.
 
 ## Where To Look
 

@@ -164,11 +164,19 @@ These hooks only work on specific platforms. Check availability first:
 
 | Hook | Platform | Description |
 | ---- | -------- | ----------- |
-| `useWidgetState()` | ChatGPT extensions | Persistent state across sessions |
+| `useWidgetState()` | ChatGPT extensions | Optional OpenAI/ChatGPT host-managed state |
 | `useUpdateModelContext()` | Host-dependent | Update model-visible context dynamically |
 | `useToolInputPartial()` | Host-dependent | Streaming input during generation |
 | `useLog()` | Host-dependent | Structured logging to host |
 | `openModal()` helper | ChatGPT extensions (fallback-safe) | Use host modal when available, fallback locally |
+
+`useWidgetState()` is not a standard MCP Apps persistence primitive.
+For portable MCP Apps, use app-managed persistence such as localStorage or
+server-backed tools.
+
+Tool result metadata (`_meta`) is available via
+`readToolResponseMetadata()` when the host exposes
+`window.openai.toolResponseMetadata`.
 
 ## Platform-Specific Features
 
@@ -179,11 +187,12 @@ optional ChatGPT extensions (`window.openai`) when needed.
 | ------- | ----------------- | ---------------------------- |
 | Tool input | Yes | (alias: `window.openai.toolInput`) |
 | Tool result | Yes | (alias: `window.openai.toolOutput`) |
+| Tool result metadata (`_meta`) | Yes | Yes (alias: `window.openai.toolResponseMetadata`) |
 | Call tool | Yes | (alias: `window.openai.callTool`) |
 | Send message | Host-dependent | (alias: `window.openai.sendFollowUpMessage`) |
 | Update model context | Host-dependent | (extension: `window.openai.setWidgetState`) |
 | Host-managed modal | No | Yes (`window.openai.requestModal`) |
-| Widget state persistence | No | Yes |
+| Widget state persistence | No | Yes (OpenAI/ChatGPT host-managed state) |
 | File upload/download | No | Yes |
 | Open in app link | No | Yes (`window.openai.setOpenInAppUrl`) |
 | Instant checkout | No | Yes (`window.openai.requestCheckout`) *(private beta)* |

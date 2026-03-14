@@ -97,6 +97,20 @@ function toMcpToolResultParams(
   return params;
 }
 
+function buildToolResultBridgePayload(
+  toolOutput: Record<string, unknown> | null,
+  toolResponseMetadata: Record<string, unknown> | null,
+): CallToolResponse | null {
+  if (toolOutput === null && toolResponseMetadata === null) {
+    return null;
+  }
+
+  return {
+    ...(toolOutput !== null ? { structuredContent: toolOutput } : {}),
+    ...(toolResponseMetadata !== null ? { _meta: toolResponseMetadata } : {}),
+  };
+}
+
 const DEFAULT_SIMULATION_RESPONSE_DATA = JSON.stringify(
   DEFAULT_TOOL_CONFIG.responseData,
 );
@@ -779,12 +793,14 @@ export function WidgetIframeHost({
       if (cancelled) return;
       mcpInitializedRef.current = true;
       void bridge.sendToolInput({ arguments: globalsRef.current.toolInput });
-      if (globalsRef.current.toolOutput) {
+      const initialToolResult = buildToolResultBridgePayload(
+        globalsRef.current.toolOutput,
+        globalsRef.current.toolResponseMetadata,
+      );
+
+      if (initialToolResult) {
         void bridge.sendToolResult(
-          toMcpToolResultParams({
-            structuredContent: globalsRef.current.toolOutput,
-            _meta: globalsRef.current.toolResponseMetadata ?? undefined,
-          }) as any,
+          toMcpToolResultParams(initialToolResult) as any,
         );
       }
     };
@@ -852,15 +868,14 @@ export function WidgetIframeHost({
     const bridge = mcpBridgeRef.current;
     if (!bridge || !mcpInitializedRef.current) return;
 
-    const parsedOutput = JSON.parse(toolOutputStr);
-    if (!parsedOutput) return;
-
-    void bridge.sendToolResult(
-      toMcpToolResultParams({
-        structuredContent: parsedOutput,
-        _meta: JSON.parse(toolResponseMetadataStr) ?? undefined,
-      }) as any,
+    const toolResult = buildToolResultBridgePayload(
+      JSON.parse(toolOutputStr),
+      JSON.parse(toolResponseMetadataStr),
     );
+
+    if (!toolResult) return;
+
+    void bridge.sendToolResult(toMcpToolResultParams(toolResult) as any);
   }, [toolOutputStr, toolResponseMetadataStr]);
 
   useEffect(() => {

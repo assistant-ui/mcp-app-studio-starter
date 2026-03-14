@@ -20,31 +20,45 @@ function isDemoBundleRequest(currentLocationSearch: string): boolean {
   return currentParams.get("demo") === "true";
 }
 
-function shouldUseStaticBundle(currentLocationSearch: string): boolean {
-  return (
-    isDemoBundleRequest(currentLocationSearch) ||
-    process.env.NODE_ENV === "production"
-  );
+type BundleBuildMode = "demo" | "runtime" | "static";
+
+function resolveBundleBuildMode(
+  currentLocationSearch: string,
+  nodeEnv: string = process.env.NODE_ENV ?? "development",
+): BundleBuildMode {
+  if (isDemoBundleRequest(currentLocationSearch)) {
+    return "demo";
+  }
+
+  return nodeEnv === "production" ? "static" : "runtime";
 }
 
 export function buildBundleCacheKey(
   componentId: string,
   currentLocationSearch: string,
+  nodeEnv: string = process.env.NODE_ENV ?? "development",
 ): string {
-  return `${encodeURIComponent(componentId)}::${
-    shouldUseStaticBundle(currentLocationSearch) ? "demo" : "runtime"
-  }`;
+  return `${encodeURIComponent(componentId)}::${resolveBundleBuildMode(
+    currentLocationSearch,
+    nodeEnv,
+  )}`;
 }
 
 export function buildBundleRequestPath(
   componentId: string,
   currentLocationSearch: string,
+  nodeEnv: string = process.env.NODE_ENV ?? "development",
 ): string {
-  if (shouldUseStaticBundle(currentLocationSearch)) {
+  const isProduction = nodeEnv === "production";
+
+  if (isProduction) {
     return `/workbench-bundles/${encodeURIComponent(componentId)}.js`;
   }
 
   const requestParams = new URLSearchParams({ id: componentId });
+  if (isDemoBundleRequest(currentLocationSearch)) {
+    requestParams.set("demo", "true");
+  }
   return `/api/workbench/bundle?${requestParams.toString()}`;
 }
 
@@ -58,17 +72,6 @@ export function buildHmrPreviewPath(
     requestParams.set("demo", "true");
   }
   return `/__workbench_hmr/lib/workbench/hmr/preview.html?${requestParams.toString()}`;
-}
-
-function buildDevFallbackBundlePath(componentId: string): string {
-  const requestParams = new URLSearchParams({ id: componentId });
-  if (
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).get("demo") === "true"
-  ) {
-    requestParams.set("demo", "true");
-  }
-  return `/api/workbench/bundle?${requestParams.toString()}`;
 }
 
 export function useWidgetBundle(
@@ -118,19 +121,9 @@ export function useWidgetBundle(
           componentId,
           currentLocationSearch,
         );
-        let response = await fetch(requestPath, {
+        const response = await fetch(requestPath, {
           signal: controller.signal,
         });
-
-        if (
-          !response.ok &&
-          requestPath.startsWith("/workbench-bundles/") &&
-          process.env.NODE_ENV === "development"
-        ) {
-          response = await fetch(buildDevFallbackBundlePath(componentId), {
-            signal: controller.signal,
-          });
-        }
 
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));

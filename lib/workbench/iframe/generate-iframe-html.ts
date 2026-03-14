@@ -1,3 +1,7 @@
+import {
+  OPENAI_SET_GLOBALS_EVENT,
+  WORKBENCH_OPENAI_SHIM_MARKER,
+} from "@/lib/sdk/openai-channel-contract";
 import type { OpenAIGlobals } from "../types";
 
 export interface IframeHtmlOptions {
@@ -53,7 +57,7 @@ const BRIDGE_SCRIPT = `
   }
 
   function dispatchGlobalsChange(changedGlobals) {
-    const event = new CustomEvent("openai:set_globals", {
+    const event = new CustomEvent("${OPENAI_SET_GLOBALS_EVENT}", {
       detail: { globals: changedGlobals },
     });
     window.dispatchEvent(event);
@@ -192,6 +196,7 @@ const BRIDGE_SCRIPT = `
     configurable: false,
     writable: false,
   });
+  window["${WORKBENCH_OPENAI_SHIM_MARKER}"] = true;
 
   // Expose initialization function for initial globals
   window.__initOpenAIGlobals = function(initialGlobals) {

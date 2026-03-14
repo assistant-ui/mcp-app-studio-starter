@@ -67,7 +67,8 @@ const HOOK_REGISTRY: Record<string, HookInfo> = {
   useWidgetState: {
     name: "useWidgetState",
     category: "chatgpt-extensions",
-    description: "Persistent widget state",
+    description:
+      "Optional OpenAI/ChatGPT host-managed state (not standard MCP Apps persistence)",
   },
   useToolInputPartial: {
     name: "useToolInputPartial",
@@ -87,7 +88,7 @@ const HOOK_REGISTRY: Record<string, HookInfo> = {
   useToolResult: {
     name: "useToolResult",
     category: "portable",
-    description: "Get/set tool result",
+    description: "Read tool result",
   },
 };
 
