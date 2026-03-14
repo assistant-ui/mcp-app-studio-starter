@@ -33,6 +33,12 @@ function clamp(value: number, min: number, max: number): number {
   return value;
 }
 
+export function getInitialAllInputValue(value: SafeAreaInsets): string {
+  const { top, bottom, left, right } = value;
+  const isUniform = top === bottom && top === left && top === right;
+  return isUniform ? String(top) : "";
+}
+
 function InsetInput({
   side,
   value,
@@ -77,7 +83,9 @@ export function SafeAreaInsetsControl({
 }: SafeAreaInsetsControlProps) {
   const [open, setOpen] = useState(false);
   const [customizeSides, setCustomizeSides] = useState(false);
-  const [allInputValue, setAllInputValue] = useState("");
+  const [allInputValue, setAllInputValue] = useState(() =>
+    getInitialAllInputValue(value),
+  );
 
   const { top, bottom, left, right } = value;
   const isUniform = top === bottom && top === left && top === right;
@@ -89,7 +97,7 @@ export function SafeAreaInsetsControl({
     setPrevIsUniform(isUniform);
     setPrevTop(top);
     if (isUniform) {
-      setAllInputValue(String(top));
+      setAllInputValue(getInitialAllInputValue(value));
     } else {
       setAllInputValue("");
     }

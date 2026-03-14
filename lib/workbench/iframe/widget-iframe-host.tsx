@@ -738,11 +738,6 @@ export function WidgetIframeHost({
 
     mcpBridgeRef.current = bridge;
 
-    bridge.onsizechange = () => {
-      // In the workbench, viewport size is host-controlled; only explicit
-      // `notifyIntrinsicHeight(...)` calls should drive inline preview height.
-    };
-
     bridge.onloggingmessage = ({ level, logger, data }) => {
       useWorkbenchStore.getState().addConsoleEntry({
         type: "event",
