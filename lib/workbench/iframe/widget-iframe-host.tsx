@@ -870,8 +870,9 @@ export function WidgetIframeHost({
   }, [toolOutputStr, toolResponseMetadataStr]);
 
   useEffect(() => {
+    setIntrinsicHeight(null);
     setIframeKey((k) => k + 1);
-  }, [widgetBundle, cssBundle, hmrSrc]);
+  }, [cssBundle, hmrSrc, setIntrinsicHeight, widgetBundle]);
 
   const effectiveTheme = globals.previewTheme || globals.theme;
   const iframeShellBackground =

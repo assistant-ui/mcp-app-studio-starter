@@ -83,32 +83,14 @@ export function SafeAreaInsetsControl({
 }: SafeAreaInsetsControlProps) {
   const [open, setOpen] = useState(false);
   const [customizeSides, setCustomizeSides] = useState(false);
-  const [allInputValue, setAllInputValue] = useState(() =>
-    getInitialAllInputValue(value),
-  );
 
   const { top, bottom, left, right } = value;
   const isUniform = top === bottom && top === left && top === right;
-
-  const [prevIsUniform, setPrevIsUniform] = useState(isUniform);
-  const [prevTop, setPrevTop] = useState(top);
-
-  if (isUniform !== prevIsUniform || top !== prevTop) {
-    setPrevIsUniform(isUniform);
-    setPrevTop(top);
-    if (isUniform) {
-      setAllInputValue(getInitialAllInputValue(value));
-    } else {
-      setAllInputValue("");
-    }
-  }
-
-  if (!isUniform && !customizeSides) {
-    setCustomizeSides(true);
-  }
+  const allInputDefaultValue = getInitialAllInputValue(value);
+  const allInputKey = `all-${top}-${right}-${bottom}-${left}`;
+  const showCustomizedSides = customizeSides || !isUniform;
 
   const handleAllChange = (inputValue: string) => {
-    setAllInputValue(inputValue);
     const parsed = Number(inputValue);
     if (Number.isFinite(parsed)) {
       const clamped = clamp(parsed, 0, 100);
@@ -129,7 +111,6 @@ export function SafeAreaInsetsControl({
 
   const handleReset = () => {
     onChange({ top: 0, bottom: 0, left: 0, right: 0 });
-    setAllInputValue("0");
     setCustomizeSides(false);
   };
 
@@ -180,8 +161,9 @@ export function SafeAreaInsetsControl({
           </Label>
           <InputGroup className={`${INPUT_GROUP_CLASSES} w-20`}>
             <InputGroupInput
+              key={allInputKey}
               type="number"
-              value={allInputValue}
+              defaultValue={allInputDefaultValue}
               placeholder={isUniform ? undefined : "mixed"}
               onChange={(e) => handleAllChange(e.target.value)}
               min={0}
@@ -206,12 +188,13 @@ export function SafeAreaInsetsControl({
           </Label>
           <Switch
             id="customize-sides"
-            checked={customizeSides}
+            checked={showCustomizedSides}
+            disabled={!isUniform}
             onCheckedChange={setCustomizeSides}
           />
         </div>
 
-        {customizeSides && (
+        {showCustomizedSides && (
           <div className="relative grid grid-cols-[auto_0px_auto] grid-rows-[auto_0px_auto] items-center justify-items-center gap-1">
             <div />
             <InsetInput
