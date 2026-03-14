@@ -117,6 +117,8 @@ export function installOpenAIShim(targetWindow: Window = window) {
     if (!message || typeof message !== "object" || !("type" in message)) return;
 
     if (message.type === "OPENAI_SET_GLOBALS") {
+      event.stopImmediatePropagation?.();
+      event.stopPropagation?.();
       applyGlobals({
         ...DEFAULT_GLOBALS,
         ...message.globals,

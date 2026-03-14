@@ -32,7 +32,7 @@ export function getLayoutVariant({
 
 export function getLayoutConfig({
   variant,
-  isDesktopDevice: _isDesktopDevice,
+  isDesktopDevice,
   isDark: _isDark,
   widgetHeight,
 }: {
@@ -103,7 +103,10 @@ export function getLayoutConfig({
         contentStackClassName:
           "mx-auto flex flex-col w-full h-full max-w-[770px]",
         morphWrapperClassName: cn(
-          "relative z-10 flex h-full w-full flex-col items-center justify-center overflow-hidden px-4 transition-colors",
+          "relative z-10 flex h-full w-full flex-col overflow-hidden px-4 transition-colors",
+          isDesktopDevice
+            ? "items-center justify-center"
+            : "items-start justify-start pt-4",
         ),
         morphContainerClassName: cn(
           "w-full max-w-[770px] overflow-hidden rounded-2xl border shadow-sm transition-colors",
