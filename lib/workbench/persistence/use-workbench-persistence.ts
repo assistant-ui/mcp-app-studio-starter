@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useDemoMode } from "@/hooks/use-demo-mode";
 import { getComponent } from "../component-registry";
@@ -17,7 +17,6 @@ import type { UrlState } from "./types";
 import { buildUrlParams, parseUrlParams } from "./url";
 
 export function useWorkbenchPersistence() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const isInitialized = useRef(false);
   const isUpdatingFromUrl = useRef(false);
@@ -74,6 +73,7 @@ export function useWorkbenchPersistence() {
 
   useEffect(() => {
     if (!isInitialized.current || isUpdatingFromUrl.current) return;
+    if (typeof window === "undefined") return;
 
     const currentUrlState: UrlState = {
       mode: store.displayMode,
@@ -82,7 +82,9 @@ export function useWorkbenchPersistence() {
       component: store.selectedComponent,
     };
 
-    const currentSearch = searchParams.toString();
+    const currentSearch = window.location.search.startsWith("?")
+      ? window.location.search.slice(1)
+      : window.location.search;
     const newParams = new URLSearchParams(currentSearch);
     const persistedParams = buildUrlParams(currentUrlState);
     for (const [key, value] of persistedParams.entries()) {
@@ -91,15 +93,16 @@ export function useWorkbenchPersistence() {
     const newSearch = newParams.toString();
 
     if (currentSearch !== newSearch) {
-      router.replace(`?${newSearch}`, { scroll: false });
+      const nextUrl = `${window.location.pathname}?${newSearch}${window.location.hash}`;
+      // Persist workbench UI state in the URL without triggering app-router
+      // updates that can remount the preview subtree.
+      window.history.replaceState(window.history.state, "", nextUrl);
     }
   }, [
     store.displayMode,
     store.deviceType,
     store.theme,
     store.selectedComponent,
-    router,
-    searchParams,
   ]);
 
   useEffect(() => {
