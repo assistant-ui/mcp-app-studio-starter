@@ -227,9 +227,7 @@ function ToolAccordionItem({
                 </div>
               )}
 
-              <div className="mb-2 font-medium text-[10px] text-muted-foreground/70 uppercase tracking-widest">
-                Mock Response
-              </div>
+              <SectionLabel>Mock Tool Result</SectionLabel>
 
               <InlineMockVariantEditor
                 variant={editorVariant}

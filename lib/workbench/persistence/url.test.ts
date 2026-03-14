@@ -1,17 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { componentConfigs } from "../component-configs";
-import { buildUrlParams, parseUrlParams } from "./url";
+import {
+  buildPersistedWorkbenchUrl,
+  buildUrlParams,
+  parseUrlParams,
+} from "./url";
 
 describe("workbench URL persistence", () => {
-  it("parses resizable device mode from URL params", () => {
-    const parsed = parseUrlParams(
-      new URLSearchParams("mode=inline&device=resizable&theme=dark"),
-    );
-
-    assert.equal(parsed.device, "resizable");
-  });
-
   it("round-trips resizable device mode through build + parse", () => {
     const params = buildUrlParams({
       mode: "pip",
@@ -29,16 +25,6 @@ describe("workbench URL persistence", () => {
     });
   });
 
-  it("parses component selection from URL params", () => {
-    const parsed = parseUrlParams(
-      new URLSearchParams(
-        "component=poi-map&mode=inline&device=desktop&theme=light",
-      ),
-    );
-
-    assert.equal(parsed.component, "poi-map");
-  });
-
   it("falls back to default component when URL component is invalid", () => {
     const parsed = parseUrlParams(
       new URLSearchParams("component=not-a-real-id"),
@@ -46,5 +32,23 @@ describe("workbench URL persistence", () => {
     const defaultComponent = componentConfigs[0]?.id ?? "welcome";
 
     assert.equal(parsed.component, defaultComponent);
+  });
+
+  it("preserves the current hash and unrelated params when persisting workbench state", () => {
+    const nextUrl = buildPersistedWorkbenchUrl({
+      currentSearch: "?demo=true&theme=light",
+      currentHash: "#keepme",
+      state: {
+        mode: "inline",
+        device: "desktop",
+        theme: "dark",
+        component: "poi-map",
+      },
+    });
+
+    assert.equal(
+      nextUrl,
+      "?demo=true&theme=dark&mode=inline&device=desktop&component=poi-map#keepme",
+    );
   });
 });

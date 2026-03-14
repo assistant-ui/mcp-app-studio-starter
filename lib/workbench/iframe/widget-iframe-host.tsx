@@ -32,7 +32,6 @@ import {
   generateEmptyIframeHtml,
   generateIframeHtml,
 } from "./generate-iframe-html";
-import { buildToolResultBridgePayload } from "./tool-result-bridge";
 import {
   WorkbenchMessageBridge,
   type WorkbenchMessageHandlers,
@@ -96,6 +95,20 @@ function toMcpToolResultParams(
     params._meta = result._meta;
   }
   return params;
+}
+
+function buildToolResultBridgePayload(
+  toolOutput: Record<string, unknown> | null,
+  toolResponseMetadata: Record<string, unknown> | null,
+): CallToolResponse | null {
+  if (toolOutput === null && toolResponseMetadata === null) {
+    return null;
+  }
+
+  return {
+    ...(toolOutput !== null ? { structuredContent: toolOutput } : {}),
+    ...(toolResponseMetadata !== null ? { _meta: toolResponseMetadata } : {}),
+  };
 }
 
 const DEFAULT_SIMULATION_RESPONSE_DATA = JSON.stringify(
@@ -780,10 +793,10 @@ export function WidgetIframeHost({
       if (cancelled) return;
       mcpInitializedRef.current = true;
       void bridge.sendToolInput({ arguments: globalsRef.current.toolInput });
-      const initialToolResult = buildToolResultBridgePayload({
-        toolOutput: globalsRef.current.toolOutput,
-        toolResponseMetadata: globalsRef.current.toolResponseMetadata,
-      });
+      const initialToolResult = buildToolResultBridgePayload(
+        globalsRef.current.toolOutput,
+        globalsRef.current.toolResponseMetadata,
+      );
 
       if (initialToolResult) {
         void bridge.sendToolResult(
@@ -855,10 +868,10 @@ export function WidgetIframeHost({
     const bridge = mcpBridgeRef.current;
     if (!bridge || !mcpInitializedRef.current) return;
 
-    const toolResult = buildToolResultBridgePayload({
-      toolOutput: JSON.parse(toolOutputStr),
-      toolResponseMetadata: JSON.parse(toolResponseMetadataStr),
-    });
+    const toolResult = buildToolResultBridgePayload(
+      JSON.parse(toolOutputStr),
+      JSON.parse(toolResponseMetadataStr),
+    );
 
     if (!toolResult) return;
 

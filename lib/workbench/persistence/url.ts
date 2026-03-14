@@ -56,3 +56,30 @@ export function buildUrlParams(state: UrlState): URLSearchParams {
   params.set(URL_PARAMS.COMPONENT, normalizeComponentId(state.component));
   return params;
 }
+
+export function buildPersistedWorkbenchUrl({
+  currentSearch,
+  currentHash,
+  state,
+}: {
+  currentSearch: string;
+  currentHash: string;
+  state: UrlState;
+}): string {
+  const normalizedSearch = currentSearch.startsWith("?")
+    ? currentSearch.slice(1)
+    : currentSearch;
+  const params = new URLSearchParams(normalizedSearch);
+
+  for (const [key, value] of buildUrlParams(state).entries()) {
+    params.set(key, value);
+  }
+
+  const nextSearch = params.toString();
+  const nextHash =
+    currentHash.length === 0 || currentHash.startsWith("#")
+      ? currentHash
+      : `#${currentHash}`;
+
+  return `${nextSearch.length > 0 ? `?${nextSearch}` : ""}${nextHash}`;
+}

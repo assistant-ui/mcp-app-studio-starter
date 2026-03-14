@@ -12,14 +12,8 @@ import {
 import { cn } from "@/lib/ui/cn";
 import { getComponent } from "@/lib/workbench/component-registry";
 import { useSelectedComponent, useWorkbenchStore } from "@/lib/workbench/store";
-import {
-  resolveEditableWidgetState,
-  resolveResetWidgetState,
-} from "@/lib/workbench/widget-state-editor";
 import { JsonEditor } from "./json-editor";
 import { useJsonEditorChannel } from "./json-editor-state";
-
-type JsonEditorTab = "toolInput" | "toolOutput" | "widgetState";
 
 type EditorSectionKey = "toolInput" | "widgetState";
 
@@ -27,7 +21,6 @@ interface EditorSectionConfig {
   key: EditorSectionKey;
   title: string;
   tooltip: string;
-  tab: JsonEditorTab;
 }
 
 const EDITOR_SECTIONS: EditorSectionConfig[] = [
@@ -36,14 +29,12 @@ const EDITOR_SECTIONS: EditorSectionConfig[] = [
     title: "App Props",
     tooltip:
       "Data passed to your app when a tool is called. Edit to test different inputs.",
-    tab: "toolInput",
   },
   {
     key: "widgetState",
     title: "Host State",
     tooltip:
       "Optional host-managed state exposed by the host. In ChatGPT this maps to widgetState. This is not part of standard MCP Apps.",
-    tab: "widgetState",
   },
 ];
 
@@ -67,9 +58,7 @@ function useJsonEditorState() {
   });
   const widgetStateController = useJsonEditorChannel({
     label: "Host State",
-    value: resolveEditableWidgetState(
-      (widgetState as Record<string, unknown> | null) ?? null,
-    ),
+    value: (widgetState as Record<string, unknown> | null) ?? {},
     emptyDraftBehavior: "clear",
     onApply: (value) =>
       setWidgetState(Object.keys(value).length === 0 ? null : value),
@@ -80,8 +69,8 @@ function useJsonEditorState() {
     widgetState: widgetStateController,
   } as const;
 
-  const handleReset = (tab: JsonEditorTab) => {
-    switch (tab) {
+  const handleReset = (key: EditorSectionKey) => {
+    switch (key) {
       case "toolInput": {
         const nextValue = getComponent(selectedComponent)?.defaultProps ?? {};
         setToolInput(nextValue);
@@ -89,16 +78,10 @@ function useJsonEditorState() {
         break;
       }
       case "widgetState": {
-        const resetWidgetState = resolveResetWidgetState();
-        const nextEditableWidgetState =
-          resolveEditableWidgetState(resetWidgetState);
-
-        setWidgetState(resetWidgetState);
-        controllers.widgetState.resetToValue(nextEditableWidgetState);
+        setWidgetState(null);
+        controllers.widgetState.resetToValue({});
         break;
       }
-      case "toolOutput":
-        break;
     }
   };
 
@@ -238,7 +221,7 @@ export function EditorPanel() {
               className="size-6"
               onClick={(e) => {
                 e.stopPropagation();
-                handleReset(section.tab);
+                handleReset(section.key);
               }}
             >
               {section.key === "widgetState" ? (

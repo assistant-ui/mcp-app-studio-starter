@@ -14,7 +14,7 @@ import {
   writeSessionStorageConsole,
 } from "./storage";
 import type { UrlState } from "./types";
-import { buildUrlParams, parseUrlParams } from "./url";
+import { buildPersistedWorkbenchUrl, parseUrlParams } from "./url";
 
 export function useWorkbenchPersistence() {
   const router = useRouter();
@@ -83,15 +83,19 @@ export function useWorkbenchPersistence() {
     };
 
     const currentSearch = searchParams.toString();
-    const newParams = new URLSearchParams(currentSearch);
-    const persistedParams = buildUrlParams(currentUrlState);
-    for (const [key, value] of persistedParams.entries()) {
-      newParams.set(key, value);
-    }
-    const newSearch = newParams.toString();
+    const currentHash =
+      typeof window === "undefined" ? "" : window.location.hash;
+    const nextUrl = buildPersistedWorkbenchUrl({
+      currentSearch,
+      currentHash,
+      state: currentUrlState,
+    });
 
-    if (currentSearch !== newSearch) {
-      router.replace(`?${newSearch}`, { scroll: false });
+    if (
+      `${currentSearch.length > 0 ? `?${currentSearch}` : ""}${currentHash}` !==
+      nextUrl
+    ) {
+      router.replace(nextUrl, { scroll: false });
     }
   }, [
     store.displayMode,

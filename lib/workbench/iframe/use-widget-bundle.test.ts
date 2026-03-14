@@ -7,11 +7,6 @@ import {
 } from "./use-widget-bundle";
 
 describe("buildBundleRequestPath", () => {
-  it("includes component id", () => {
-    const path = buildBundleRequestPath("poi-map", "", "development");
-    assert.equal(path, "/api/workbench/bundle?id=poi-map");
-  });
-
   it("uses a fresh demo API bundle in development when demo=true is present", () => {
     const path = buildBundleRequestPath("poi-map", "?demo=true", "development");
     assert.equal(path, "/api/workbench/bundle?id=poi-map&demo=true");

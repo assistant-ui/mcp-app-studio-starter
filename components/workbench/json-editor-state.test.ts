@@ -14,26 +14,26 @@ describe("json editor channel state", () => {
 
   it("applies valid object drafts without rewriting the user's formatting", () => {
     const state = createJsonEditorChannelState({});
-    const result = applyJsonEditorTextChange(
+    const nextState = applyJsonEditorTextChange(
       state,
       '{\n  "categoryFilter": "cafe"\n}',
       "App State",
     );
 
-    assert.deepEqual(result.nextState.pendingAppliedValue, {
+    assert.deepEqual(nextState.pendingAppliedValue, {
       categoryFilter: "cafe",
     });
-    assert.equal(result.nextState.text, '{\n  "categoryFilter": "cafe"\n}');
-    assert.equal(result.nextState.invalidMessage, null);
+    assert.equal(nextState.text, '{\n  "categoryFilter": "cafe"\n}');
+    assert.equal(nextState.invalidMessage, null);
   });
 
   it("treats null as an empty object draft", () => {
     const state = createJsonEditorChannelState({ selectedPoiId: "1" });
-    const result = applyJsonEditorTextChange(state, "null", "App State");
+    const nextState = applyJsonEditorTextChange(state, "null", "App State");
 
-    assert.deepEqual(result.nextState.pendingAppliedValue, {});
-    assert.equal(result.nextState.text, "null");
-    assert.equal(result.nextState.invalidMessage, null);
+    assert.deepEqual(nextState.pendingAppliedValue, {});
+    assert.equal(nextState.text, "null");
+    assert.equal(nextState.invalidMessage, null);
   });
 
   it("does not apply an empty draft immediately", () => {
@@ -41,15 +41,15 @@ describe("json editor channel state", () => {
       id: "demo-poi-map",
       title: "San Francisco Highlights",
     });
-    const result = applyJsonEditorTextChange(state, "", "App Props");
+    const nextState = applyJsonEditorTextChange(state, "", "App Props");
 
-    assert.equal(result.nextState.pendingAppliedValue, null);
+    assert.equal(nextState.pendingAppliedValue, null);
     assert.equal(
-      result.nextState.invalidMessage,
+      nextState.invalidMessage,
       "Empty App Props draft. Type null to clear it. Preview is using the last valid value.",
     );
     assert.equal(
-      result.nextState.appliedValueStr,
+      nextState.appliedValueStr,
       JSON.stringify({
         id: "demo-poi-map",
         title: "San Francisco Highlights",
@@ -59,30 +59,31 @@ describe("json editor channel state", () => {
 
   it("rejects valid JSON that is not an object", () => {
     const state = createJsonEditorChannelState({});
-    const result = applyJsonEditorTextChange(state, '["museum"]', "App State");
+    const nextState = applyJsonEditorTextChange(
+      state,
+      '["museum"]',
+      "App State",
+    );
 
-    assert.equal(result.nextState.pendingAppliedValue, null);
+    assert.equal(nextState.pendingAppliedValue, null);
     assert.equal(
-      result.nextState.invalidMessage,
+      nextState.invalidMessage,
       "App State must be a JSON object or null. Preview is using the last valid value.",
     );
   });
 
   it("preserves an invalid draft when the applied value changes externally", () => {
     const state = createJsonEditorChannelState({});
-    const invalidResult = applyJsonEditorTextChange(
+    const invalidState = applyJsonEditorTextChange(
       state,
       '{"categoryFilter":',
       "App State",
     );
 
-    const reconciled = reconcileJsonEditorChannelState(
-      invalidResult.nextState,
-      {
-        selectedPoiId: "3",
-        categoryFilter: null,
-      },
-    );
+    const reconciled = reconcileJsonEditorChannelState(invalidState, {
+      selectedPoiId: "3",
+      categoryFilter: null,
+    });
 
     assert.equal(reconciled.text, '{"categoryFilter":');
     assert.equal(

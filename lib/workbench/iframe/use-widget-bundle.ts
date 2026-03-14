@@ -27,21 +27,10 @@ function resolveBundleBuildMode(
   nodeEnv: string = process.env.NODE_ENV ?? "development",
 ): BundleBuildMode {
   if (isDemoBundleRequest(currentLocationSearch)) {
-    return nodeEnv === "production" ? "demo" : "demo";
+    return "demo";
   }
 
   return nodeEnv === "production" ? "static" : "runtime";
-}
-
-function shouldUseStaticBundle(
-  currentLocationSearch: string,
-  nodeEnv: string = process.env.NODE_ENV ?? "development",
-): boolean {
-  if (nodeEnv !== "production") {
-    return false;
-  }
-
-  return isDemoBundleRequest(currentLocationSearch) || nodeEnv === "production";
 }
 
 export function buildBundleCacheKey(
@@ -60,7 +49,9 @@ export function buildBundleRequestPath(
   currentLocationSearch: string,
   nodeEnv: string = process.env.NODE_ENV ?? "development",
 ): string {
-  if (shouldUseStaticBundle(currentLocationSearch, nodeEnv)) {
+  const isProduction = nodeEnv === "production";
+
+  if (isProduction) {
     return `/workbench-bundles/${encodeURIComponent(componentId)}.js`;
   }
 
@@ -81,17 +72,6 @@ export function buildHmrPreviewPath(
     requestParams.set("demo", "true");
   }
   return `/__workbench_hmr/lib/workbench/hmr/preview.html?${requestParams.toString()}`;
-}
-
-function buildDevFallbackBundlePath(componentId: string): string {
-  const requestParams = new URLSearchParams({ id: componentId });
-  if (
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).get("demo") === "true"
-  ) {
-    requestParams.set("demo", "true");
-  }
-  return `/api/workbench/bundle?${requestParams.toString()}`;
 }
 
 export function useWidgetBundle(
@@ -141,19 +121,9 @@ export function useWidgetBundle(
           componentId,
           currentLocationSearch,
         );
-        let response = await fetch(requestPath, {
+        const response = await fetch(requestPath, {
           signal: controller.signal,
         });
-
-        if (
-          !response.ok &&
-          requestPath.startsWith("/workbench-bundles/") &&
-          process.env.NODE_ENV === "development"
-        ) {
-          response = await fetch(buildDevFallbackBundlePath(componentId), {
-            signal: controller.signal,
-          });
-        }
 
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));

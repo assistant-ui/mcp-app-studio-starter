@@ -57,6 +57,11 @@ There are two kinds of "OpenAI/ChatGPT" references you may see in workbench code
 MCP Apps persistence primitive. For portable MCP Apps, use app-managed
 persistence such as localStorage or server-backed tools.
 
+Tool result metadata lives on the tool result itself as `_meta`. In ChatGPT
+that metadata is also exposed to widgets as `toolResponseMetadata`. In the
+workbench UI, author tool result metadata in Simulation and inspect it in
+Activity.
+
 ## Where To Look
 
 - Host simulation (MCP + ChatGPT extensions): `lib/workbench/iframe/widget-iframe-host.tsx`

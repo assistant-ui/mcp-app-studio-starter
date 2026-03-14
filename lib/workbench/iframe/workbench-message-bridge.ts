@@ -78,8 +78,8 @@ export class WorkbenchMessageBridge {
     if (maybeMessage.type !== "OPENAI_METHOD_CALL") return;
 
     // The MCP AppBridge transport also listens to `message` events and expects
-    // JSON-RPC payloads. Stop OPENAI shim messages from reaching it so we don't
-    // spam parse errors in the console.
+    // JSON-RPC payloads so we need to stop OPENAI shim messages from reaching it to avoid
+    // spam parse errors in the console
     event.stopImmediatePropagation?.();
     event.stopPropagation?.();
 

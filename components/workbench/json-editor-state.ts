@@ -1,47 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useReducer } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface JsonEditorChannelState {
   text: string;
   appliedValueStr: string;
   invalidMessage: string | null;
   pendingAppliedValue: Record<string, unknown> | null;
-  pendingApplyVersion: number;
 }
 
-interface JsonEditorChannelOptions {
-  emptyDraftBehavior?: "reject" | "clear";
-}
+type EmptyDraftBehavior = "reject" | "clear";
 
-interface JsonEditorTextChangeResult {
-  nextState: JsonEditorChannelState;
-}
-
-interface UseJsonEditorChannelOptions extends JsonEditorChannelOptions {
+interface UseJsonEditorChannelOptions {
   label: string;
   value: Record<string, unknown>;
   onApply: (value: Record<string, unknown>) => void;
+  emptyDraftBehavior?: EmptyDraftBehavior;
 }
-
-type JsonEditorChannelAction =
-  | {
-      type: "userEdit";
-      text: string;
-      label: string;
-      options?: JsonEditorChannelOptions;
-    }
-  | {
-      type: "externalValueChanged";
-      value: Record<string, unknown>;
-    }
-  | {
-      type: "resetToValue";
-      value: Record<string, unknown>;
-    }
-  | {
-      type: "flushPendingApply";
-    };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -57,6 +32,18 @@ function formatInvalidShapeMessage(label: string): string {
 
 function formatEmptyDraftMessage(label: string): string {
   return `Empty ${label} draft. Type null to clear it. Preview is using the last valid value.`;
+}
+
+function createAppliedDraftState(
+  text: string,
+  value: Record<string, unknown>,
+): JsonEditorChannelState {
+  return {
+    text,
+    appliedValueStr: JSON.stringify(value),
+    invalidMessage: null,
+    pendingAppliedValue: value,
+  };
 }
 
 export function serializeJsonEditorValue(
@@ -76,7 +63,6 @@ export function createJsonEditorChannelState(
     appliedValueStr: JSON.stringify(value),
     invalidMessage: null,
     pendingAppliedValue: null,
-    pendingApplyVersion: 0,
   };
 }
 
@@ -84,75 +70,45 @@ export function applyJsonEditorTextChange(
   state: JsonEditorChannelState,
   text: string,
   label: string,
-  options?: JsonEditorChannelOptions,
-): JsonEditorTextChangeResult {
+  emptyDraftBehavior: EmptyDraftBehavior = "reject",
+): JsonEditorChannelState {
   const trimmed = text.trim();
 
   if (trimmed === "") {
-    if (options?.emptyDraftBehavior === "clear") {
-      return {
-        nextState: {
-          text,
-          appliedValueStr: JSON.stringify({}),
-          invalidMessage: null,
-          pendingAppliedValue: {},
-          pendingApplyVersion: state.pendingApplyVersion + 1,
-        },
-      };
+    if (emptyDraftBehavior === "clear") {
+      return createAppliedDraftState(text, {});
     }
 
     return {
-      nextState: {
-        ...state,
-        text,
-        invalidMessage: formatEmptyDraftMessage(label),
-        pendingAppliedValue: null,
-      },
+      ...state,
+      text,
+      invalidMessage: formatEmptyDraftMessage(label),
+      pendingAppliedValue: null,
     };
   }
 
   if (trimmed === "null") {
-    return {
-      nextState: {
-        text,
-        appliedValueStr: JSON.stringify({}),
-        invalidMessage: null,
-        pendingAppliedValue: {},
-        pendingApplyVersion: state.pendingApplyVersion + 1,
-      },
-    };
+    return createAppliedDraftState(text, {});
   }
 
   try {
     const parsed = JSON.parse(text);
     if (!isRecord(parsed)) {
       return {
-        nextState: {
-          ...state,
-          text,
-          invalidMessage: formatInvalidShapeMessage(label),
-          pendingAppliedValue: null,
-        },
+        ...state,
+        text,
+        invalidMessage: formatInvalidShapeMessage(label),
+        pendingAppliedValue: null,
       };
     }
 
-    return {
-      nextState: {
-        text,
-        appliedValueStr: JSON.stringify(parsed),
-        invalidMessage: null,
-        pendingAppliedValue: parsed,
-        pendingApplyVersion: state.pendingApplyVersion + 1,
-      },
-    };
+    return createAppliedDraftState(text, parsed);
   } catch {
     return {
-      nextState: {
-        ...state,
-        text,
-        invalidMessage: formatInvalidJsonMessage(label),
-        pendingAppliedValue: null,
-      },
+      ...state,
+      text,
+      invalidMessage: formatInvalidJsonMessage(label),
+      pendingAppliedValue: null,
     };
   }
 }
@@ -177,35 +133,6 @@ export function reconcileJsonEditorChannelState(
   return createJsonEditorChannelState(value);
 }
 
-export function jsonEditorChannelReducer(
-  state: JsonEditorChannelState,
-  action: JsonEditorChannelAction,
-): JsonEditorChannelState {
-  switch (action.type) {
-    case "userEdit":
-      return applyJsonEditorTextChange(
-        state,
-        action.text,
-        action.label,
-        action.options,
-      ).nextState;
-    case "externalValueChanged":
-      return reconcileJsonEditorChannelState(state, action.value);
-    case "resetToValue":
-      return createJsonEditorChannelState(action.value);
-    case "flushPendingApply":
-      if (state.pendingAppliedValue === null) {
-        return state;
-      }
-      return {
-        ...state,
-        pendingAppliedValue: null,
-      };
-    default:
-      return state;
-  }
-}
-
 export function useJsonEditorChannel({
   label,
   value,
@@ -213,14 +140,12 @@ export function useJsonEditorChannel({
   emptyDraftBehavior,
 }: UseJsonEditorChannelOptions) {
   const appliedValueStr = useMemo(() => JSON.stringify(value), [value]);
-  const [state, dispatch] = useReducer(
-    jsonEditorChannelReducer,
-    value,
-    createJsonEditorChannelState,
-  );
+  const [state, setState] = useState(() => createJsonEditorChannelState(value));
 
   useEffect(() => {
-    dispatch({ type: "externalValueChanged", value });
+    setState((currentState) =>
+      reconcileJsonEditorChannelState(currentState, value),
+    );
   }, [appliedValueStr, value]);
 
   useEffect(() => {
@@ -229,23 +154,34 @@ export function useJsonEditorChannel({
     }
 
     onApply(state.pendingAppliedValue);
-    dispatch({ type: "flushPendingApply" });
-  }, [onApply, state.pendingAppliedValue, state.pendingApplyVersion]);
+    setState((currentState) => {
+      if (currentState.pendingAppliedValue === null) {
+        return currentState;
+      }
+
+      return {
+        ...currentState,
+        pendingAppliedValue: null,
+      };
+    });
+  }, [onApply, state.pendingAppliedValue]);
 
   const handleTextChange = useCallback(
     (text: string) => {
-      dispatch({
-        type: "userEdit",
-        text,
-        label,
-        options: { emptyDraftBehavior },
-      });
+      setState((currentState) =>
+        applyJsonEditorTextChange(
+          currentState,
+          text,
+          label,
+          emptyDraftBehavior,
+        ),
+      );
     },
     [emptyDraftBehavior, label],
   );
 
   const resetToValue = useCallback((nextValue: Record<string, unknown>) => {
-    dispatch({ type: "resetToValue", value: nextValue });
+    setState(createJsonEditorChannelState(nextValue));
   }, []);
 
   return {
